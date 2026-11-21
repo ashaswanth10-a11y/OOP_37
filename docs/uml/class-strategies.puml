@@ -70,11 +70,6 @@ package "intelligence / ai" {
   class KeywordCategoryClassifier {
     - SERVICE_PRIOR = 1.5
   }
-  class ClaudeCategoryClassifier <<Adapter>> {
-    - client : AnthropicClient
-    - model : String
-    + isEnabled() : boolean
-  }
   class GeminiCategoryClassifier <<Adapter>> {
     - apiKey : String
     - model : String
@@ -108,11 +103,9 @@ AssignmentService o--> "5" AssignmentStrategy
 AssignmentStrategy ..> Cand
 AssignmentStrategy ..> Rec
 CategoryClassifier <|.. KeywordCategoryClassifier
-CategoryClassifier <|.. ClaudeCategoryClassifier
 CategoryClassifier <|.. GeminiCategoryClassifier
-TriageService --> ClaudeCategoryClassifier : 1st (if key)
-TriageService --> GeminiCategoryClassifier : 2nd (if key)
-TriageService --> KeywordCategoryClassifier : last (always)
+TriageService --> GeminiCategoryClassifier : if enabled
+TriageService --> KeywordCategoryClassifier : fallback
 PriorityService --> SettingsService
 AssignmentService --> SettingsService
 TriageService --> SettingsService

@@ -90,36 +90,26 @@ function Segmented({
 }
 
 function Suggestions({ preview, loading, typed, staff }: { preview: Preview | undefined; loading: boolean; typed: boolean; staff: boolean }) {
-  if (!typed) {
-    return (
-      <div className="rounded-lg border border-dashed border-line-strong p-5 text-sm text-mute">
-        Start describing the problem. CampusOps will suggest a category, check whether someone already reported it, and
-        show fixes that worked before.
-      </div>
-    )
-  }
+  if (!typed) return null
   return (
     <div className="space-y-4">
       <div className="panel p-4">
         <div className="flex items-center justify-between">
-          <span className="eyebrow">Suggested category</span>
+          <h2 className="font-medium">Suggested category</h2>
           {loading && <Loader2 size={13} className="animate-spin text-mute" />}
         </div>
         {preview?.category ? (
           <>
             <div className="mt-1.5 flex items-baseline justify-between gap-2">
               <span className="font-medium">{preview.category.name}</span>
-              <span className="font-mono text-xs text-signal">{Math.round(preview.category.confidence * 100)}% sure</span>
+              {staff && <span className="font-mono text-xs text-signal">{Math.round(preview.category.confidence * 100)}%</span>}
             </div>
-            <div className="mt-1 h-1 overflow-hidden rounded-full bg-sunk">
-              <div className="h-full bg-signal" style={{ width: Math.round(preview.category.confidence * 100) + "%" }} />
-            </div>
-            <div className="mt-2 text-xs text-mute">{preview.category.reason}</div>
+            {staff && <div className="mt-2 text-xs text-mute">{preview.category.reason}</div>}
           </>
         ) : (
           <div className="mt-1.5 text-sm text-mute">Not sure yet. Add a few more details.</div>
         )}
-        {preview && (
+        {staff && preview && (
           <div className="mt-2 flex items-center gap-1 font-mono text-[10.5px] text-mute">
             <Sparkles size={11} /> {preview.aiAvailable ? "AI triage runs on submission" : "Keyword classifier"}
           </div>
@@ -184,7 +174,7 @@ function Created({ d, onAnother }: { d: IncidentDetail; onAnother: () => void })
         <div className="flex items-center gap-3 bg-rail px-6 py-5 text-white">
           <CheckCircle2 size={26} className="text-ok" />
           <div>
-            <div className="font-cond text-[22px] font-semibold leading-tight">Reported. We're on it.</div>
+            <div className="font-cond text-[22px] font-semibold leading-tight">Report submitted</div>
             <div className="font-mono text-[13px] text-beacon">{s.number}</div>
           </div>
         </div>
@@ -429,10 +419,9 @@ export default function ReportPage() {
   return (
     <div>
       <div className="mb-5">
-        <div className="eyebrow">IT help desk</div>
         <h1 className="font-cond text-[28px] font-semibold leading-tight">Report a problem</h1>
         <p className="mt-1 text-sm text-mute">
-          Tell us what's wrong in plain words. Priority, category and the right technician are worked out automatically.
+          Tell IT support what happened and where.
         </p>
       </div>
 
@@ -536,7 +525,7 @@ export default function ReportPage() {
               <div>
                 <label className="label" htmlFor="cat">Category</label>
                 <select id="cat" className="field" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-                  <option value="">Let CampusOps decide</option>
+                  <option value="">Choose automatically</option>
                   {(categoriesQ.data ?? [])
                     .filter((c) => c.active)
                     .map((c) => (
@@ -605,9 +594,9 @@ export default function ReportPage() {
 
           <div className="flex items-center gap-3">
             <button className="btn btn-primary px-6 py-2.5 text-[15px]" disabled={busy}>
-              {busy && <Loader2 size={15} className="animate-spin" />} Send report
+              {busy && <Loader2 size={15} className="animate-spin" />} Submit ticket
             </button>
-            <span className="text-xs text-mute">You'll get updates by email{user?.telegramLinked ? " and Telegram" : ""}.</span>
+            <span className="text-xs text-mute">You can follow updates in My tickets.</span>
           </div>
         </form>
 

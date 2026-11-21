@@ -17,10 +17,10 @@ entity users {
   * full_name : varchar
   * email : varchar <<UQ>>
   * password_hash : varchar  (BCrypt)
-  phone, telegram_chat_id, telegram_link_code
-  email_notifications, telegram_notifications, active
+  phone
+  email_notifications, active
   * created_at : timestamp
-  department, location        (employee)
+  department, location        (student)
   team, max_concurrent, experience_years, available  (technician)
 }
 

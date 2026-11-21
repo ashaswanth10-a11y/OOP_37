@@ -9,7 +9,7 @@ skinparam sequence {
 skinparam maxMessageSize 220
 title Sequence - report -> classify -> prioritise -> SLA -> assign -> notify
 
-actor Employee as E
+actor Student as E
 participant "IncidentController" as C
 participant "IncidentService" as S
 participant "SimilarityService" as SIM
@@ -38,7 +38,7 @@ F --> S : new Incident (NEW, INC-nnnn)
 S -> EP : publish(CREATED)
 EP -> L : on(event): audit row, "logged" notification
 S -> T : suggest(text, service)
-T --> S : Suggestion(category, confidence, method)\n(Claude if enabled, else keywords)
+T --> S : Suggestion(category, confidence, method)\n(Gemini if enabled, with keyword fallback)
 S -> I : classify(category, by, confidence)
 note right of I : NEW -> CLASSIFIED\n(state object validates)
 S -> EP : publish(CLASSIFIED)
@@ -58,7 +58,7 @@ A --> S : Recommendation(technician, score, reason)
 S -> I : assignTo(technician, strategyKey)
 note right of I : CLASSIFIED -> ASSIGNED
 S -> EP : publish(ASSIGNED)
-EP -> L : audit row; notify technician (in-app,\nemail, Telegram) and reporter
+EP -> L : audit row; notify technician (in-app, email) and reporter
 S -> CE : correlate(incident)
 CE --> S : ProblemRecord? (links incidents,\npublishes PROBLEM_LINKED)
 S --> C : Incident

@@ -280,9 +280,8 @@ export const updateTechnician = (
 ) => put<User>("/users/" + id + "/technician", b)
 export const setUserActive = (id: number, active: boolean) => patch<User>("/users/" + id + "/active?active=" + active)
 export const setAvailability = (available: boolean) => patch<User>("/users/me/availability?available=" + available)
-export const setPreferences = (emailNotifications: boolean, telegramNotifications: boolean) =>
-  put<User>("/users/me/preferences", { emailNotifications, telegramNotifications })
-export const telegramCode = () => post<{ code: string }>("/users/me/telegram-code")
+export const setPreferences = (emailNotifications: boolean) =>
+  put<User>("/users/me/preferences", { emailNotifications })
 
 // problems + map
 export const problems = () => get<Problem[]>("/problems")

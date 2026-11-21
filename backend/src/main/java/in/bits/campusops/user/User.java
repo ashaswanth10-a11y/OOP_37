@@ -14,7 +14,7 @@ import java.util.EnumSet;
 import java.util.Set;
 
 /**
- * Every person who uses CampusOps. Concrete kinds (employee, technician, admin) are
+ * Every person who uses CampusOps. Concrete kinds (student, technician, admin) are
  * real "is-a" specialisations that add their own data and behaviour.
  */
 @Entity
@@ -40,10 +40,7 @@ public abstract class User {
     private String passwordHash;
 
     private String phone;
-    private String telegramChatId;
-    private String telegramLinkCode;
     private boolean emailNotifications = true;
-    private boolean telegramNotifications = true;
     private boolean active = true;
 
     @Column(nullable = false)
@@ -88,23 +85,11 @@ public abstract class User {
         this.phone = phone;
     }
 
-    public void updateNotificationPreferences(boolean email, boolean telegram) {
+    public void updateNotificationPreferences(boolean email) {
         this.emailNotifications = email;
-        this.telegramNotifications = telegram;
     }
 
-    public void issueTelegramLinkCode(String linkCode) {
-        this.telegramLinkCode = linkCode;
-    }
 
-    public void linkTelegram(String chatId) {
-        this.telegramChatId = chatId;
-        this.telegramLinkCode = null;
-    }
-
-    public void unlinkTelegram() {
-        this.telegramChatId = null;
-    }
 
     public void deactivate() {
         this.active = false;
@@ -138,24 +123,10 @@ public abstract class User {
         return phone;
     }
 
-    public String getTelegramChatId() {
-        return telegramChatId;
-    }
 
-    public String getTelegramLinkCode() {
-        return telegramLinkCode;
-    }
-
-    public boolean isTelegramLinked() {
-        return telegramChatId != null;
-    }
 
     public boolean isEmailNotifications() {
         return emailNotifications;
-    }
-
-    public boolean isTelegramNotifications() {
-        return telegramNotifications;
     }
 
     public boolean isActive() {

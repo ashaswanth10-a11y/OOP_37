@@ -8,7 +8,7 @@ import in.bits.campusops.user.User;
  */
 public interface NotificationChannel {
 
-    enum Type { IN_APP, EMAIL, TELEGRAM }
+    enum Type { IN_APP, EMAIL }
 
     record Message(User recipient, String title, String body, Long incidentId, String incidentNumber,
                    Notification.Severity severity) {

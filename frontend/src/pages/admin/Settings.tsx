@@ -97,54 +97,41 @@ export default function SettingsAdmin() {
             <input type="checkbox" checked={form.autoEscalation} onChange={(e) => set("autoEscalation", e.target.checked)} /> Enabled
           </label>
         </Row>
-        <Row label="AI triage" hint="Classify reports with the configured AI provider (Claude or Gemini), with keywords as the fallback.">
+        <Row label="AI triage" hint="Use Gemini to suggest a category when a report is submitted.">
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={form.aiTriage} onChange={(e) => set("aiTriage", e.target.checked)} /> Enabled
           </label>
           <div className="mt-1 text-xs text-mute">
-            {!data.integrations.claude && !data.integrations.gemini
+            {!data.integrations.gemini
               ? "Keyword classifier (offline): no AI key configured"
-              : "Using " +
-                [data.integrations.claude && "Claude", data.integrations.gemini && "Gemini"].filter(Boolean).join(" + ") +
-                (form.aiTriage ? "" : " when enabled")}
+              : (form.aiTriage ? "Gemini is enabled for new reports." : "New reports use keyword matching.")}
           </div>
         </Row>
       </fieldset>
 
       <section className="mt-5 grid gap-4 md:grid-cols-2">
         <div className="panel p-5">
-          <div className="eyebrow mb-3">Integrations</div>
-          {[
-            { k: "Claude API", sub: null, on: data.integrations.claude },
-            { k: "Google Gemini API", sub: data.integrations.geminiModel, on: !!data.integrations.gemini },
-            { k: "Telegram Bot", sub: null, on: data.integrations.telegram },
-          ].map((i) => (
-            <div key={i.k} className="flex items-center justify-between gap-3 border-b border-line py-2">
-              <span className="text-[13.5px]">
-                {i.k}
-                {i.sub && <span className="block font-mono text-[11px] text-mute">model: {i.sub}</span>}
-              </span>
-              <span className="flex shrink-0 items-center gap-1.5 whitespace-nowrap text-[12.5px]" style={{ color: i.on ? "var(--ok)" : "var(--mute)" }}>
-                <span className={"h-2 w-2 shrink-0 rounded-full " + (i.on ? "bg-ok" : "bg-p4")} />
-                {i.on ? "Configured" : "Not configured (add key to .env)"}
-              </span>
+          <h2 className="mb-3 text-base font-semibold">Integrations</h2>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line py-2">
+            <div>
+              <div className="text-sm font-medium">Google Gemini</div>
+              {data.integrations.gemini && <div className="text-xs text-mute">{data.integrations.geminiModel}</div>}
             </div>
-          ))}
-          {!data.integrations.claude && !data.integrations.gemini && (
-            <div className="border-b border-line py-2 text-[12.5px] text-mute">AI triage: Keyword classifier (offline)</div>
-          )}
+            <span className={"text-sm " + (data.integrations.gemini ? "text-ok" : "text-mute")}>
+              {data.integrations.gemini ? "Configured" : "No API key set"}
+            </span>
+          </div>
           <div className="flex items-center justify-between py-2">
             <span className="text-[13.5px]">Live dashboard connections</span>
             <span className="font-mono text-[13px]">{data.integrations.liveConnections}</span>
           </div>
         </div>
         <div className="panel p-5">
-          <div className="eyebrow mb-3">Escalation chain</div>
+          <h2 className="mb-3 text-base font-semibold">Escalation chain</h2>
           <div className="flex flex-wrap items-center gap-1.5">
             {data.escalationChain.map((step, k) => (
               <span key={step} className="inline-flex items-center gap-1.5">
                 <span className="rounded-md border border-line-strong px-2.5 py-1 text-[13px]">
-                  <span className="mr-1.5 font-mono text-[11px] text-mute">L{k}</span>
                   {step}
                 </span>
                 {k < data.escalationChain.length - 1 && <ChevronRight size={14} className="text-mute" />}
@@ -152,8 +139,7 @@ export default function SettingsAdmin() {
             ))}
           </div>
           <p className="mt-3 text-[12.5px] text-mute">
-            A missed response or resolution target moves the incident one step up. Each step is notified by email,
-            Telegram and in the app.
+            A missed response or resolution target moves the incident one step up. Each step is notified in CampusOps and recorded in the email outbox.
           </p>
         </div>
       </section>

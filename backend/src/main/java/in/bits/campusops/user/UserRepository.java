@@ -11,9 +11,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmailIgnoreCase(String email);
 
-    Optional<User> findByTelegramLinkCode(String code);
 
-    Optional<User> findByTelegramChatId(String chatId);
 
     @Query("select t from Technician t where t.active = true order by t.id")
     List<Technician> findActiveTechnicians();

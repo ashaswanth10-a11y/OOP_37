@@ -7,7 +7,7 @@ import type { Role, User } from "../../lib/types"
 import { Dialog, ErrorBox, Loading, PageHeader } from "../../components/ui"
 
 const ROLES: { v: Role; label: string }[] = [
-  { v: "EMPLOYEE", label: "Employee / student" },
+  { v: "STUDENT", label: "Student" },
   { v: "TECHNICIAN", label: "Technician" },
   { v: "TEAM_LEAD", label: "Team lead" },
   { v: "SYSTEM_ADMIN", label: "System admin" },
@@ -39,7 +39,7 @@ function SkillPicker({ value, onChange }: { value: string[]; onChange: (v: strin
 function CreateDialog({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient()
   const toast = useToast()
-  const [role, setRole] = useState<Role>("EMPLOYEE")
+  const [role, setRole] = useState<Role>("STUDENT")
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -58,8 +58,8 @@ function CreateDialog({ onClose }: { onClose: () => void }) {
         fullName: fullName.trim(),
         email: email.trim(),
         password,
-        department: role === "EMPLOYEE" ? department || null : null,
-        location: role === "EMPLOYEE" ? location || null : null,
+        department: role === "STUDENT" ? department || null : null,
+        location: role === "STUDENT" ? location || null : null,
         team: tech ? team || null : null,
         skills: tech ? skills : null,
         maxConcurrent: tech ? Number(max) : null,
@@ -110,7 +110,7 @@ function CreateDialog({ onClose }: { onClose: () => void }) {
             <label className="label" htmlFor="u-pw">Initial password</label>
             <input id="u-pw" className="field" type="password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
-          {role === "EMPLOYEE" && (
+          {role === "STUDENT" && (
             <>
               <div>
                 <label className="label" htmlFor="u-dept">Department</label>

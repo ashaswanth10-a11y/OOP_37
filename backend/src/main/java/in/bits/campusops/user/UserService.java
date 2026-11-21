@@ -3,7 +3,6 @@ package in.bits.campusops.user;
 import in.bits.campusops.common.Exceptions.InvalidInputException;
 import in.bits.campusops.common.Exceptions.ResourceNotFoundException;
 import in.bits.campusops.incident.IncidentRepository;
-import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -14,8 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class UserService {
-
-    private static final SecureRandom RANDOM = new SecureRandom();
 
     private final UserRepository users;
     private final UserFactory factory;
@@ -32,7 +29,7 @@ public class UserService {
 
     public User register(UserFactory.Spec spec) {
         String email = spec.email().trim().toLowerCase();
-        if (!allowedDomain.isBlank() && spec.role() == Role.EMPLOYEE && !email.endsWith("@" + allowedDomain)) {
+        if (!allowedDomain.isBlank() && spec.role() == Role.STUDENT && !email.endsWith("@" + allowedDomain)) {
             throw new InvalidInputException("Use your campus email (@" + allowedDomain + ")");
         }
         if (users.existsByEmailIgnoreCase(email)) {
@@ -104,16 +101,9 @@ public class UserService {
         return u;
     }
 
-    public String issueTelegramLinkCode(User user) {
-        String code = "%06d".formatted(RANDOM.nextInt(1_000_000));
+    public User updatePreferences(User user, boolean email) {
         User managed = require(user.getId());
-        managed.issueTelegramLinkCode(code);
-        return code;
-    }
-
-    public User updatePreferences(User user, boolean email, boolean telegram) {
-        User managed = require(user.getId());
-        managed.updateNotificationPreferences(email, telegram);
+        managed.updateNotificationPreferences(email);
         return managed;
     }
 }

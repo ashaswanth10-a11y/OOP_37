@@ -9,7 +9,7 @@ skinparam usecase {
 skinparam actorStyle awesome
 title CampusOps - Use Case Diagram
 
-actor "Employee /\nStudent" as EMP
+actor "Student" as STUDENT
 actor "Technician" as TECH
 actor "Team Lead" as LEAD
 actor "System\nAdministrator" as ADMIN
@@ -20,7 +20,7 @@ actor "Visitor\n(no login)" as VIS
 rectangle "CampusOps" {
   package "Reporting & tracking" {
     usecase "Register / log in" as UC_LOGIN
-    usecase "Report incident\n(web, voice, QR, Telegram)" as UC_REPORT
+    usecase "Report incident\n(web, voice, QR)" as UC_REPORT
     usecase "See live preview:\ncategory, duplicates, known fixes" as UC_PREVIEW
     usecase "View & track own incidents" as UC_TRACK
     usecase "Confirm an existing incident\n(Me too)" as UC_METOO
@@ -54,21 +54,20 @@ rectangle "CampusOps" {
     usecase "Classify, prioritise,\nstart SLA, auto-assign" as UC_TRIAGE
     usecase "Detect duplicates &\ncorrelate root cause" as UC_CORR
     usecase "Monitor SLA, warn,\nrecord breach, escalate" as UC_MON
-    usecase "Notify (in-app, email,\nTelegram)" as UC_NOTIFY
+    usecase "Notify (in-app, email)" as UC_NOTIFY
   }
 }
 
-actor "Telegram Bot API" as TG <<secondary>>
 actor "SLA Scheduler" as SCHED <<secondary>>
-actor "Claude API /\nGoogle Gemini API" as AI <<secondary>>
+actor "Google Gemini API" as AI <<secondary>>
 
-EMP --> UC_LOGIN
-EMP --> UC_REPORT
-EMP --> UC_TRACK
-EMP --> UC_METOO
-EMP --> UC_INFO
-EMP --> UC_VERIFY
-EMP --> UC_REOPEN
+STUDENT --> UC_LOGIN
+STUDENT --> UC_REPORT
+STUDENT --> UC_TRACK
+STUDENT --> UC_METOO
+STUDENT --> UC_INFO
+STUDENT --> UC_VERIFY
+STUDENT --> UC_REOPEN
 VIS --> UC_STATUS
 
 TECH --> UC_QUEUE
@@ -102,7 +101,5 @@ UC_RESOLVE ..> UC_NOTIFY : <<include>>
 UC_TRIAGE --> AI
 LEAD -[#7B1FA2,dashed]-|> TECH : <<extends role>>
 MGR -[#7B1FA2,dashed]-|> ADMIN : <<extends role>>
-UC_NOTIFY --> TG
-TG --> UC_REPORT
 SCHED --> UC_MON
 @enduml

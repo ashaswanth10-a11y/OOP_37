@@ -62,7 +62,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public AuthResponse register(@Valid @RequestBody RegisterRequest req) {
-        User user = userService.register(new UserFactory.Spec(Role.EMPLOYEE, req.fullName().trim(), req.email(),
+        User user = userService.register(new UserFactory.Spec(Role.STUDENT, req.fullName().trim(), req.email(),
                 req.password(), req.department(), req.location(), null, null, null, null));
         return new AuthResponse(jwt.issue(user), UserView.of(user));
     }

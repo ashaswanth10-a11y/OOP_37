@@ -208,13 +208,13 @@ public class DemoDataSeeder implements ApplicationRunner {
     // ---- people ------------------------------------------------------------------
 
     private void seedUsers() {
-        employee("aarav", "Aarav Mehta", "Computer Science", "Gautam Bhavan 214");
-        employee("diya", "Diya Reddy", "Electrical & Electronics", "Meera Bhavan 118");
-        employee("kabir", "Kabir Singh", "Mechanical", "Krishna Bhavan 305");
-        employee("ananya", "Ananya Iyer", "Chemical", "Meera Bhavan 220");
-        employee("rohan", "Rohan Varma", "Physics", "Vyas Bhavan 112");
-        employee("lakshmi", "Prof. Lakshmi Narayan", "Computer Science (Faculty)", "C Block 210");
-        employee("sneha", "Sneha Kulkarni", "Accounts Office", "C Block, Accounts Office");
+        student("aarav", "Aarav Mehta", "Computer Science", "Gautam Bhavan 214");
+        student("diya", "Diya Reddy", "Electrical & Electronics", "Meera Bhavan 118");
+        student("kabir", "Kabir Singh", "Mechanical", "Krishna Bhavan 305");
+        student("ananya", "Ananya Iyer", "Chemical", "Meera Bhavan 220");
+        student("rohan", "Rohan Varma", "Physics", "Vyas Bhavan 112");
+        student("lakshmi", "Lakshmi Narayan", "Computer Science", "Meera Bhavan 216");
+        student("sneha", "Sneha Kulkarni", "Economics", "Meera Bhavan 208");
 
         staff("ravi", Role.TECHNICIAN, "Ravi Kumar", "Network Ops", List.of("NETWORK"), 5, 6);
         staff("imran", Role.TECHNICIAN, "Imran Shaikh", "Network Ops", List.of("NETWORK", "SECURITY"), 4, 3);
@@ -228,8 +228,8 @@ public class DemoDataSeeder implements ApplicationRunner {
         staff("anil", Role.IT_MANAGER, "Dr. Anil Kapoor", null, null, null, null);
     }
 
-    private void employee(String handle, String name, String department, String location) {
-        people.put(handle, users.save(userFactory.create(new UserFactory.Spec(Role.EMPLOYEE, name, handle + DOMAIN,
+    private void student(String handle, String name, String department, String location) {
+        people.put(handle, users.save(userFactory.create(new UserFactory.Spec(Role.STUDENT, name, handle + DOMAIN,
                 DEMO_PASSWORD, department, location, null, null, null, null))));
     }
 
@@ -328,8 +328,7 @@ public class DemoDataSeeder implements ApplicationRunner {
     }
 
     private void playLifecycle(Template t, User reporter, Instant at, Random rnd) {
-        Incident.Channel[] channels = {Incident.Channel.WEB, Incident.Channel.WEB, Incident.Channel.VOICE,
-                Incident.Channel.TELEGRAM};
+        Incident.Channel[] channels = {Incident.Channel.WEB, Incident.Channel.WEB, Incident.Channel.VOICE};
         Incident.Channel channel = channels[rnd.nextInt(channels.length)];
         Incident i = time.at(at, () -> incidents.report(command(t, channel), reporter));
         Long id = i.getId();

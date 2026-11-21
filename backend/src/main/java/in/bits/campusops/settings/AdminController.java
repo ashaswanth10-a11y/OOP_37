@@ -1,6 +1,5 @@
 package in.bits.campusops.settings;
 
-import in.bits.campusops.ai.ClaudeCategoryClassifier;
 import in.bits.campusops.ai.GeminiCategoryClassifier;
 import in.bits.campusops.assignment.AssignmentService;
 import in.bits.campusops.priority.PriorityService;
@@ -8,7 +7,6 @@ import in.bits.campusops.realtime.SseHub;
 import in.bits.campusops.sla.EscalationService;
 import in.bits.campusops.sla.SlaMonitor;
 import in.bits.campusops.sla.SlaViolation;
-import in.bits.campusops.telegram.TelegramAdapter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.util.LinkedHashMap;
@@ -29,21 +27,17 @@ public class AdminController {
     private final AssignmentService assignment;
     private final PriorityService priority;
     private final SlaMonitor.SlaViolationRepository violations;
-    private final ClaudeCategoryClassifier ai;
     private final GeminiCategoryClassifier gemini;
-    private final TelegramAdapter telegram;
     private final SseHub hub;
 
     public AdminController(SettingsService settings, AssignmentService assignment, PriorityService priority,
-                           SlaMonitor.SlaViolationRepository violations, ClaudeCategoryClassifier ai,
-                           GeminiCategoryClassifier gemini, TelegramAdapter telegram, SseHub hub) {
+                           SlaMonitor.SlaViolationRepository violations, GeminiCategoryClassifier gemini,
+                           SseHub hub) {
         this.settings = settings;
         this.assignment = assignment;
         this.priority = priority;
         this.violations = violations;
-        this.ai = ai;
         this.gemini = gemini;
-        this.telegram = telegram;
         this.hub = hub;
     }
 
@@ -63,8 +57,8 @@ public class AdminController {
         out.put("assignmentStrategies", assignment.all().stream().map(s -> new Option(s.key(), s.label())).toList());
         out.put("priorityStrategies", priority.all().stream().map(s -> new Option(s.key(), s.label())).toList());
         out.put("escalationChain", EscalationService.CHAIN);
-        out.put("integrations", Map.of("claude", ai.isEnabled(), "gemini", gemini.isEnabled(),
-                "geminiModel", gemini.model(), "telegram", telegram.isEnabled(),
+        out.put("integrations", Map.of("gemini", gemini.isEnabled(),
+                "geminiModel", gemini.model(),
                 "liveConnections", hub.connections()));
         return out;
     }

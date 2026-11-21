@@ -7,15 +7,14 @@
 ## Before recording (10 minutes, off camera)
 
 1. Start everything with `run.cmd` (Windows) or `./run.sh` (macOS/Linux). Keep the ticket IDs visible as you record.
-2. Optional keys in `.env`: `GEMINI_API_KEY` (free, shows "AI" classification), `TELEGRAM_BOT_TOKEN` (for the Telegram segment). Without keys the keyword classifier and the other features still work.
+2. To demonstrate Gemini classification, set `GEMINI_API_KEY` in your local `.env`. The app can also classify reports using local keyword matching.
 3. Open four browser profiles (or one normal + three private windows), all at `http://localhost:5173`, and log in (password `Campus@123`, domain `@hyderabad.bits-pilani.ac.in`):
    - A: **aarav** (student, Gautam Bhavan)
    - B: **ravi** (technician, Network Ops) - keep a second tab for **arjun** (Apps & Data)
    - C: **priya** (team lead, Network Ops)
    - D: **kiran** (system admin) - open the Overview dashboard
-4. Keep a phone with Telegram open if the bot is configured; link it beforehand from aarav's Profile page ("Link Telegram", send `/start CODE` to the bot).
-5. Print or open the QR sticker sheet (`/admin/assets/print`) and keep the phone camera ready.
-6. Screen at 1080p, browser zoom 110 %, notifications muted. Record each segment separately and join them.
+4. Print or open the QR sticker sheet (`/admin/assets/print`) and keep the phone camera ready.
+5. Record at 1080p, browser zoom 110 %, notifications muted. Record each segment separately and join them.
 
 Note on numbers: the seeded campus has INC-1001 to INC-1048. New incidents in the demo start at INC-1049. If you re-seed, numbers stay the same; if you do not, read the number off the screen instead.
 
@@ -42,7 +41,7 @@ Note on numbers: the seeded campus has INC-1001 to INC-1048. New incidents in th
 | 3 | 7:30-11:00 | Workflow 3: duplicates, "Me too", correlation, escalation | Member 5 (intelligence) |
 | 4 | 11:00-13:30 | OOP design walk-through | Member 3 |
 | 5 | 13:30-14:30 | Intelligent features recap and AI integrations | Member 5 |
-| 6 | 14:30-15:30 | Telegram, QR sticker, public status page | Member 2 + Member 1 |
+| 6 | 14:30-15:30 | QR sticker, public status page | Member 2 + Member 1 |
 | 7 | 15:30-16:45 | Admin configuration and database | Member 4 |
 | 8 | 16:45-17:45 | Tests and CI | Member 5 |
 | 9 | 17:45-18:15 | Close | Member 1 |
@@ -58,7 +57,7 @@ Note on numbers: the seeded campus has INC-1001 to INC-1048. New incidents in th
 - **Members 2-5**, one line each: name, ID and module (Backend and APIs; Domain model and OOP; Database and persistence; Testing, DevOps and intelligent features).
 - **Member 1 (problem, about 40 s):** "On our campus, IT problems are reported in WhatsApp groups, on the Shoutbox and by word of mouth. There is no ticket number, no owner and no deadline. During Atmos the academic-block internet collapses and fifty people post 'same here'. Nobody can tell whether that is fifty problems or one. CampusOps gives every problem a number, a priority, an SLA clock, an owner and a history, and it notices when many complaints are one root cause."
 
-## Segment 1 - Workflow 1: employee reports, system prioritises, technician assigned, notification (1:30-4:30)
+## Segment 1 - Workflow 1: student reports, system prioritises, technician assigned, notification (1:30-4:30)
 
 **Window A (aarav):**
 1. Click **Report a problem**. Choose service **Hostel Wi-Fi: Gautam Bhavan**.
@@ -74,7 +73,7 @@ Note on numbers: the seeded campus has INC-1001 to INC-1048. New incidents in th
 **Window B (the assigned technician, normally ravi):**
 6. Show the bell: a new notification "New incident INC-1049 (P2)" arrived live without refreshing (Server-Sent Events).
 7. Open **My queue**: the incident is at the top with its SLA countdown.
-- **Member 1:** "Notifications go out on three channels: in-app (live), email (simulated outbox, visible to the admin) and Telegram for linked users."
+- **Member 1:** "CampusOps sends live in-app alerts and records copies for email in the admin outbox."
 
 **Window D (kiran):** open **Email outbox** for two seconds to show the email copy.
 
@@ -97,8 +96,8 @@ Note on numbers: the seeded campus has INC-1001 to INC-1048. New incidents in th
 
 ## Segment 3 - Workflow 3: many incidents, duplicates and related incidents, correlation and escalation (7:30-11:00)
 
-**Window A (employee), then Window D (admin):**
-1. As employees, submit three reports for the Fee Payment Portal with similar titles describing a failed fee payment. Choose high impact and critical urgency. Confirm a separate report when prompted so the admin can compare related tickets.
+**Window A (student), then Window D (admin):**
+1. As students, submit three reports for the Fee Payment Portal with similar titles describing a failed fee payment. Choose high impact and critical urgency. Confirm a separate report when prompted so the admin can compare related tickets.
 2. Open the second and third incidents: show "Possible duplicate of INC-1050" (the first payment incident on a fresh seed; read the number off the screen) with the score and reason ("78% text match, same service, reported 0 min ago").
 - **Member 5:** "Duplicate detection uses TF-IDF with synonym folding: unavailable, failing and unable all become the token 'fail', payment and transaction become 'payment'. Score is 0.6 text similarity plus 0.25 for the same service plus 0.15 for recency."
 
@@ -108,12 +107,12 @@ Note on numbers: the seeded campus has INC-1001 to INC-1048. New incidents in th
 - **Member 5:** "Instead of a fourth duplicate, the student confirms the existing one. It is the up-vote idea from SU Connect, but here the vote feeds the priority formula: more affected people can raise the priority automatically, and each person counts once."
 
 **Correlation, Window D:**
-5. Use the employee report form to submit Wi-Fi outages for the Gautam, Krishna, Vyas and Meera hostel services within the correlation window. Use the affected hostel as the service on each report.
+5. Use the student report form to submit Wi-Fi outages for the Gautam, Krishna, Vyas and Meera hostel services within the correlation window. Use the affected hostel as the service on each report.
 6. Open **Outage map**: Core Switch B is marked as the root cause, the four hostel Wi-Fi services are red. Open **Problems**: "Suspected Core Switch B (Hostels) failure" with the four incidents and the analysis text.
 - **Member 5:** "The correlation engine walks the service dependency graph. All four hostels depend on Core Switch B, the captive portal, the Sophos firewall and the uplink. Core Switch B is the most specific shared dependency, so it is the likely root cause. A fifth Wi-Fi report would be attached to the same problem straight away."
 
-**Known outage, Window A (aarav):** open **Report a problem**. A red "Known outage" strip is already at the top. Choose **Hostel Wi-Fi: Ram Bhavan** (nobody has reported Ram yet): the form says "This is probably a known outage" because Ram also hangs off Core Switch B. Click **Me too** instead of filing.
-- **Member 5:** "We stop duplicates before they are filed. The form knows everything downstream of the failed switch, so even a hostel that hasn't complained yet is told it's a known outage. The Telegram bot does the same: /report on an affected service answers with /metoo."
+**Known outage, Window A (aarav):** open **Report a problem**. A red "Known outage" strip is already at the top. Choose **Hostel Wi-Fi: Ram Bhavan** (nobody has reported Ram yet): the form says "There’s a known outage for this service" because Ram also hangs off Core Switch B. Click **Me too** instead of filing.
+- **Member 5:** "We stop duplicates before they are filed. The form knows everything downstream of the failed switch, so even a hostel that hasn't complained yet is told it's a known outage."
 
 **Escalation, Window D:**
 7. Open the P1 payment ticket. Show its actual first-response deadline. Once that time passes without acknowledgement, show the recorded violation and escalation in its timeline.
@@ -127,22 +126,21 @@ Note on numbers: the seeded campus has INC-1001 to INC-1048. New incidents in th
 **Show:** `docs/report/CampusOps_Report.pdf` section 4 and 5, or the IDE. Keep each item to 15-20 seconds.
 
 - **Member 3:**
-  1. Class diagram 1: `User` is abstract; `Employee`, `Technician`, `Administrator`; `TeamLead` *is a* `Technician`, `ItManager` *is an* `Administrator`. `UserFactory` is the only place that builds them.
+  1. Class diagram 1: `User` is abstract; `Student`, `Technician`, `Administrator`; `TeamLead` *is a* `Technician`, `ItManager` *is an* `Administrator`. `UserFactory` is the only place that builds them.
   2. Class diagram 2: `Incident` is the aggregate root, no setters. `SlaTracker`, `Resolution`, `Feedback` are composed into it; `WorkNote`s are owned; `ProblemRecord` aggregates incidents it does not own.
   3. State pattern: open `IncidentStates.java`, show `ResolvedState` (allowed next, validateEntry, onEnter). "NEW to CLOSED is impossible: the state object rejects it with a 409."
   4. Strategy pattern: `AssignmentStrategy` with five implementations and `PriorityStrategy` with two; open **Settings** in the app and switch the assignment strategy to **Load-based** live.
   5. Observer: `IncidentEventPublisher` and the three listeners (audit, notifications, live updates).
-  6. Adapter and Factory: `ClaudeCategoryClassifier` / `GeminiCategoryClassifier` / `TelegramAdapter` / `EmailGateway`; `NotificationChannelFactory`.
+  6. Adapter and Factory: `GeminiCategoryClassifier` / `EmailGateway`; `NotificationChannelFactory`.
   7. Exceptions: `CampusOpsException` hierarchy and `GlobalExceptionHandler` returning a uniform JSON error.
 
 ## Segment 5 - Intelligent features recap (13:30-14:30)
 
 - **Member 5** on the **Overview** dashboard: SLA compliance, technician workload, service and category analysis, 14-day trend, the "At risk" list from the SLA risk predictor ("Typical fix 37 min, 117 % used, Arjun Rao has 2 active").
-- Mention the triage chain: Claude (if key) then Google Gemini (if key) then keywords; show the **Integrations** panel on the Settings page. If a Gemini key is configured, show an incident whose classification says "by GEMINI".
+- Mention the triage chain: Gemini if enabled, with local keyword matching as the fallback; show the **Integrations** panel on the Settings page. If a Gemini key is configured, show an incident whose classification says "by GEMINI".
 
-## Segment 6 - Telegram, QR sticker, public status page (14:30-15:30)
+## Segment 6 - QR sticker, public status page (14:30-15:30)
 
-- **Member 2 (Telegram, only if the bot token is configured):** on the phone send `/services`, then `/report WIFI-RAM no internet in Ram Bhavan since morning`. The bot replies with the incident number, priority and technician. Send `/status INC-10xx`. Also show a notification arriving in Telegram. If no token: skip and say it is optional.
 - **Member 1 (QR):** scan the sticker for **LAB-F104-PC07** with the phone camera; the report form opens with service **Lab PCs (D+F Block)**, location and category already filled. Show the **Assets & QR** page and the printable sticker sheet.
 - **Member 1 (status page):** log out and open `/status`: campus health per service and known problems without login, so students can check before reporting.
 
@@ -153,7 +151,7 @@ Note on numbers: the seeded campus has INC-1001 to INC-1048. New incidents in th
 
 ## Segment 8 - Tests and CI (16:45-17:45)
 
-- **Member 5:** run `cd backend && ./mvnw test` (or show a finished run): **47 tests, 0 failures** (TC01-TC46 plus context load). Show two names: TC01 "NEW cannot jump straight to CLOSED" and TC35 "An unacknowledged P1 breaches its SLA and is escalated up the chain".
+- **Member 5:** run `cd backend && ./mvnw test` (or show a finished run): **50 tests, 0 failures**. Show two names: TC01 "NEW cannot jump straight to CLOSED" and TC35 "An unacknowledged P1 breaches its SLA and is escalated up the chain".
 - Show `.github/workflows/ci.yml`: backend `mvnw verify` and frontend `npm run build` on every push.
 - Show the test table in the report (section 10) and the traceability matrix (section 12).
 
@@ -163,7 +161,7 @@ Note on numbers: the seeded campus has INC-1001 to INC-1048. New incidents in th
 
 ## Optional extra - Fest-load scenario (about 45 s)
 
-- As employees, report internet failures for Academic Blocks LAN, Library Wi-Fi and the D+F lab network. As Kiran, open the outage map and inspect the shared dependency.
+- As students, report internet failures for Academic Blocks LAN, Library Wi-Fi and the D+F lab network. As Kiran, open the outage map and inspect the shared dependency.
 - "This is modelled on the Atmos complaints: one saturated academic uplink, many different-looking reports."
 
 ## Fallbacks during recording

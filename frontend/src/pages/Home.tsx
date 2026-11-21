@@ -1,11 +1,10 @@
 import { Link, Navigate } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
-import { ArrowRight, MessageCircleQuestion, Mic, QrCode, Star } from "lucide-react"
+import { ArrowRight, MessageCircleQuestion, Plus, Star } from "lucide-react"
 import * as api from "../lib/api"
 import { homeFor, isStaff, useAuth } from "../lib/auth"
 import { ago, OPEN_STATUSES } from "../lib/format"
 import type { IncidentSummary } from "../lib/types"
-import { Lifecycle, LifecycleBar } from "../components/Lifecycle"
 import { Empty, ErrorBox, Loading, PriorityTag, StatusPill } from "../components/ui"
 import { Reach } from "../components/incident/MeToo"
 
@@ -28,12 +27,9 @@ function OpenCard({ i }: { i: IncidentSummary }) {
       <div className="mt-1.5 text-[16px] font-medium leading-snug">{i.title}</div>
       <div className="mt-0.5 text-sm text-mute">
         {i.service?.name}
-        {i.assignee ? " · " + i.assignee.name + " is on it" : " · finding the right technician"}
+        {i.assignee ? " · " + i.assignee.name + " is on it" : " · Waiting for assignment"}
       </div>
       {i.supporters > 0 && <Reach affected={i.affectedUsers} supporters={i.supporters} className="mt-1" />}
-      <div className="mt-4">
-        <Lifecycle status={i.status} />
-      </div>
     </Link>
   )
 }
@@ -55,40 +51,21 @@ export default function HomePage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <div className="text-sm text-mute">{greeting()},</div>
-        <h1 className="font-cond text-[30px] font-semibold leading-tight">{user?.fullName.split(" ")[0]}, what's not working?</h1>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold leading-tight tracking-tight">{greeting()}, {user?.fullName.split(" ")[0]}</h1>
+          <p className="mt-1 text-sm text-mute">Get IT help and keep track of your tickets.</p>
+        </div>
+        <Link to="/report" className="btn btn-primary"><Plus size={16} /> Report a problem</Link>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-[1.4fr_1fr]">
-        <Link
-          to="/report"
-          className="group relative overflow-hidden rounded-xl bg-rail p-6 text-white sm:p-7"
-        >
-          <div className="font-mono text-[11px] tracking-[0.14em] text-beacon">IT HELP DESK</div>
-          <div className="mt-2 font-cond text-[28px] font-semibold leading-tight">Report a problem</div>
-          <p className="mt-1 max-w-sm text-[14.5px] text-rail-ink">
-            Wi-Fi, ERP, CMS, lab PCs, printers. Describe it in your own words and we'll work out the rest.
-          </p>
-          <div className="mt-5 inline-flex items-center gap-2 rounded-md bg-beacon px-4 py-2 font-semibold text-rail transition-colors group-hover:bg-[#ffc12e]">
-            Start a report <ArrowRight size={16} />
-          </div>
-          <div className="mt-5 flex flex-wrap gap-x-5 gap-y-1 text-[12.5px] text-rail-ink/80">
-            <span className="inline-flex items-center gap-1.5">
-              <Mic size={14} /> Speak instead of typing
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <QrCode size={14} /> Or scan the sticker on the device
-            </span>
-          </div>
-        </Link>
-
-        <Link to="/status" className="panel flex flex-col justify-between p-5 hover:border-line-strong">
+      <div>
+        <Link to="/status" className="panel block p-4 hover:border-line-strong sm:p-5">
           <div>
-            <div className="eyebrow">Campus right now</div>
+            <h2 className="font-semibold">Campus status</h2>
             {s ? (
               <div className="mt-2 font-cond text-[20px] font-semibold leading-snug" style={{ color: down ? "var(--outage)" : "var(--operational)" }}>
-                {down ? down + " service" + (down > 1 ? "s" : "") + " down" : "Everything is running"}
+                {down ? down + " service" + (down > 1 ? "s" : "") + " down" : s.overall === "DEGRADED" ? "Some services are disrupted" : "Services are running normally"}
               </div>
             ) : (
               <div className="mt-2 text-mute">Checking…</div>
@@ -100,7 +77,7 @@ export default function HomePage() {
             ))}
           </div>
           <div className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-signal">
-            Check before reporting <ArrowRight size={14} />
+            View service status <ArrowRight size={14} />
           </div>
         </Link>
       </div>
@@ -113,7 +90,7 @@ export default function HomePage() {
         >
           <MessageCircleQuestion className="shrink-0 text-risk" size={22} />
           <div className="min-w-0 flex-1">
-            <div className="font-medium">We need more info from you</div>
+            <div className="font-medium">IT support asked for more information</div>
             <div className="truncate text-sm text-ink-2">
               <span className="font-mono text-[12px]">{i.number}</span> {i.title}
             </div>
@@ -130,7 +107,7 @@ export default function HomePage() {
         >
           <Star className="shrink-0 text-ok" size={22} />
           <div className="min-w-0 flex-1">
-            <div className="font-medium">We think it's fixed. Please confirm and rate us</div>
+            <div className="font-medium">Can you confirm that this is fixed?</div>
             <div className="truncate text-sm text-ink-2">
               <span className="font-mono text-[12px]">{i.number}</span> {i.title}
             </div>
@@ -141,9 +118,9 @@ export default function HomePage() {
 
       <section className="mt-8">
         <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="font-cond text-[19px] font-semibold">My open incidents</h2>
+          <h2 className="font-cond text-[19px] font-semibold">Open tickets</h2>
           <Link to="/incidents" className="text-sm text-signal hover:underline">
-            See all
+            View all tickets
           </Link>
         </div>
         {mine.isLoading && <Loading />}
@@ -160,15 +137,12 @@ export default function HomePage() {
 
       {(past.length > 0 || toVerify.length > 0) && (
         <section className="mt-8">
-          <h2 className="mb-3 font-cond text-[19px] font-semibold">Recently fixed</h2>
+          <h2 className="mb-3 font-cond text-[19px] font-semibold">Resolved and closed tickets</h2>
           <div className="panel divide-y divide-line">
             {[...toVerify, ...past].slice(0, 8).map((i) => (
-              <Link key={i.id} to={"/incidents/" + i.id} className="grid grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 hover:bg-sunk sm:grid-cols-[90px_1fr_140px_auto]">
+              <Link key={i.id} to={"/incidents/" + i.id} className="grid grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 hover:bg-sunk sm:grid-cols-[90px_1fr_auto]">
                 <span className="font-mono text-[12px] text-mute">{i.number}</span>
                 <span className="truncate text-[13.5px]">{i.title}</span>
-                <span className="hidden sm:block">
-                  <LifecycleBar status={i.status} />
-                </span>
                 <StatusPill s={i.status} />
               </Link>
             ))}

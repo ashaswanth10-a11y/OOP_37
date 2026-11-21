@@ -9,9 +9,7 @@ package "user" {
     - fullName : String
     - email : String
     - passwordHash : String
-    - telegramChatId : String
     - emailNotifications : boolean
-    - telegramNotifications : boolean
     - active : boolean
     - createdAt : Instant
     --
@@ -20,11 +18,10 @@ package "user" {
     + hasRole(r : Role) : boolean
     + isStaff() : boolean
     + changePassword(hash : String)
-    + linkTelegram(chatId : String)
     + deactivate()
   }
 
-  class Employee <<Entity>> {
+  class Student <<Entity>> {
     - department : String
     - location : String
     --
@@ -61,7 +58,7 @@ package "user" {
   }
 
   enum Role {
-    EMPLOYEE
+    STUDENT
     TECHNICIAN
     TEAM_LEAD
     SYSTEM_ADMIN
@@ -98,7 +95,6 @@ package "user" {
     + register(spec : Spec) : User
     + requireTechnician(id : Long) : Technician
     + activeLoad() : Map<Long,Integer>
-    + issueTelegramLinkCode(u : User) : String
   }
 
   class CurrentUser <<Component>> {
@@ -107,7 +103,7 @@ package "user" {
   }
 }
 
-User <|-- Employee
+User <|-- Student
 User <|-- Technician
 Technician <|-- TeamLead
 User <|-- Administrator

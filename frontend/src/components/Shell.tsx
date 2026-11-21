@@ -32,7 +32,7 @@ import { isAdmin, isLead, isTech, shellFor, useAuth } from "../lib/auth"
 import { useNow } from "../lib/clock"
 import { useLive } from "../lib/live"
 import { useTheme } from "../lib/theme"
-import { initials } from "../lib/format"
+import { initials, ROLE_LABEL } from "../lib/format"
 import { Bell } from "./Bell"
 import { LampBoard } from "./LampBoard"
 import { Loading, Meter } from "./ui"
@@ -61,8 +61,8 @@ export function Logo({ light, small }: { light?: boolean; small?: boolean }) {
           CampusOps
         </span>
         {!small && (
-          <span className={"block font-mono text-[9.5px] tracking-[0.14em] " + (light ? "text-rail-ink/70" : "text-mute")}>
-            BITS HYD · IT
+          <span className={"block text-[10px] " + (light ? "text-rail-ink/70" : "text-mute")}>
+            BITS Hyderabad
           </span>
         )}
       </span>
@@ -104,7 +104,7 @@ function UserMenu() {
         </span>
         <span className="hidden text-left leading-tight md:block">
           <span className="block text-[13px] font-medium">{user.fullName}</span>
-          <span className="block font-mono text-[10.5px] text-mute">{user.code}</span>
+          <span className="block text-[11px] text-mute">{ROLE_LABEL[user.role]}</span>
         </span>
       </button>
       {open && (
@@ -135,7 +135,7 @@ export function PortalShell() {
   const items = [
     { to: "/home", label: "Home" },
     { to: "/report", label: "Report a problem" },
-    { to: "/incidents", label: "My incidents" },
+    { to: "/incidents", label: "My tickets" },
     { to: "/status", label: "Campus status" },
   ]
   return (

@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
-import java.util.Map;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -41,7 +40,7 @@ public class UserController {
                                    @Min(0) int experienceYears, boolean available) {
     }
 
-    public record Preferences(boolean emailNotifications, boolean telegramNotifications) {
+    public record Preferences(boolean emailNotifications) {
     }
 
     @GetMapping
@@ -87,12 +86,6 @@ public class UserController {
 
     @PutMapping("/me/preferences")
     public UserView preferences(@RequestBody Preferences req) {
-        return UserView.of(service.updatePreferences(currentUser.get(), req.emailNotifications(),
-                req.telegramNotifications()));
-    }
-
-    @PostMapping("/me/telegram-code")
-    public Map<String, String> telegramCode() {
-        return Map.of("code", service.issueTelegramLinkCode(currentUser.get()));
+        return UserView.of(service.updatePreferences(currentUser.get(), req.emailNotifications()));
     }
 }

@@ -170,13 +170,13 @@ own campus.</p>
 <table>
 <thead><tr><th style="width:24%">Stakeholder</th><th>Interest</th><th style="width:22%">Role in CampusOps</th></tr></thead>
 <tbody>
-<tr><td>Students, faculty, office staff</td><td>Report a problem quickly (from a phone, by voice, by scanning a sticker or over Telegram), know that it was received, see progress, confirm the fix.</td><td><code>Employee</code></td></tr>
+<tr><td>Students</td><td>Report a problem quickly (from a phone, by voice, or by scanning a sticker), know that it was received, see progress, confirm the fix.</td><td><code>Student</code></td></tr>
 <tr><td>Support technicians (Network Ops, Apps &amp; Data, Desktop Support)</td><td>A clear queue ordered by urgency, the context needed to start work, similar past fixes, a fair workload.</td><td><code>Technician</code></td></tr>
 <tr><td>Team leads</td><td>See their team's load, reassign work, take escalations, fix one root cause behind many tickets.</td><td><code>TeamLead</code> (a technician)</td></tr>
 <tr><td>System administrator (CCIT)</td><td>Configure services, dependencies, SLAs, categories, users and strategies; watch SLA violations and the audit log.</td><td><code>Administrator</code></td></tr>
 <tr><td>IT manager</td><td>Top of the escalation chain; campus-wide reports.</td><td><code>ItManager</code> (an administrator)</td></tr>
 <tr><td>Anyone on campus (no login)</td><td>Check whether a service is already known to be down before reporting it.</td><td>Public <code>/status</code> page</td></tr>
-<tr><td>External services</td><td>Anthropic Claude API and Google Gemini API (category suggestion), Telegram Bot API (chat reporting and messages).</td><td>Secondary actors</td></tr>
+<tr><td>External services</td><td>Google Gemini API for category suggestions.</td><td>Secondary actors</td></tr>
 </tbody></table>
 
 <h2>1.3 Existing challenges</h2>
@@ -194,21 +194,21 @@ own campus.</p>
 <p>CampusOps is a full-stack web application (installable as a PWA) with a Spring Boot backend and a React frontend.
 Its core is a rich <code>Incident</code> aggregate whose lifecycle is a State-pattern object graph. Around it:</p>
 <ul>
-<li><b>Intake</b> through the web form (with voice dictation and QR-sticker prefill), Telegram chat, and a scripted simulation channel for demos.</li>
+<li><b>Intake</b> through the web form (with voice dictation and QR-sticker prefill).</li>
 <li><b>Crowd confirmation</b>: instead of filing a duplicate, a student presses "Me too" on an existing incident; the affected-user count and, when it matters, the priority go up automatically.</li>
-<li><b>Automatic triage</b> on every report: category (a chain: Claude, then Google Gemini, then an offline keyword classifier), priority (two interchangeable strategies), SLA deadlines from a service-specific or campus-default policy, duplicate check, auto-assignment (five interchangeable strategies) and root-cause correlation on the service dependency graph.</li>
+<li><b>Automatic triage</b> on every report: category (Google Gemini with local keyword matching as a fallback), priority (two interchangeable strategies), SLA deadlines from a service-specific or campus-default policy, duplicate check, auto-assignment (five interchangeable strategies) and root-cause correlation on the service dependency graph.</li>
 <li><b>Monitoring</b>: a scheduled SLA sweep raises warnings at a configurable percentage, records breaches and escalates Technician &rarr; Team Lead &rarr; System Administrator &rarr; IT Manager.</li>
-<li><b>Communication</b>: every change is an <code>IncidentEvent</code>; observers write the audit trail, send notifications over in-app, (simulated) email and Telegram channels, and push live updates to open browsers over Server-Sent Events.</li>
+<li><b>Communication</b>: every change is an <code>IncidentEvent</code>; observers write the audit trail, send notifications in the app and through a simulated email outbox, and push live updates to open browsers over Server-Sent Events.</li>
 <li><b>Insight</b>: dashboard, technician workload, service and category analysis, SLA-risk list, live outage map and a public status page.</li>
 </ul>
 
 <h2>1.5 Assumptions</h2>
 <ol>
-<li>One campus, one organisation; all users have an <code>@hyderabad.bits-pilani.ac.in</code> address. Self-registration is only for employees/students; staff accounts are created by an administrator.</li>
+<li>One campus, one organisation; all users have an <code>@hyderabad.bits-pilani.ac.in</code> address. Self-registration is only for students; staff accounts are created by an administrator.</li>
 <li>Times are stored in UTC (<code>Instant</code>) and shown in IST (<code>Asia/Kolkata</code>). SLA clocks run 24x7 (no business-hours calendar).</li>
 <li>A technician's skills are the incident category codes they can handle (e.g. <code>NETWORK</code>, <code>DATABASE</code>); a team lead is also a working technician.</li>
 <li>The SLA clock starts when the incident is created; "response" means the technician acknowledged it.</li>
-<li>Email delivery is simulated (stored in an outbox the admin can read). Telegram, Gemini and Claude are real integrations that switch on only when their keys are configured; without them the system still works fully offline.</li>
+<li>Email delivery is simulated (stored in an outbox the admin can read). Gemini is optional. Without a key, the system classifies tickets using local keywords.</li>
 <li>Campus scale: thousands of users and tens to hundreds of incidents a day, which is why analytics are computed in memory (see Section 6, question 9, for what changes at larger scale).</li>
 </ol>
 </section>
@@ -221,8 +221,8 @@ Its core is a rich <code>Incident</code> aggregate whose lifecycle is a State-pa
 <table class="small">
 <thead><tr><th style="width:7%">ID</th><th>Requirement</th></tr></thead>
 <tbody>
-<tr><td>FR-1</td><td>Users log in with email and password; employees can self-register with a campus email. Admins create staff accounts, edit technician profiles (team, skills, capacity, experience, availability) and activate/deactivate users.</td></tr>
-<tr><td>FR-2</td><td>An employee reports an incident with title, description, affected service (or an asset tag from a QR sticker), optional category, impact, urgency, number of affected users and location, through web, voice, QR or Telegram.</td></tr>
+<tr><td>FR-1</td><td>Users log in with email and password; students can self-register with a campus email. Admins create staff accounts, edit technician profiles (team, skills, capacity, experience, availability) and activate/deactivate users.</td></tr>
+<tr><td>FR-2</td><td>An student reports an incident with title, description, affected service (or an asset tag from a QR sticker), optional category, impact, urgency, number of affected users and location, through the web form, by voice or by scanning a QR sticker.</td></tr>
 <tr><td>FR-3</td><td>While typing, the reporter sees a suggested category with confidence and reason, similar open incidents and known fixes from past incidents.</td></tr>
 <tr><td>FR-4</td><td>On submission the system creates the incident (<code>INC-nnnn</code>), classifies it, calculates priority, determines the SLA, checks for duplicates, assigns a technician, correlates it with other incidents and notifies the people involved.</td></tr>
 <tr><td>FR-5</td><td>Technicians see their queue, take unassigned incidents, acknowledge, start investigation, add internal or public notes, request information from the reporter, resolve with a summary, root cause and code, and close verified incidents.</td></tr>
@@ -234,8 +234,7 @@ Its core is a rich <code>Incident</code> aggregate whose lifecycle is a State-pa
 <tr><td>FR-11</td><td>Search incidents by free text/number, status, priority, category, service, technician, SLA state, date range, escalated-only, problem and open-only, with sorting and paging.</td></tr>
 <tr><td>FR-12</td><td>Reports: incident overview, technician workload, service analysis, category analysis, priority/status/channel breakdowns, 14-day trend and an at-risk list.</td></tr>
 <tr><td>FR-13</td><td>A public status page (no login) shows each service's health and known problems.</td></tr>
-<tr><td>FR-14</td><td>Telegram: link an account with a one-time 6-digit code, then <code>/report</code>, <code>/status</code>, <code>/mine</code>, <code>/services</code>; receive notifications in chat.</td></tr>
-<tr><td>FR-15</td><td>Any logged-in user can say "Me too" on an open incident they did not report. Each person counts once; the affected-user count becomes at least reporter + supporters and the priority is re-assessed (it can only rise automatically).</td></tr>\n</tbody></table>
+<tr><td>FR-14</td><td>Any logged-in user can say "Me too" on an open incident they did not report. Each person counts once; the affected-user count becomes at least reporter + supporters and the priority is re-assessed (it can only rise automatically).</td></tr>\n</tbody></table>
 
 <h2>2.2 Non-functional requirements</h2>
 <table class="small">
@@ -254,8 +253,8 @@ Its core is a rich <code>Incident</code> aggregate whose lifecycle is a State-pa
 <table class="small">
 <thead><tr><th style="width:18%">Role (class)</th><th>Main permissions (enforced by <code>@PreAuthorize</code> and <code>IncidentPolicy</code>)</th></tr></thead>
 <tbody>
-<tr><td>EMPLOYEE (<code>Employee</code>)</td><td>Report; view only own incidents; provide info; comment; verify / reopen / cancel own incidents; notifications; Telegram link.</td></tr>
-<tr><td>TECHNICIAN (<code>Technician</code>)</td><td>Everything an employee can do, plus: view all incidents, queue, dashboard, outage map, problems; take; acknowledge / start / request info / resolve / close when assigned; internal notes; set own availability.</td></tr>
+<tr><td>STUDENT (<code>Student</code>)</td><td>Report; view only own incidents; provide info; comment; verify / reopen / cancel own incidents; notifications.</td></tr>
+<tr><td>TECHNICIAN (<code>Technician</code>)</td><td>Everything a student can do, plus: view all incidents, queue, dashboard, outage map, problems; take; acknowledge / start / request info / resolve / close when assigned; internal notes; set own availability.</td></tr>
 <tr><td>TEAM_LEAD (<code>TeamLead</code>, grants TECHNICIAN + TEAM_LEAD)</td><td>Technician rights on any incident, plus assign/reassign with override, change priority, resolve problem records, view audit log, SLA violations, settings (read), user list, edit technician profiles.</td></tr>
 <tr><td>SYSTEM_ADMIN (<code>Administrator</code>)</td><td>Supervisor rights plus catalogue, SLA, category, asset, user and settings management, and email outbox.</td></tr>
 <tr><td>IT_MANAGER (<code>ItManager</code>, grants SYSTEM_ADMIN + IT_MANAGER)</td><td>All admin rights; receives level-3 escalations.</td></tr>
@@ -385,21 +384,18 @@ are linked and leads/admins get a "Possible root cause found" notification.</li>
 
 <h2>3.1 Explanation</h2>
 <p><b>Clients.</b> A React + TypeScript single-page app (installable PWA) serves every role with different navigation;
-the public <code>/status</code> page needs no login. Telegram users talk to the same backend through the bot.</p>
+the public <code>/status</code> page needs no login.</p>
 <p><b>Edge.</b> In Docker the SPA is served by nginx, which also reverse-proxies <code>/api</code> to the backend and passes
 <code>/api/stream</code> unbuffered for Server-Sent Events. In development Vite proxies <code>/api</code> to port 8080.</p>
 <p><b>Backend.</b> One Spring Boot application organised by business capability, not by technical layer:
 <code>user</code>, <code>auth</code>, <code>catalog</code>, <code>incident</code>, <code>priority</code>, <code>assignment</code>,
 <code>sla</code>, <code>intelligence</code>, <code>ai</code>, <code>problem</code>, <code>events</code>, <code>audit</code>,
-<code>notification</code>, <code>realtime</code>, <code>telegram</code>, <code>report</code>, <code>settings</code>,
+<code>notification</code>, <code>realtime</code>, <code>report</code>, <code>settings</code>,
 <code>seed</code>, <code>common</code>. Inside each, controllers are thin (validate, resolve the current user,
 call a service, map to a view record); services orchestrate; the rules live in domain objects (<code>Incident</code>, its state
 objects, <code>SlaTracker</code>, <code>SlaPolicy</code>, <code>Technician</code>), strategies and the policy.</p>
 <p><b>Persistence.</b> Spring Data JPA repositories over H2 (default, file-based) or PostgreSQL 16 (Docker / <code>postgres</code> profile).</p>
-<p><b>Integrations.</b> Each external system sits behind an adapter: <code>ClaudeCategoryClassifier</code> (official Anthropic Java SDK),
-<code>GeminiCategoryClassifier</code> (Google Gemini REST API, <code>generateContent</code>),
-<code>TelegramAdapter</code> (Telegram Bot HTTP API via <code>java.net.http.HttpClient</code>) and <code>EmailGateway</code>
-(simulated outbox).</p>
+<p><b>Integrations.</b> <code>GeminiCategoryClassifier</code> calls the Google Gemini REST API. <code>EmailGateway</code> writes to the simulated email outbox.</p>
 
 <h2>3.2 Modular monolith with event-driven internals</h2>
 <p>Services never call the audit or notification code directly. They publish an <code>IncidentEvent</code> through
@@ -409,7 +405,7 @@ objects, <code>SlaTracker</code>, <code>SlaPolicy</code>, <code>Technician</code
 <li><code>NotificationListener</code> (<code>@Order(10)</code>) decides who hears about what and fans out over every channel that applies to the recipient. Channel failures are logged and swallowed.</li>
 <li><code>RealtimeListener</code> (<code>@TransactionalEventListener(AFTER_COMMIT)</code>) broadcasts a small "incident changed" message over SSE only after the commit, so browsers never refetch uncommitted data.</li>
 </ul>
-<p>Background work runs on Spring's scheduler: <code>SlaMonitor</code> (every 15 s), <code>TelegramBot.poll</code> (every 3 s) and an SSE heartbeat (every 25 s).</p>
+<p>Background work runs on Spring's scheduler: <code>SlaMonitor</code> (every 15 s) and an SSE heartbeat (every 25 s).</p>
 
 <h2>3.3 Why not microservices yet</h2>
 <p>We considered splitting incidents, notifications, intelligence and SLA monitoring into services and decided against it for now:</p>
@@ -426,12 +422,12 @@ objects, <code>SlaTracker</code>, <code>SlaPolicy</code>, <code>Technician</code
 <p>All diagrams are PlantUML sources in <code>docs/uml/*.puml</code>, rendered to SVG and PNG. They were drawn from the code,
 so names, attributes and multiplicities match the classes. The architecture diagram is in Section 3 and the ER diagram in
 Section 8. Wide diagrams are printed on landscape pages; the SVG files in <code>docs/uml/</code> can be zoomed without loss.</p>
-<div class="figure tall"><img src="../uml/use-case.svg" alt="Use case diagram"><div class="caption">Figure 4.1 - Use case diagram: five human roles, a public visitor, and Telegram, the SLA scheduler and the Claude / Gemini APIs as secondary actors. Team Lead and IT Manager inherit the use cases of Technician and System Administrator.</div></div>
+<div class="figure tall"><img src="../uml/use-case.svg" alt="Use case diagram"><div class="caption">Figure 4.1 - Use case diagram: five human roles, a public visitor, with the SLA scheduler and Gemini as secondary actors. Team Lead and IT Manager inherit the use cases of Technician and System Administrator.</div></div>
 <div class="figure tall"><img src="../uml/class-users.svg" alt="Users class diagram"><div class="caption">Figure 4.2 - Class diagram 1: user hierarchy (inheritance only where "is-a" holds), Role enum, UserFactory.</div></div>
 <div class="landscape"><div class="figure"><img src="img/class-incident-rotated.png" alt="Incident class diagram"><div class="caption">Figure 4.3 - Class diagram 2: the Incident aggregate. Filled diamonds are composition (SlaTracker, Resolution, Feedback, WorkNote live and die with the incident); hollow diamonds are aggregation (ProblemRecord groups incidents it does not own; services aggregate their dependencies); plain arrows are associations.</div></div></div>
 <div class="figure"><img src="../uml/class-state.svg" alt="State pattern class diagram"><div class="caption">Figure 4.4 - Class diagram 3: State pattern. Eleven immutable state objects registered in an EnumMap.</div></div>
-<div class="landscape"><div class="figure"><img src="img/class-strategies-rotated.png" alt="Strategies class diagram"><div class="caption">Figure 4.5 - Class diagram 4: Strategy pattern for priority (2), assignment (5) and categorisation (3: Claude and Gemini adapters, keyword classifier, run as a chain).</div></div></div>
-<div class="figure"><img src="../uml/class-observer.svg" alt="Observer class diagram"><div class="caption">Figure 4.6 - Class diagram 5: Observer (event publisher and three listeners), notification channels created by a factory, and adapters for email and Telegram.</div></div>
+<div class="landscape"><div class="figure"><img src="img/class-strategies-rotated.png" alt="Strategies class diagram"><div class="caption">Figure 4.5 - Class diagram 4: Strategy pattern for priority (2), assignment (5) and categorisation (2: Gemini and the keyword classifier).</div></div></div>
+<div class="figure"><img src="../uml/class-observer.svg" alt="Observer class diagram"><div class="caption">Figure 4.6 - Class diagram 5: Observer (event publisher and three listeners), notification channels created by a factory, and an adapter for email.</div></div>
 <div class="figure tall"><img src="../uml/state-lifecycle.svg" alt="State diagram"><div class="caption">Figure 4.7 - State machine of the incident lifecycle exactly as encoded in IncidentStates.</div></div>
 <div class="landscape"><div class="figure"><img src="img/sequence-report-rotated.png" alt="Sequence diagram"><div class="caption">Figure 4.8 - Sequence: report &rarr; duplicate check &rarr; classify &rarr; prioritise &rarr; SLA &rarr; assign &rarr; correlate &rarr; notify (IncidentService.report).</div></div></div>
 </section>
@@ -483,7 +479,7 @@ public abstract class User {
 }</pre>
 
 <h3>Inheritance</h3>
-<p>Inheritance is used only for real "is-a" relations: an <code>Employee</code>, <code>Technician</code> and
+<p>Inheritance is used only for real "is-a" relations: an <code>Student</code>, <code>Technician</code> and
 <code>Administrator</code> are users; a <code>TeamLead</code> is a technician (gets auto-assigned work and has skills) who also
 supervises; an <code>ItManager</code> is an administrator at the top of the chain. JPA maps the hierarchy to one table with a
 <code>user_type</code> discriminator. Exceptions form a second hierarchy (e.g. <code>ServiceNotFoundException extends
@@ -505,7 +501,7 @@ into the token, which a <code>TeamLead</code> overrides.</p>
 <pre><span class="cm">// notification/NotificationService.java</span>
 for (NotificationChannel channel : factory.channelsFor(recipient)) {
     try {
-        channel.send(message);              <span class="cm">// InApp, Email or Telegram: dynamic dispatch</span>
+        channel.send(message);              <span class="cm">// InApp or Email: dynamic dispatch</span>
     } catch (RuntimeException ex) {
         log.warn("{} notification to {} failed: {}", channel.type(), recipient.getCode(), ex.getMessage());
     }
@@ -517,7 +513,7 @@ for (NotificationChannel channel : factory.channelsFor(recipient)) {
 methods carry shared behaviour (<code>IncidentState.canTransitionTo</code>, <code>AssignmentStrategy.select</code>).</p>
 <pre><span class="cm">// notification/NotificationChannel.java</span>
 public interface NotificationChannel {
-    enum Type { IN_APP, EMAIL, TELEGRAM }
+    enum Type { IN_APP, EMAIL }
     record Message(User recipient, String title, String body, Long incidentId, String incidentNumber,
                    Notification.Severity severity) { }
     Type type();
@@ -569,7 +565,7 @@ get their own handlers so no stack trace reaches the client.</p>
 <tr><td>Missing SLA configuration</td><td><code>MissingSlaConfigurationException</code></td><td>422 MISSING_SLA_CONFIGURATION</td></tr>
 <tr><td>Duplicate incident</td><td><code>DuplicateIncidentException</code> (carries the existing number)</td><td>409 DUPLICATE_INCIDENT</td></tr>
 <tr><td>Database failure</td><td><code>DataAccessException</code> handler</td><td>503 DATABASE_FAILURE</td></tr>
-<tr><td>Network failure (Claude, Gemini, Telegram, channels)</td><td>Caught inside the adapters / <code>NotificationService</code>; the AI chain falls through to keywords (TC40); <code>ExternalServiceException</code> (502) is defined for future synchronous calls</td><td>workflow continues</td></tr>
+<tr><td>Network failure (Gemini or a notification channel)</td><td>Caught inside the adapters / <code>NotificationService</code>; the AI chain falls through to keywords (TC40); <code>ExternalServiceException</code> (502) is defined for future synchronous calls</td><td>workflow continues</td></tr>
 </tbody></table>
 <pre><span class="cm">// common/GlobalExceptionHandler.java</span>
 @ExceptionHandler(CampusOpsException.class)
@@ -621,7 +617,7 @@ static final class ResolvedState extends AbstractState {
 <code>ExperienceBased</code>, <code>Smart</code>; contexts <code>PriorityService</code> and <code>AssignmentService</code>.
 Spring injects every implementation as a list; the context indexes them by <code>key()</code> and picks the one named in
 <code>SystemSettings</code>, so the admin switches strategy at runtime with no redeploy. <code>CategoryClassifier</code> is a
-third family (<code>ClaudeCategoryClassifier</code>, <code>GeminiCategoryClassifier</code>, <code>KeywordCategoryClassifier</code>), which
+third family (<code>GeminiCategoryClassifier</code>, <code>KeywordCategoryClassifier</code>), which
 <code>TriageService</code> runs as a chain of responsibility: each classifier either answers or returns empty and the next one is asked.</p>
 <pre><span class="cm">// assignment/AssignmentService.java</span>
 public AssignmentService(List&lt;AssignmentStrategy&gt; strategies, SettingsService settings, ...) {
@@ -658,30 +654,15 @@ a NEW incident with the next <code>INC-nnnn</code> number. <code>NotificationCha
 that apply to a recipient.</p>
 <pre><span class="cm">// user/UserFactory.java</span>
 return switch (spec.role()) {
-    case EMPLOYEE -&gt; new Employee(code, spec.fullName(), spec.email(), hash, now, spec.department(), spec.location());
+    case STUDENT -&gt; new Student(code, spec.fullName(), spec.email(), hash, now, spec.department(), spec.location());
     case TECHNICIAN -&gt; new Technician(code, spec.fullName(), spec.email(), hash, now, spec.team(), skills, max, exp);
     case TEAM_LEAD -&gt; new TeamLead(code, spec.fullName(), spec.email(), hash, now, spec.team(), skills, max, exp);
     case SYSTEM_ADMIN -&gt; new Administrator(code, spec.fullName(), spec.email(), hash, now);
     case IT_MANAGER -&gt; new ItManager(code, spec.fullName(), spec.email(), hash, now);
 };</pre>
 
-<h3>Adapter - Claude, Gemini, Telegram, email</h3>
-<p><code>ClaudeCategoryClassifier</code> adapts the Anthropic Java SDK (<code>MessageCreateParams</code>, JSON reply parsing) and
-<code>GeminiCategoryClassifier</code> adapts the Google Gemini REST API (<code>POST /v1beta/models/{model}:generateContent</code> with an
-<code>x-goog-api-key</code> header and JSON response mode) to the same <code>CategoryClassifier</code> interface; any failure, HTTP error,
-refusal or unknown category returns <code>Optional.empty()</code> and <code>TriageService</code> moves to the next classifier. <code>TelegramAdapter</code> hides the Telegram Bot HTTP API behind
-<code>sendMessage</code> and <code>getUpdates</code>. <code>EmailGateway</code> is the target interface for outgoing mail;
-<code>SimulatedEmailGateway</code> stores messages in an outbox, and an SMTP or SendGrid adapter can replace it without touching
-<code>EmailChannel</code>.</p>
-<pre><span class="cm">// ai/ClaudeCategoryClassifier.java (abridged)</span>
-MessageCreateParams params = MessageCreateParams.builder()
-        .model(model).maxTokens(1024L)
-        .outputConfig(OutputConfig.builder().effort(OutputConfig.Effort.LOW).build())
-        .addUserMessage(prompt).build();
-Message response = client.messages().create(params);
-...
-return categories.stream().filter(c -&gt; c.getCode().equals(code)).findFirst()
-        .map(c -&gt; new Suggestion(c, Math.round(confidence * 100) / 100.0, name(), reason));</pre>
+<h3>Adapter - Gemini and email</h3>
+<p><code>GeminiCategoryClassifier</code> adapts the Google Gemini REST API to the <code>CategoryClassifier</code> interface. The adapter authenticates using <code>x-goog-api-key</code> and requests JSON from <code>generateContent</code>. When the provider fails or returns an unknown category, <code>TriageService</code> uses keyword matching. <code>EmailGateway</code> defines outgoing email, with <code>SimulatedEmailGateway</code> persisting messages in the outbox.</p>
 
 <h3>Repository - persistence</h3>
 <p>Every aggregate has a Spring Data repository interface (<code>IncidentRepository</code>, <code>UserRepository</code>,
@@ -711,8 +692,8 @@ public interface IncidentRepository extends JpaRepository&lt;Incident, Long&gt;,
 <tr><td>Language</td><td>Java 21 (backend), TypeScript ~7.0 (frontend)</td></tr>
 <tr><td>Backend framework</td><td>Spring Boot 4.0.10: Web MVC, Data JPA (Hibernate), Security + OAuth2 Resource Server (Nimbus JWT, HS256), Validation (Jakarta Bean Validation), Actuator (health), scheduling</td></tr>
 <tr><td>API docs</td><td>springdoc-openapi 3.2.0 (Swagger UI at <code>/swagger-ui.html</code>)</td></tr>
-<tr><td>AI</td><td>Google Gemini API (free tier, REST via <code>java.net.http.HttpClient</code>; model via <code>GEMINI_MODEL</code>, default <code>gemini-3.5-flash-lite</code>); optional Anthropic Claude API through the official Anthropic Java SDK 3.12.0 (<code>com.anthropic:anthropic-java</code>; model via <code>CAMPUSOPS_AI_MODEL</code>, default <code>claude-opus-5-5</code>)</td></tr>
-<tr><td>Messaging</td><td>Telegram Bot HTTP API via <code>java.net.http.HttpClient</code>; Server-Sent Events (<code>SseEmitter</code>)</td></tr>
+<tr><td>AI</td><td>Google Gemini API (free tier, REST via <code>java.net.http.HttpClient</code>; model via <code>GEMINI_MODEL</code>, default <code>gemini-3.5-flash-lite</code>)</td></tr>
+<tr><td>Messaging</td><td>Server-Sent Events (<code>SseEmitter</code>)</td></tr>
 <tr><td>Database</td><td>H2 (embedded file DB, default) and PostgreSQL 16 (Docker, <code>postgres</code> profile)</td></tr>
 <tr><td>Frontend</td><td>React 18.3, Vite 8, React Router 6, TanStack Query 5, Tailwind CSS 4, React Flow (<code>@xyflow/react</code> 13) for the outage map, Recharts 3, <code>qrcode.react</code> 4 for stickers, lucide-react icons, Web Speech API for voice input, PWA manifest + service worker</td></tr>
 <tr><td>Testing</td><td>JUnit 5, AssertJ, Spring Boot Test, MockMvc, H2 in-memory test database</td></tr>
@@ -720,9 +701,7 @@ public interface IncidentRepository extends JpaRepository&lt;Incident, Long&gt;,
 <tr><td>Diagrams</td><td>PlantUML</td></tr>
 </tbody></table>
 
-<p><b>Third-party APIs.</b> CampusOps integrates three external services, each behind an adapter and each optional: the
-<b>Google Gemini API</b> (free-tier category suggestion), the <b>Telegram Bot API</b> (chat reporting and notifications) and the
-<b>Anthropic Claude API</b> (category suggestion through the official Java SDK). Without keys the system runs fully offline.</p>
+<p><b>Third-party API.</b> The Google Gemini API provides optional category suggestions on ticket submission.</p>
 <h2>6.2 Technology selection report</h2>
 <h3>Q1. Why this programming language?</h3>
 <p>Java 21 is the course language, so every member can read and defend every class, which the brief explicitly requires. It is
@@ -742,8 +721,7 @@ the Web Speech API gives voice input for free.</p>
 <p>Spring Boot gives us, without boilerplate, the exact mechanisms our OOP design relies on: dependency injection of
 <i>all implementations of an interface</i> (the basis of our runtime-switchable strategies and channel factory), an in-process
 event bus with ordering and transaction phases (our Observer), declarative transactions, method-level security
-(<code>@PreAuthorize</code>), Bean Validation, scheduling for the SLA monitor and Spring Data repositories. It also has an
-official, maintained Anthropic SDK for Java, and Java 21's built-in HTTP client is enough for the Gemini and Telegram REST APIs.</p>
+(<code>@PreAuthorize</code>), Bean Validation, scheduling for the SLA monitor and Spring Data repositories. The built-in Java HTTP client calls the Gemini REST API.</p>
 <h3>Q4. Why this database?</h3>
 <p>The data is relational and integrity-heavy: incidents reference users, services, categories, assets and problems; services
 form a many-to-many dependency graph; SLA policies are unique per (service, priority). A relational database with foreign keys
@@ -765,7 +743,7 @@ and one CI pipeline, while packages by capability and event-based communication 
 <tr><td>Architecture</td><td>Microservices, serverless</td><td>Distributed transactions, more infrastructure and slower development with no scaling need at campus size.</td></tr>
 <tr><td>Real-time</td><td>WebSockets, polling</td><td>Updates flow one way (server to browser), so SSE is simpler, works through nginx and reconnects automatically.</td></tr>
 <tr><td>Auth</td><td>Server sessions, OAuth with Google</td><td>Stateless JWT scales horizontally and suits the SPA; campus Google SSO is listed as future work.</td></tr>
-<tr><td>Categorisation</td><td>Train our own ML model; a single LLM provider</td><td>No labelled data; LLMs with a keyword fallback work from day one and the fallback is fully explainable. Two providers (Gemini free tier first choice for cost, Claude optional) avoid depending on one vendor.</td></tr>
+<tr><td>Categorisation</td><td>Train our own ML model; a single LLM provider</td><td>No labelled data; LLMs with a keyword fallback work from day one and the fallback is fully explainable. The built-in keyword classifier also lets the system work offline.</td></tr>
 </tbody></table>
 <h3>Q7. Advantages and limitations of the stack</h3>
 <p><b>Advantages:</b> strong typing end to end; mature security and persistence; one command to run (H2) or deploy (Compose);
@@ -787,7 +765,7 @@ of simultaneous dashboards per instance.</p>
 PostgreSQL. To make that correct we would change the parts that currently assume one instance:</p>
 <ol>
 <li><b>Number sequences</b> (<code>IncidentFactory</code>, <code>UserFactory</code> use an in-memory <code>AtomicInteger</code>) &rarr; database sequences.</li>
-<li><b>Scheduled jobs</b> (<code>SlaMonitor</code>, <code>TelegramBot.poll</code>) would run on every instance &rarr; a distributed lock (e.g. ShedLock) or a dedicated worker; the Telegram bot would move to webhooks.</li>
+<li><b>Scheduled jobs</b> such as <code>SlaMonitor</code> would run on every instance &rarr; a distributed lock (e.g. ShedLock) or a dedicated worker.</li>
 <li><b>SSE fan-out</b> (<code>SseHub</code> is per instance) &rarr; Redis pub/sub or a message broker so an event on one instance reaches browsers connected to another; possibly WebFlux for many idle connections.</li>
 <li><b>Round-robin cursor and SLA-risk cache</b> (in memory) &rarr; shared store.</li>
 <li><b>Analytics</b> (<code>ReportService</code> loads all incidents) &rarr; SQL aggregates, materialised views or a read replica; archive closed incidents.</li>
@@ -803,17 +781,13 @@ PostgreSQL. To make that correct we would change the parts that currently assume
 <p>The brief requires at least two intelligent/automated features; CampusOps implements seven, all running on every relevant
 request without manual steps.</p>
 
-<h2>7.1 Category suggestion (Claude / Gemini with keyword fallback)</h2>
-<p><code>TriageService.suggest</code> runs a chain of classifiers. When AI triage is switched on in settings it first asks
-<code>ClaudeCategoryClassifier</code> (if <code>ANTHROPIC_API_KEY</code> is set), then <code>GeminiCategoryClassifier</code> (if
-<code>GEMINI_API_KEY</code> is set); <code>KeywordCategoryClassifier</code> is always last and always answers. Any failure, HTTP error,
-refusal or unknown category code makes a classifier return empty, so the next one is asked and reporting never stops. The live
-preview while typing always uses keywords so typing never calls an external API.</p>
+<h2>7.1 Category suggestion (Gemini with keyword fallback)</h2>
+<p>When AI triage is enabled and a key is configured, <code>TriageService</code> asks Gemini for a category on submission. It uses the built-in keyword classifier when Gemini is unavailable. The live preview always uses keywords.</p>
 <ul>
-<li><b>Claude and Gemini:</b> the prompt lists the active categories (code, name, description), the affected service and the report inside
+<li><b>Gemini:</b> the prompt lists the active categories (code, name, description), the affected service and the report inside
 <code>&lt;report&gt;</code> tags, and asks for a one-line JSON object <code>{"code", "confidence", "reason"}</code>. The reply is
 parsed defensively (first <code>{</code> to last <code>}</code>), confidence is clamped to 0-1 and the code must match an active
-category. Claude uses the SDK with a 20 s timeout and one retry; Gemini uses <code>generateContent</code> with <code>responseMimeType: application/json</code>, temperature 0 and a 15 s timeout. The Gemini prompt marks the report as data, not instructions.</li>
+category. Gemini uses <code>generateContent</code> with <code>responseMimeType: application/json</code>, temperature 0 and a 15 s timeout. The Gemini prompt marks the report as data, not instructions.</li>
 <li><b>Keywords:</b> text is normalised by <code>TextAnalyzer.terms</code> (below). Each category scores +1 per configured keyword
 present (each keyword counted once) plus a prior of +1.5 if it is the affected service's default category. The best positive score
 wins; confidence = best score &divide; sum of all scores; the reason lists the matched words. Categories and keywords are
@@ -906,7 +880,7 @@ their fix and root cause. They appear in the reporter's live preview on the repo
 <table class="small">
 <thead><tr><th style="width:17%">Table</th><th style="width:15%">Entity</th><th>Key columns</th></tr></thead>
 <tbody>
-<tr><td>users</td><td>User hierarchy</td><td>id PK, user_type (discriminator), code UQ, email UQ, password_hash, active, telegram_chat_id; employee: department, location; technician: team, max_concurrent, experience_years, available</td></tr>
+<tr><td>users</td><td>User hierarchy</td><td>id PK, user_type (discriminator), code UQ, email UQ, password_hash, active; student: department, location; technician: team, max_concurrent, experience_years, available</td></tr>
 <tr><td>technician_skills</td><td><code>@ElementCollection</code></td><td>technician_id FK, category_code</td></tr>
 <tr><td>incident_category</td><td>IncidentCategory</td><td>id PK, code UQ, name, keywords, color, active</td></tr>
 <tr><td>it_service</td><td>ItService</td><td>id PK, code UQ, name, type, criticality, user_base, default_category_id FK, mapx, mapy, active</td></tr>
@@ -991,14 +965,14 @@ slightly between runs because the history generator uses a fixed random seed but
 <tbody>
 <tr><td>Authentication</td><td><code>POST /api/auth/login</code> checks the BCrypt hash and returns a JWT signed with HS256 (<code>JwtService</code>): subject = user id, claims name, email, roles; 12 h expiry. The backend is an OAuth2 resource server that validates the signature and expiry on every <code>/api/**</code> request. Inactive users cannot log in, and <code>CurrentUser.get()</code> re-checks <code>active</code> on every call, so deactivation takes effect immediately.</td></tr>
 <tr><td>Role-based authorization</td><td>Roles from the token become <code>ROLE_*</code> authorities; endpoints use <code>@PreAuthorize</code>, e.g. dashboard <code>hasAnyRole('TECHNICIAN','SYSTEM_ADMIN')</code>, settings update and catalogue writes <code>hasRole('SYSTEM_ADMIN')</code>. Role inheritance is explicit: a TeamLead token carries TECHNICIAN and TEAM_LEAD; an IT manager carries SYSTEM_ADMIN and IT_MANAGER.</td></tr>
-<tr><td>Object-level authorization</td><td><code>IncidentPolicy</code> checks ownership per action (an employee sees only incidents they reported; only the assignee or a supervisor can resolve; only the reporter answers info requests and verifies). Employee searches are forced to their own incidents (<code>IncidentSearch.forReporter</code>). Internal notes and their audit lines are hidden from non-staff. Notifications can only be marked read by their recipient.</td></tr>
+<tr><td>Object-level authorization</td><td><code>IncidentPolicy</code> checks ownership per action (a student sees only incidents they reported; only the assignee or a supervisor can resolve; only the reporter answers info requests and verifies). Student searches are forced to their own incidents (<code>IncidentSearch.forReporter</code>). Internal notes and their audit lines are hidden from non-staff. Notifications can only be marked read by their recipient.</td></tr>
 <tr><td>Password protection</td><td>BCrypt (salted, adaptive); minimum 8 characters (max 72, BCrypt's limit); the hash never leaves the server (<code>UserView</code> omits it).</td></tr>
 <tr><td>Input validation</td><td>Jakarta Bean Validation on every request record (<code>@NotBlank</code>, <code>@Size</code>, <code>@Min/@Max</code>, <code>@Email</code>, <code>@Pattern</code> for codes and tags), plus domain checks in factories and value objects. Enum parameters are type-checked. Sort fields are whitelisted and page size is capped at 100.</td></tr>
-<tr><td>Registration control</td><td>Self-registration creates only employees and only with the campus domain (<code>ALLOWED_DOMAIN</code>); emails are unique.</td></tr>
+<tr><td>Registration control</td><td>Self-registration creates only students and only with the campus domain (<code>ALLOWED_DOMAIN</code>); emails are unique.</td></tr>
 <tr><td>Secure API access</td><td>Stateless sessions; CSRF protection is disabled because no cookies are used (the token is sent in the <code>Authorization</code> header); the token is read only from the <code>Authorization</code> header, except on <code>/api/stream</code>, which also accepts
 <code>?access_token=</code> because browsers' <code>EventSource</code> cannot set headers; CORS allows only configured origins; 401 responses are JSON; error bodies never include stack traces; database errors map to a generic 503.</td></tr>
-<tr><td>Secrets</td><td>JWT secret (must be &ge; 32 bytes, startup fails otherwise), Claude and Gemini keys and the Telegram token come from environment variables or an untracked <code>.env</code>; <code>.env.example</code> documents them.</td></tr>
-<tr><td>Data exposure</td><td>The public status endpoint returns only service health and problem titles, without incident numbers or people. Claude and Gemini receive only the report text, the service name and the category list, and only when a key is configured.</td></tr>
+<tr><td>Secrets</td><td>JWT secret (must be &ge; 32 bytes, startup fails otherwise), the Gemini key comes from environment variables or an untracked <code>.env</code>; <code>.env.example</code> documents them.</td></tr>
+<tr><td>Data exposure</td><td>The public status endpoint returns only service health and problem titles, without incident numbers or people. Gemini receives only the report text, the service name and the category list, and only when a key is configured.</td></tr>
 <tr><td>Concurrency</td><td><code>@Version</code> optimistic locking on incidents prevents lost updates when two people act at once.</td></tr>
 <tr><td>Container</td><td>The backend image runs as a non-root <code>campusops</code> user.</td></tr>
 </tbody></table>
@@ -1006,7 +980,6 @@ slightly between runs because the history generator uses a fixed random seed but
 <ul>
 <li>No refresh tokens, token revocation, password reset or account lockout after repeated failed logins; no rate limiting.</li>
 <li>The H2 web console is reachable without login in the default (H2) profile; it is disabled in the <code>postgres</code> profile and must stay off in any shared deployment.</li>
-<li>Telegram link codes are 6 digits and do not expire.</li>
 <li>HTTPS termination is expected at the reverse proxy / hosting platform; the compose file serves plain HTTP for local use.</li>
 </ul>
 </section>
@@ -1014,13 +987,13 @@ slightly between runs because the history generator uses a fixed random seed but
 <!-- ======================= 10 ======================= -->
 <section>
 <h1 id="s10">10. Testing</h1>
-<p>The backend has 47 automated JUnit 5 tests: 46 documented test cases (display names TC01-TC46) and one Spring context-load test.
+<p>The backend has 50 automated JUnit 5 tests covering domain rules, API workflows, database compatibility and responses from a mocked Gemini provider.
 Unit tests construct domain objects directly with the <code>Fixtures</code> helper (no Spring, no database). Integration tests start
 the full application with an in-memory H2 database seeded by <code>DemoDataSeeder</code> and drive it through the REST API with
-MockMvc and real JWTs. The SLA test evaluates a future deadline using a pinned timestamp. The persistence test signs in again to retrieve a submitted incident. The known-outage test creates its reports through the employee API.
+MockMvc and real JWTs. The SLA test evaluates a future deadline using a pinned timestamp. The persistence test signs in again to retrieve a submitted incident. The known-outage test creates its reports through the student API.
 CI (<code>.github/workflows/ci.yml</code>) runs <code>./mvnw -B verify</code> on every push and pull request and uploads the
-Surefire reports and the JaCoCo coverage report. Result of the latest run (21 November 2026): <b>47 tests, 0 failures, 0 errors, 0 skipped</b>.</p>
-<p><b>Coverage</b> (JaCoCo, <code>./mvnw verify</code> writes <code>backend/target/site/jacoco/index.html</code>): <b>78.5 %</b> of lines and <b>64.0 %</b> of branches overall, and <b>87.5 %</b> of lines in the core logic (incident, priority, assignment, sla, intelligence, problem, events, audit). By module: events 100 %, audit 97 %, problem 96 %, intelligence 95 %, assignment 92 %, priority 91 %, sla 90 %, incident 81 %, notification 78 %, user 76 %. The lowest figures are the outside-service adapters (Telegram, Claude, Gemini), which are only exercised through their fallback paths because the tests run without API keys.</p>
+Surefire reports and the JaCoCo coverage report. Result of the latest run (22 November 2026): <b>50 tests, 0 failures, 0 errors, 0 skipped</b>.</p>
+<p><b>Coverage</b> (JaCoCo, <code>./mvnw verify</code> writes <code>backend/target/site/jacoco/index.html</code>): <b>83.2 %</b> of lines and <b>68.7 %</b> of branches overall, and <b>87.4 %</b> of lines in the core logic (incident, priority, assignment, sla, intelligence, problem, events, audit). Gemini request handling is covered with mock responses.</p>
 
 <table class="small test-cases">
 <thead><tr><th style="width:5%">ID</th><th style="width:19%">Name</th><th style="width:7%">Type</th><th style="width:10%">Category</th><th style="width:28%">Steps</th><th style="width:25%">Expected</th><th style="width:6%">Result</th></tr></thead>
@@ -1049,28 +1022,27 @@ Surefire reports and the JaCoCo coverage report. Result of the latest run (21 No
 <tr><td>TC22</td><td>Keyword classifier suggests the right category with a reason</td><td>Unit</td><td>Normal (intelligent)</td><td>Classify "The hostel wifi router has no internet" against NETWORK and PRINTING.</td><td>NETWORK, confidence 1.0, reason mentions wifi.</td><td class="ok">PASS</td></tr>
 <tr><td>TC23</td><td>Workflow 1+2: report &rarr; auto classify/prioritise/assign &rarr; investigate &rarr; resolve &rarr; verify &rarr; close</td><td>Integration</td><td>Normal</td><td>rohan reports a LAB-NET outage via API; the auto-assigned tech acknowledges, starts, resolves; rohan verifies; tech closes.</td><td>ASSIGNED with category NETWORK, P1/P2, SLA due set; each step 200 with the right status; timeline contains CREATED, CLASSIFIED, PRIORITY_CALCULATED, ASSIGNED, RESOLVED, FEEDBACK_GIVEN, CLOSED.</td><td class="ok">PASS</td></tr>
 <tr><td>TC24</td><td>Reporting the same problem twice is caught; confirming a different problem is allowed</td><td>Integration</td><td>Business rule / exception</td><td>ananya posts the same VPN report twice, then again with <code>confirmedNew</code>.</td><td>200, then 409 DUPLICATE_INCIDENT, then 200.</td><td class="ok">PASS</td></tr>
-<tr><td>TC25</td><td>Workflow 3: Wi-Fi reports from several hostels are correlated to Core Switch B</td><td>Integration</td><td>Normal (intelligent)</td><td>Employees submit reports for four hostel Wi-Fi services; read problems and outage map.</td><td>A problem rooted at Core Switch B with &ge; 3 incidents; CORE-B node is rootCause and OUTAGE.</td><td class="ok">PASS</td></tr>
+<tr><td>TC25</td><td>Workflow 3: Wi-Fi reports from several hostels are correlated to Core Switch B</td><td>Integration</td><td>Normal (intelligent)</td><td>Students submit reports for four hostel Wi-Fi services; read problems and outage map.</td><td>A problem rooted at Core Switch B with &ge; 3 incidents; CORE-B node is rootCause and OUTAGE.</td><td class="ok">PASS</td></tr>
 <tr><td>TC26</td><td>Search filters by status and priority</td><td>Integration</td><td>Normal</td><td><code>GET /api/incidents?status=CLOSED&amp;priority=P1&amp;priority=P2</code>.</td><td>Non-empty; every item CLOSED and P1/P2.</td><td class="ok">PASS</td></tr>
 <tr><td>TC27</td><td>Unknown service is a 404 with code SERVICE_NOT_FOUND</td><td>Integration</td><td>Exception</td><td>Report against service id 99999.</td><td>404, code SERVICE_NOT_FOUND.</td><td class="ok">PASS</td></tr>
 <tr><td>TC28</td><td>Invalid input is rejected with field errors</td><td>Integration</td><td>Invalid input</td><td>Title "Hi", description "short", affectedUsers 0.</td><td>400 INVALID_INPUT with fieldErrors for title and affectedUsers.</td><td class="ok">PASS</td></tr>
 <tr><td>TC29</td><td>Wrong password returns 401 INVALID_LOGIN</td><td>Integration</td><td>Invalid input / authentication</td><td>Log in as aarav with a wrong password.</td><td>401, code INVALID_LOGIN.</td><td class="ok">PASS</td></tr>
 <tr><td>TC30</td><td>API calls without a token are rejected; the public status page is open</td><td>Integration</td><td>Authorization</td><td><code>GET /api/incidents/mine</code> and <code>/api/public/status</code> with no token.</td><td>401; 200 with <code>overall</code>.</td><td class="ok">PASS</td></tr>
-<tr><td>TC31</td><td>An employee cannot open admin settings or the dashboard</td><td>Integration</td><td>Authorization</td><td>aarav calls settings and dashboard; ravi calls dashboard.</td><td>403, 403; 200 for the technician.</td><td class="ok">PASS</td></tr>
-<tr><td>TC32</td><td>An employee cannot view another person's incident or resolve their own</td><td>Integration</td><td>Authorization</td><td>diya reports; kabir opens it; diya tries to resolve it.</td><td>403; 403 UNAUTHORIZED_OPERATION.</td><td class="ok">PASS</td></tr>
+<tr><td>TC31</td><td>An student cannot open admin settings or the dashboard</td><td>Integration</td><td>Authorization</td><td>aarav calls settings and dashboard; ravi calls dashboard.</td><td>403, 403; 200 for the technician.</td><td class="ok">PASS</td></tr>
+<tr><td>TC32</td><td>An student cannot view another person's incident or resolve their own</td><td>Integration</td><td>Authorization</td><td>diya reports; kabir opens it; diya tries to resolve it.</td><td>403; 403 UNAUTHORIZED_OPERATION.</td><td class="ok">PASS</td></tr>
 <tr><td>TC33</td><td>Closing before the fix is verified is an invalid state transition (409)</td><td>Integration</td><td>Exception / business rule</td><td>sneha reports; admin calls close immediately.</td><td>409 INVALID_STATE_TRANSITION.</td><td class="ok">PASS</td></tr>
 <tr><td>TC34</td><td>Self-registration requires a campus email</td><td>Integration</td><td>Invalid input / business rule</td><td>Register with someone@gmail.com.</td><td>400, message mentions campus email.</td><td class="ok">PASS</td></tr>
 <tr><td>TC35</td><td>An unacknowledged P1 breaches its SLA and is escalated up the chain</td><td>Integration</td><td>Business rule (SLA)</td><td>sneha reports a CRITICAL/CRITICAL fee-portal outage for 900 users; the test evaluates the SLA monitor 11 minutes later; read incident and violations.</td><td>P1; responseBreached; escalationLevel &ge; 1 with escalatedTo; ESCALATED in timeline; SLA violations list non-empty.</td><td class="ok">PASS</td></tr>
 <tr><td>TC36</td><td>Manual assignment beyond a technician's limit is refused unless overridden</td><td>Integration</td><td>Boundary / exception</td><td>Admin sets Suresh max = 1; lead assigns two ERP incidents to him, then retries with override.</td><td>Second assignment 409 WORKLOAD_EXCEEDED; with override 200.</td><td class="ok">PASS</td></tr>
 <tr><td>TC37</td><td>A missing SLA policy is reported as MISSING_SLA_CONFIGURATION</td><td>Integration</td><td>Exception</td><td>Delete the campus-default P4 policy (rolled back); ask for the PRINT/P4 policy.</td><td><code>MissingSlaConfigurationException</code>.</td><td class="ok">PASS</td></tr>
 <tr><td>TC38</td><td>'Me too' counts affected people once per person; the reporter cannot me-too their own incident</td><td>Integration</td><td>Business rule / boundary</td><td>diya reports a library printer fault (1 user); kabir says "me too" twice; diya says "me too" on her own incident.</td><td>supporters 1, affectedUsers 2; second click still 1; own incident 409 INVALID_STATE_TRANSITION.</td><td class="ok">PASS</td></tr>
-<tr><td>TC39</td><td>Fest-load scenario: academic-block network reports point at Core Switch A</td><td>Integration</td><td>Normal (intelligent)</td><td>Employees report outages across academic network services; read problems.</td><td>A problem rooted at Core Switch A exists.</td><td class="ok">PASS</td></tr>
-<tr><td>TC40</td><td>AI adapters without an API key stay disabled and step aside for the keyword classifier</td><td>Unit</td><td>Exception (external service)</td><td>Build <code>GeminiCategoryClassifier</code> and <code>ClaudeCategoryClassifier</code> with empty keys; classify "wifi down".</td><td>Both report disabled and return empty, so the chain falls through to keywords.</td><td class="ok">PASS</td></tr>
+<tr><td>TC39</td><td>Fest-load scenario: academic-block network reports point at Core Switch A</td><td>Integration</td><td>Normal (intelligent)</td><td>Students report outages across academic network services; read problems.</td><td>A problem rooted at Core Switch A exists.</td><td class="ok">PASS</td></tr>
+<tr><td>TC40</td><td>Gemini without an API key steps aside for the keyword classifier</td><td>Unit</td><td>Provider configuration</td><td>Build the Gemini adapter without a key.</td><td>Disabled adapter returns an empty suggestion.</td><td class="ok">PASS</td></tr>
 <tr><td>TC41</td><td>The scheduled SLA sweep saves its flags, so a breach is alerted and recorded only once</td><td>Integration</td><td>Business rule (SLA)</td><td>Run the scheduled sweep once, then sweep twice more.</td><td>The repeat sweeps fire no new warnings, breaches or escalations and check the same incidents.</td><td class="ok">PASS</td></tr>
-<tr><td>TC42</td><td>Users can still be updated after the pool replaces the connection that created the schema</td><td>Integration</td><td>Robustness (database)</td><td>Evict every pooled connection, then request a Telegram link code (an update to the user row).</td><td>200 with a code. Before the fix, H2 rejected every user update with &ldquo;Check constraint invalid&rdquo; about 30 minutes after a fresh start; <code>H2CheckConstraintFix</code> drops the affected IN constraints on H2 only.</td><td class="ok">PASS</td></tr>
-<tr><td>TC43</td><td>Reported incident survives a new login</td><td>Integration</td><td>Persistence</td><td>Submit a printer ticket as an employee, sign in again, and read it by ID.</td><td>The employee retrieves the same incident number.</td><td class="ok">PASS</td></tr>
+<tr><td>TC42</td><td>Users can save preferences after connection-pool recycling</td><td>Integration</td><td>Database robustness</td><td>Evict idle connections, then save the student’s email preference.</td><td>200 with the updated preference.</td><td class="ok">PASS</td></tr>
+<tr><td>TC43</td><td>Reported incident survives a new login</td><td>Integration</td><td>Persistence</td><td>Submit a printer ticket as a student, sign in again, and read it by ID.</td><td>The student retrieves the same incident number.</td><td class="ok">PASS</td></tr>
 <tr><td>TC44</td><td>The public status page lists a known outage with every downstream service it affects</td><td>Integration</td><td>Normal (correlation)</td><td>Report outages across the four hostel services, then read <code>/api/public/status</code> without logging in.</td><td>The known problem names Core Switch B, gives an incident to follow, and its affected services include Gautam Bhavan Wi-Fi (downstream).</td><td class="ok">PASS</td></tr>
-<tr><td>TC45</td><td>The Telegram bot points a new report on an affected service to /metoo, and /metoo adds the person</td><td>Integration</td><td>Business rule (duplicates)</td><td>A linked student sends <code>/report WIFI-GAUTAM ...</code> during the outage, then <code>/metoo INC-n</code>, then <code>/report WIFI-GAUTAM anyway ...</code>.</td><td>First reply warns about the known outage with the /metoo command; /metoo adds a supporter; "anyway" files a separate incident.</td><td class="ok">PASS</td></tr>
-<tr><td>TC46</td><td>Everyone who said "Me too" is notified when the outage is fixed</td><td>Integration</td><td>Business rule (notifications)</td><td>A student says "Me too" on an outage incident; the team lead resolves the problem and all its linked incidents.</td><td>The supporter receives a "fixed" notification carrying the resolution summary (as promised by the known-outage banner and the Telegram bot).</td><td class="ok">PASS</td></tr>
+<tr><td>TC46</td><td>Everyone who said "Me too" is notified when the outage is fixed</td><td>Integration</td><td>Business rule (notifications)</td><td>A student says "Me too" on an outage incident; the team lead resolves the problem and all its linked incidents.</td><td>The supporter receives a "fixed" notification carrying the resolution summary.</td><td class="ok">PASS</td></tr>
 <tr><td>-</td><td>contextLoads</td><td>Integration</td><td>Smoke</td><td>Start the Spring context.</td><td>Context starts; seeder runs.</td><td class="ok">PASS</td></tr>
 </tbody></table>
 <p>Coverage by brief category: normal operations (TC02, 06, 10, 11, 14-17, 20-23, 25, 26, 39), boundary conditions (TC07, 08, 12, 19, 36, 38),
@@ -1084,16 +1056,15 @@ invalid inputs (TC03, 09, 28, 29, 34), exceptions (TC18, 24, 27, 33, 37, 40), au
 <table class="small">
 <thead><tr><th style="width:24%">Brief's Innovation Challenge item</th><th style="width:9%">Status</th><th>What CampusOps does</th></tr></thead>
 <tbody>
-<tr><td>AI-assisted incident classification</td><td class="ok">Done</td><td>Google Gemini API (<code>GeminiCategoryClassifier</code>) and Claude via the official Anthropic Java SDK (<code>ClaudeCategoryClassifier</code>) in a fallback chain ending in an explainable keyword classifier; confidence, method and reason stored and shown.</td></tr>
+<tr><td>AI-assisted incident classification</td><td class="ok">Done</td><td>Google Gemini API with local keyword matching as a fallback.</td></tr>
 <tr><td>AI-based resolution recommendation</td><td class="partial">Partial</td><td>Suggested fixes from past resolutions using TF-IDF similarity (Section 7.7). Algorithmic, not LLM-generated.</td></tr>
 <tr><td>Incident similarity detection</td><td class="ok">Done</td><td>TF-IDF with synonym folding; duplicate flag, own-duplicate block, similar incidents panel, live preview with "Me too".</td></tr>
 <tr><td>Automated root-cause analysis</td><td class="ok">Done</td><td><code>CorrelationEngine</code> finds the most specific shared upstream service and opens a problem record.</td></tr>
 <tr><td>Predictive SLA violation detection</td><td class="ok">Done</td><td><code>SlaRiskAnalyzer</code> (median fix time, workload factor); at-risk list on the dashboard and risk on every incident.</td></tr>
 <tr><td>Service dependency graph</td><td class="ok">Done</td><td>Editable many-to-many graph with cycle check, blast-radius endpoint, React Flow outage map.</td></tr>
 <tr><td>Real-time notifications</td><td class="ok">Done</td><td>Server-Sent Events push notifications and incident changes to open browsers; bell with unread count.</td></tr>
-<tr><td>Mobile push notifications</td><td class="partial">Partial</td><td>Telegram messages reach phones in real time; the PWA is installable, but Web Push via the service worker is not implemented.</td></tr>
+<tr><td>Mobile notifications</td><td class="partial">Partial</td><td>Live in-app notifications work while the PWA is open.</td></tr>
 <tr><td>Voice-based incident reporting</td><td class="ok">Done</td><td>Dictation on the report form with the browser Web Speech API; channel recorded as VOICE.</td></tr>
-<tr><td>Chatbot-based incident reporting</td><td class="ok">Done</td><td>Telegram bot: link account, <code>/report</code>, <code>/metoo</code>, <code>/status</code>, <code>/mine</code>, <code>/services</code>. During a known outage <code>/report</code> on an affected service answers with the outage and the <code>/metoo</code> command instead of filing a duplicate.</td></tr>
 <tr><td>Cloud deployment</td><td class="partial">Ready</td><td>Docker images, Compose file and nginx config are cloud-ready; deployment to a public host is outside this submission.</td></tr>
 <tr><td>Microservice architecture</td><td class="no">No (by choice)</td><td>Deliberately a modular monolith (Section 3.3), with module boundaries ready for extraction.</td></tr>
 <tr><td>Event-driven architecture</td><td class="ok">Done (in-process)</td><td>All side effects driven by <code>IncidentEvent</code>s and observers.</td></tr>
@@ -1103,7 +1074,7 @@ invalid inputs (TC03, 09, 28, 29, 34), exceptions (TC18, 24, 27, 33, 37, 40), au
 </tbody></table>
 <p>Extras not in the list: "Me too" crowd confirmation that feeds the priority formula (inspired by SU Connect voting), QR stickers on physical assets (printable sticker sheet; scanning opens the report form with the service,
 location and category prefilled), a public campus status page, an incident replay slider built from audit snapshots and runtime-switchable strategies.</p>
-<p><b>Known-outage deflection.</b> While a root-cause problem is open, the report form shows it before the student types anything. When the chosen service (or the service of a scanned QR sticker) sits anywhere downstream of the failed component, the form says "This is probably a known outage" and offers <b>Me too</b> on the problem's oldest open incident. The affected set is the root plus <code>CatalogService.downstreamOf(root)</code>, so a hostel nobody has reported yet is still recognised. The same data drives the public status page and the Telegram bot. Duplicates are stopped before they are filed, instead of being detected afterwards.</p>
+<p><b>Known-outage deflection.</b> While a root-cause problem is open, the report form shows it before the student types anything. When the chosen service (or the service of a scanned QR sticker) sits anywhere downstream of the failed component, the form says "There’s a known outage for this service" and offers <b>Me too</b> on the problem's oldest open incident. The affected set is the root plus <code>CatalogService.downstreamOf(root)</code>, so a hostel nobody has reported yet is still recognised. The same data drives the public status page. Duplicates are stopped before they are filed, instead of being detected afterwards.</p>
 <p><b>Resilience for a sleeping host.</b> If the backend cannot be reached (stopped, or a free host waking up), the frontend keeps the user's session, shows a "server is starting up" banner, polls until the server answers and then refetches everything.</p>
 </section>
 
@@ -1116,7 +1087,7 @@ in the demo, not by an automated test.</p>
 <thead><tr><th style="width:20%">Brief requirement</th><th style="width:31%">Class / endpoint</th><th style="width:17%">Screen</th><th style="width:12%">Test</th><th style="width:8%">Status</th></tr></thead>
 <tbody>
 <tr><th colspan="5">MVP - User management</th></tr>
-<tr><td>Employee, Technician, Administrator users</td><td><code>User</code> hierarchy, <code>UserFactory</code>; <code>POST /auth/register</code>, <code>POST /users</code>, <code>PATCH /users/{id}/active</code></td><td>/register, /admin/users</td><td>TC29-TC34</td><td class="ok">Full</td></tr>
+<tr><td>Student, Technician, Administrator users</td><td><code>User</code> hierarchy, <code>UserFactory</code>; <code>POST /auth/register</code>, <code>POST /users</code>, <code>PATCH /users/{id}/active</code></td><td>/register, /admin/users</td><td>TC29-TC34</td><td class="ok">Full</td></tr>
 <tr><td>At least three user categories (+ extra roles)</td><td>5 roles: <code>Role</code>, <code>TeamLead</code>, <code>ItManager</code></td><td>role-specific navigation (Shell)</td><td>TC31</td><td class="ok">Full</td></tr>
 <tr><th colspan="5">MVP - Incident management</th></tr>
 <tr><td>Create</td><td><code>IncidentService.report</code>, <code>IncidentFactory</code>; <code>POST /incidents</code></td><td>/report</td><td>TC23, TC28</td><td class="ok">Full</td></tr>
@@ -1134,7 +1105,7 @@ in the demo, not by an automated test.</p>
 <tr><td>Deadline tracking</td><td><code>SlaTracker</code>, <code>SlaMonitor</code></td><td>/queue (countdowns), /incidents/:id</td><td>TC07</td><td class="ok">Full</td></tr>
 <tr><td>Violation detection (+ warnings, records)</td><td><code>SlaTracker.evaluate</code>, <code>SlaViolation</code>; <code>GET /admin/sla-violations</code></td><td>/admin/violations</td><td>TC07, TC08, TC35</td><td class="ok">Full</td></tr>
 <tr><th colspan="5">MVP - Notification</th></tr>
-<tr><td>At least two mechanisms</td><td><code>InAppChannel</code> (+SSE), <code>EmailChannel</code> (simulated outbox), <code>TelegramChannel</code>; <code>GET /notifications</code>, <code>/notifications/outbox</code></td><td>bell menu, /admin/outbox</td><td>Manual</td><td class="partial">Full (no automated test)</td></tr>
+<tr><td>At least two mechanisms</td><td><code>InAppChannel</code> (+SSE), <code>EmailChannel</code> (simulated outbox); <code>GET /notifications</code>, <code>/notifications/outbox</code></td><td>bell menu, /admin/outbox</td><td>Manual</td><td class="partial">Full (no automated test)</td></tr>
 <tr><th colspan="5">MVP - Audit</th></tr>
 <tr><td>Complete incident history</td><td><code>AuditListener</code>, <code>AuditRecord</code>; <code>GET /audit</code>, timeline in incident detail</td><td>/incidents/:id (timeline + replay), /admin/audit</td><td>TC23, TC35</td><td class="ok">Full</td></tr>
 <tr><th colspan="5">MVP - Search and reporting</th></tr>
@@ -1142,9 +1113,9 @@ in the demo, not by an automated test.</p>
 <tr><td>Reports / dashboards</td><td><code>ReportService.dashboard</code>; <code>GET /reports/dashboard</code></td><td>/dashboard</td><td>TC31 (access)</td><td class="ok">Full</td></tr>
 <tr><th colspan="5">MVP - Intelligent features and persistence</th></tr>
 <tr><td>&ge; 2 intelligent features</td><td>Section 7 (seven features)</td><td>/report preview, /incidents/:id, /map, /problems, /dashboard</td><td>TC20-TC22, TC24, TC25, TC35, TC38, TC39</td><td class="ok">Full</td></tr>
-<tr><td>Third-party APIs (rubric: "use of APIs (Google API...)")</td><td><code>GeminiCategoryClassifier</code> (Google Gemini API), <code>TelegramAdapter</code> (Telegram Bot API), <code>ClaudeCategoryClassifier</code> (Anthropic Claude API)</td><td>/report, /admin/settings (integration status), Telegram chat</td><td>TC40 (fallback); live calls manual</td><td class="ok">Full</td></tr>
+<tr><td>Third-party APIs (rubric: "use of APIs (Google API...)")</td><td><code>GeminiCategoryClassifier</code> (Google Gemini API)</td><td>/report, /admin/settings (integration status)</td><td>TC40 (fallback); live calls manual</td><td class="ok">Full</td></tr>
 <tr><td>Persistence</td><td>JPA entities + repositories; H2 / PostgreSQL</td><td>-</td><td>all integration tests</td><td class="ok">Full</td></tr>
-<tr><th colspan="5">Employee capabilities</th></tr>
+<tr><th colspan="5">Student capabilities</th></tr>
 <tr><td>Register / login</td><td><code>AuthController</code></td><td>/register, /login</td><td>TC29, TC34</td><td class="ok">Full</td></tr>
 <tr><td>Report; view submitted; track status</td><td><code>POST /incidents</code>, <code>GET /incidents/mine</code>, detail with state description</td><td>/report, /incidents, /incidents/:id</td><td>TC23</td><td class="ok">Full</td></tr>
 <tr><td>Confirm an existing problem instead of a duplicate ("Me too")</td><td><code>IncidentService.meToo</code>; <code>POST /incidents/{id}/me-too</code></td><td>/report (live preview), /incidents/:id</td><td>TC38</td><td class="ok">Full</td></tr>
@@ -1191,7 +1162,7 @@ that matches the brief's example and the code's package structure. Every member 
 <thead><tr><th style="width:22%">Member</th><th style="width:22%">Area</th><th>Modules / classes owned</th><th style="width:16%">Demo segment</th></tr></thead>
 <tbody>
 <tr><td>[Member 1 name, ID]</td><td>UI / UX</td><td><code>frontend/</code>: Shell and role navigation, report form (voice, QR prefill, live preview), incident page with replay slider, queue, dashboard, outage map, status page, PWA</td><td>Intro, workflow 1 (UI)</td></tr>
-<tr><td>[Member 2 name, ID]</td><td>Backend / APIs</td><td>controllers, <code>auth</code> (JWT, <code>SecurityConfig</code>), <code>realtime</code> (SSE), <code>telegram</code>, <code>notification</code>, OpenAPI</td><td>Workflow 2, Telegram</td></tr>
+<tr><td>[Member 2 name, ID]</td><td>Backend / APIs</td><td>controllers, <code>auth</code> (JWT, <code>SecurityConfig</code>), <code>realtime</code> (SSE), <code>notification</code>, OpenAPI</td><td>Workflow 2</td></tr>
 <tr><td>[Member 3 name, ID]</td><td>Domain model / OOP</td><td><code>user</code>, <code>incident</code> (aggregate, State pattern, <code>IncidentPolicy</code>), <code>priority</code>, <code>assignment</code>, <code>events</code>, <code>common</code> exceptions, UML</td><td>OOP walk-through</td></tr>
 <tr><td>[Member 4 name, ID]</td><td>Database / persistence</td><td>JPA mapping, repositories and specifications, <code>catalog</code> (services graph, SLA policies), <code>audit</code>, <code>seed/DemoDataSeeder</code>, Postgres profile, ER diagram</td><td>Admin config, database</td></tr>
 <tr><td>[Member 5 name, ID]</td><td>Testing / DevOps / intelligent features</td><td><code>intelligence</code>, <code>ai</code>, <code>problem</code> (correlation), <code>sla</code> (monitor, escalation), JUnit tests, Docker, CI</td><td>Workflow 3, tests and CI</td></tr>
@@ -1211,7 +1182,7 @@ that matches the brief's example and the code's package structure. Every member 
 <li><b>Correlation step 1 has no time limit.</b> A new incident attaches to any open problem that explains it, however old; stale problems must be resolved by a lead.</li>
 <li><b>Analytics in memory</b> (<code>ReportService</code> loads all incidents); fine for campus scale only.</li>
 <li><b>Schema management</b> uses Hibernate <code>ddl-auto=update</code>, not versioned migrations.</li>
-<li>Security gaps listed in Section 9 (refresh tokens, rate limiting, H2 console, non-expiring Telegram codes, token in the URL of the live stream).</li>
+<li>Security gaps listed in Section 9 (refresh tokens, rate limiting, H2 console, token in the URL of the live stream).</li>
 <li>No file attachments (screenshots) on incidents; no frontend automated tests.</li>
 </ul>
 <h2>14.2 Future work</h2>
@@ -1251,9 +1222,6 @@ npm run dev</pre>
 <tbody>
 <tr><td><code>GEMINI_API_KEY</code></td><td>Turns on Google Gemini category suggestion (free tier key from Google AI Studio).</td></tr>
 <tr><td><code>GEMINI_MODEL</code></td><td>Gemini model id (default <code>gemini-3.5-flash-lite</code>); commented out in <code>.env.example</code>.</td></tr>
-<tr><td><code>ANTHROPIC_API_KEY</code></td><td>Turns on Claude category suggestion (tried before Gemini). With neither key the keyword classifier is used.</td></tr>
-<tr><td><code>CAMPUSOPS_AI_MODEL</code></td><td>Claude model id (default <code>claude-opus-5-5</code>).</td></tr>
-<tr><td><code>TELEGRAM_BOT_TOKEN</code></td><td>Turns on the Telegram bot and channel.</td></tr>
 <tr><td><code>JWT_SECRET</code></td><td>Token signing key, at least 32 characters (commented out in <code>.env.example</code>; a development default is used locally). Set it for any shared deployment.</td></tr>
 <tr><td><code>ALLOWED_DOMAIN</code>, <code>CORS_ORIGINS</code>, <code>SEED_ENABLED</code>, <code>PORT</code>, <code>DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD</code></td><td>Campus email domain for registration, allowed browser origins, seeding, port and PostgreSQL connection (with <code>SPRING_PROFILES_ACTIVE=postgres</code>).</td></tr>
 </tbody></table>
@@ -1261,7 +1229,7 @@ npm run dev</pre>
 <table class="small">
 <thead><tr><th>Role</th><th>Logins</th></tr></thead>
 <tbody>
-<tr><td>Employee / student / faculty</td><td>aarav, diya, kabir, ananya, rohan, lakshmi, sneha</td></tr>
+<tr><td>Student</td><td>aarav, diya, kabir, ananya, rohan, lakshmi, sneha</td></tr>
 <tr><td>Technician</td><td>ravi, imran (Network Ops); arjun, meghana (Apps &amp; Data); suresh, farah (Desktop Support)</td></tr>
 <tr><td>Team lead</td><td>priya (Network Ops), vikram (Apps &amp; Data)</td></tr>
 <tr><td>System administrator</td><td>kiran</td></tr>
@@ -1269,7 +1237,7 @@ npm run dev</pre>
 </tbody></table>
 <h2>15.5 Tests</h2>
 <pre>cd backend
-./mvnw test        <span class="cm"># 47 tests (TC01-TC46 + context load); ./mvnw verify also writes the coverage report, in-memory H2</span></pre>
+./mvnw test        <span class="cm"># 50 tests; ./mvnw verify also writes the coverage report, in-memory H2</span></pre>
 </section>
 
 </body>

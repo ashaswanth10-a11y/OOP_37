@@ -96,7 +96,7 @@ export function hasRole(user: User | null, role: Role) {
 export type Shell = "portal" | "tech" | "control"
 
 export function shellFor(user: User): Shell {
-  if (user.role === "EMPLOYEE") return "portal"
+  if (user.role === "STUDENT") return "portal"
   if (user.role === "TECHNICIAN") return "tech"
   return "control"
 }
@@ -108,7 +108,7 @@ export function homeFor(user: User) {
   return "/dashboard"
 }
 
-export const isStaff = (u: User | null) => !!u && u.role !== "EMPLOYEE"
+export const isStaff = (u: User | null) => !!u && u.role !== "STUDENT"
 export const isTech = (u: User | null) => hasRole(u, "TECHNICIAN")
 export const isLead = (u: User | null) => hasRole(u, "TEAM_LEAD")
 export const isAdmin = (u: User | null) => hasRole(u, "SYSTEM_ADMIN")

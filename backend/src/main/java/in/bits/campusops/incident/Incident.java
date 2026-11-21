@@ -19,6 +19,7 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumeratedValue;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -50,7 +51,17 @@ import java.util.stream.Collectors;
 })
 public class Incident {
 
-    public enum Channel { WEB, QR, VOICE, TELEGRAM, SIMULATION }
+    public enum Channel {
+        WEB("WEB"), QR("QR"), VOICE("VOICE"), LEGACY("TELEGRAM"), SIMULATION("SIMULATION");
+
+        // The old source stays readable for reports already in the database.
+        @EnumeratedValue
+        private final String storedValue;
+
+        Channel(String storedValue) {
+            this.storedValue = storedValue;
+        }
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -35,7 +35,7 @@ class SecurityIntegrationTest extends ApiSupport {
     }
 
     @Test
-    @DisplayName("TC31 An employee cannot open admin settings or the dashboard")
+    @DisplayName("TC31 A student cannot open admin settings or the dashboard")
     void roleBasedAuthorization() throws Exception {
         String student = bearer("aarav");
         mvc.perform(get("/api/admin/settings").header("Authorization", student)).andExpect(status().isForbidden());
@@ -44,7 +44,7 @@ class SecurityIntegrationTest extends ApiSupport {
     }
 
     @Test
-    @DisplayName("TC32 An employee cannot view another person's incident or resolve their own")
+    @DisplayName("TC32 A student cannot view another person's incident or resolve their own")
     void ownership() throws Exception {
         String diya = bearer("diya");
         var created = mvc.perform(post("/api/incidents").header("Authorization", diya).contentType(MediaType.APPLICATION_JSON)
@@ -82,5 +82,17 @@ class SecurityIntegrationTest extends ApiSupport {
                         .content("{\"fullName\":\"Outsider\",\"email\":\"someone@gmail.com\",\"password\":\"longenough1\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("campus email")));
+    }
+
+    @Test
+    @DisplayName("Self-registration creates a student account")
+    void registersStudent() throws Exception {
+        mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"fullName":"New Student","email":"new-student%s","password":"longenough1"}
+                                """.formatted(DOMAIN)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.user.role").value("STUDENT"))
+                .andExpect(jsonPath("$.user.roles[0]").value("STUDENT"));
     }
 }

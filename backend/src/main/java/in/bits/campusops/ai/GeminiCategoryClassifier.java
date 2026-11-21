@@ -22,8 +22,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Adapter over the Google Gemini API (free tier, REST generateContent). Same contract as the
- * Claude adapter: pick one configured category, or return empty so the keyword classifier takes over.
+ * Adapter over the Google Gemini API (REST generateContent). Returns empty when the local keyword classifier should take over.
  */
 @Component
 public class GeminiCategoryClassifier implements CategoryClassifier {

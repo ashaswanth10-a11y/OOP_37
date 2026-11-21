@@ -3,19 +3,19 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --paper: #f3f6f8;
+  --paper: #f7f6f3;
   --card: #ffffff;
-  --sunk: #e9eef1;
-  --line: #d9e1e6;
-  --line-strong: #bfcbd3;
-  --ink: #13202a;
-  --ink-2: #33444f;
-  --mute: #64737d;
+  --sunk: #eeeee9;
+  --line: #dedfd8;
+  --line-strong: #c2c5bb;
+  --ink: #202622;
+  --ink-2: #3e4a42;
+  --mute: #58645d;
   --rail: #0f1b24;
   --rail-2: #182833;
   --rail-ink: #c9d5dc;
-  --signal: #0a6c7e;
-  --signal-soft: #dcefF2;
+  --signal: #246047;
+  --signal-soft: #e2f0e7;
   --beacon: #f2a900;
 
   --p1: #d02b2b;
@@ -71,7 +71,7 @@
 @theme inline {
   --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
-  --font-cond: "IBM Plex Sans Condensed", "IBM Plex Sans", sans-serif;
+  --font-cond: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
 
   --color-paper: var(--paper);
   --color-card: var(--card);

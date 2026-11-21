@@ -1,5 +1,13 @@
 import { serverNow } from "./clock"
-import type { Health, Priority, SlaState, Status } from "./types"
+import type { Health, Priority, Role, SlaState, Status } from "./types"
+
+export const ROLE_LABEL: Record<Role, string> = {
+  STUDENT: "Student",
+  TECHNICIAN: "Technician",
+  TEAM_LEAD: "Team lead",
+  SYSTEM_ADMIN: "System administrator",
+  IT_MANAGER: "IT manager",
+}
 
 export const PRIORITY_LABEL: Record<Priority, string> = {
   P1: "Critical",
@@ -80,7 +88,7 @@ export const CHANNEL_LABEL: Record<string, string> = {
   WEB: "Web",
   QR: "QR sticker",
   VOICE: "Voice",
-  TELEGRAM: "Telegram",
+  LEGACY: "Archived source",
   SIMULATION: "Demo scenario",
 }
 

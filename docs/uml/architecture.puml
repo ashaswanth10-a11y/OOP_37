@@ -10,9 +10,8 @@ skinparam rectangle {
 }
 title CampusOps - component / deployment architecture (modular monolith)
 
-actor "Employee /\nTechnician / Admin" as U
+actor "Student /\nTechnician / Admin" as U
 actor "Visitor" as V
-actor "Telegram user" as TU
 
 node "Browser (PWA)" as BR {
   component "React + TypeScript SPA\n(Vite, React Router,\nTanStack Query, React Flow,\nRecharts)" as SPA
@@ -45,17 +44,13 @@ node "Spring Boot 4 backend (Java 21, :8080)" as BE {
     component "AuditListener\nNotificationListener\nRealtimeListener" as LIS
   }
   rectangle "Adapters" {
-    component "ClaudeCategoryClassifier\n(Anthropic Java SDK)" as CLA
     component "GeminiCategoryClassifier\n(REST, java.net.http)" as GEM
-    component "TelegramAdapter + TelegramBot" as TGA
     component "EmailGateway\n(SimulatedEmailGateway)" as EMG
   }
   component "Spring Data JPA\nrepositories" as REPO
 }
 
 database "PostgreSQL 16\n(Docker) or H2 file DB\n(local default)" as DB
-cloud "Anthropic Claude API" as CLAUDE
-cloud "Telegram Bot API" as TGAPI
 cloud "Google Gemini API" as GEMAPI
 
 U --> SPA
@@ -76,13 +71,8 @@ MON --> DOM
 PUB --> LIS
 LIS --> SSE
 LIS --> EMG
-LIS --> TGA
-INT --> CLA
-CLA --> CLAUDE : Messages API
 INT --> GEM
 GEM --> GEMAPI : generateContent
-TGA --> TGAPI : sendMessage / getUpdates
-TU --> TGAPI
 IS --> REPO
 CS --> REPO
 RS --> REPO

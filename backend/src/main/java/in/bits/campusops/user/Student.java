@@ -4,19 +4,20 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import java.time.Instant;
 
-/** A student, faculty or staff member who reports problems. */
+/** A student with a campus account. */
 @Entity
+// Keep the discriminator used by existing CampusOps databases.
 @DiscriminatorValue("EMPLOYEE")
-public class Employee extends User {
+public class Student extends User {
 
     private String department;
     /** Hostel room, lab or office, used to pre-fill reports. */
     private String location;
 
-    protected Employee() {
+    protected Student() {
     }
 
-    public Employee(String code, String fullName, String email, String passwordHash, Instant createdAt,
+    public Student(String code, String fullName, String email, String passwordHash, Instant createdAt,
                     String department, String location) {
         super(code, fullName, email, passwordHash, createdAt);
         this.department = department;
@@ -25,7 +26,7 @@ public class Employee extends User {
 
     @Override
     public Role getRole() {
-        return Role.EMPLOYEE;
+        return Role.STUDENT;
     }
 
     public void moveTo(String department, String location) {

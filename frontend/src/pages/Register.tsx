@@ -43,9 +43,9 @@ export default function RegisterPage() {
           <Logo />
         </Link>
         <div className="panel mt-6 p-6 sm:p-8">
-          <h1 className="font-cond text-[26px] font-semibold">Create your account</h1>
+          <h1 className="font-cond text-[26px] font-semibold">Create a student account</h1>
           <p className="mt-1 text-sm text-mute">
-            For students and staff with a <span className="font-mono text-[12.5px]">@hyderabad.bits-pilani.ac.in</span> email.
+            Use your <span className="font-mono text-[12.5px]">@hyderabad.bits-pilani.ac.in</span> email address.
           </p>
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div>

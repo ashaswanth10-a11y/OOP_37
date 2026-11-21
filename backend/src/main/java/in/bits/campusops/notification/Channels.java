@@ -4,7 +4,6 @@ import in.bits.campusops.common.TimeProvider;
 import in.bits.campusops.notification.NotificationRepositories.EmailOutboxRepository;
 import in.bits.campusops.notification.NotificationRepositories.NotificationRepository;
 import in.bits.campusops.realtime.SseHub;
-import in.bits.campusops.telegram.TelegramAdapter;
 import in.bits.campusops.user.User;
 import java.util.Map;
 import org.springframework.stereotype.Component;
@@ -73,38 +72,6 @@ public final class Channels {
             String body = m.body() + (m.incidentNumber() == null ? "" : "\n\nIncident: " + m.incidentNumber())
                     + "\n\n- CampusOps, IT Services";
             gateway.send(m.recipient().getEmail(), "[CampusOps] " + m.title(), body);
-        }
-    }
-
-    /** Telegram through the bot adapter. Only for users who linked their account. */
-    @Component
-    public static class TelegramChannel implements NotificationChannel {
-        private final TelegramAdapter telegram;
-
-        public TelegramChannel(TelegramAdapter telegram) {
-            this.telegram = telegram;
-        }
-
-        @Override
-        public Type type() {
-            return Type.TELEGRAM;
-        }
-
-        @Override
-        public boolean supports(User user) {
-            return telegram.isEnabled() && user.isTelegramLinked() && user.isTelegramNotifications();
-        }
-
-        @Override
-        public void send(Message m) {
-            String icon = switch (m.severity()) {
-                case CRITICAL -> "🔴";
-                case WARNING -> "🟠";
-                case SUCCESS -> "✅";
-                case INFO -> "🔵";
-            };
-            telegram.sendMessage(m.recipient().getTelegramChatId(),
-                    icon + " " + m.title() + "\n" + m.body());
         }
     }
 

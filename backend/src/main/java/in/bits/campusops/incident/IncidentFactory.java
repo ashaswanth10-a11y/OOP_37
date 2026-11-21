@@ -41,6 +41,9 @@ public class IncidentFactory {
         if (users < 1 || users > 100_000) {
             throw new InvalidInputException("Affected users must be between 1 and 100000");
         }
+        if (channel == Incident.Channel.LEGACY) {
+            throw new InvalidInputException("Choose a current reporting source");
+        }
         return new Incident(nextSequence(), reporter, title, description, service, asset,
                 location, impact == null ? Level.MEDIUM : impact, urgency == null ? Level.MEDIUM : urgency,
                 users, channel == null ? Incident.Channel.WEB : channel, time.now());

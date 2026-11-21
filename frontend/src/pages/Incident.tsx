@@ -113,7 +113,7 @@ function Conversation({ d, staff }: { d: IncidentDetail; staff: boolean }) {
       <div className="space-y-3 p-4">
         {notes.length === 0 && <div className="text-sm text-mute">No messages yet.</div>}
         {notes.map((n) => {
-          const mine = n.authorRole === "EMPLOYEE"
+          const mine = n.authorRole === "STUDENT"
           return (
             <div key={n.id} className={"flex " + (mine ? "justify-end" : "")}>
               <div
@@ -260,7 +260,7 @@ export default function IncidentPage() {
                   {d.escalatedTo ? " → " + d.escalatedTo.name : ""}
                 </span>
               )}
-              {s.problemNumber && d.problem && (
+              {staff && s.problemNumber && d.problem && (
                 <Link to={"/problems/" + d.problem.id} className="inline-flex items-center gap-1 rounded bg-outage px-1.5 py-0.5 font-mono text-[11px] font-semibold text-white">
                   <ShieldAlert size={12} /> {s.problemNumber}
                 </Link>
@@ -272,11 +272,9 @@ export default function IncidentPage() {
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full" style={{ background: s.category.color ?? "var(--mute)" }} />
                   {s.category.name}
-                  {d.classifiedBy && (
-                    <span className="font-mono text-[11px] text-mute">
-                      ({d.classifiedBy.toLowerCase()}
-                      {d.classificationConfidence != null ? " " + Math.round(d.classificationConfidence * 100) + "%" : ""})
-                    </span>
+                  {d.classifiedBy === "GEMINI" && <span className="text-xs text-mute">Suggested by Gemini</span>}
+                  {staff && d.classifiedBy && d.classifiedBy !== "GEMINI" && (
+                    <span className="text-xs text-mute">{d.classifiedBy.toLowerCase()}</span>
                   )}
                 </span>
               )}
@@ -365,13 +363,12 @@ export default function IncidentPage() {
 
           <Conversation d={d} staff={staff} />
 
-          <div className="panel p-4 sm:p-5">
-            <div className="mb-3 flex items-baseline justify-between">
-              <span className="font-cond text-[15px] font-semibold">Replay</span>
-              <span className="text-xs text-mute">Scrub or press play to watch this incident unfold</span>
-            </div>
-            <Replay timeline={d.timeline} />
-          </div>
+          {staff && (
+            <section className="panel p-4 sm:p-5">
+              <h2 className="mb-3 text-base font-semibold">Ticket history replay</h2>
+              <Replay timeline={d.timeline} />
+            </section>
+          )}
         </div>
 
         <aside className="space-y-4">
@@ -395,7 +392,7 @@ export default function IncidentPage() {
             )}
           </div>
 
-          {d.problem && (
+          {staff && d.problem && (
             <Link to={"/problems/" + d.problem.id} className="panel block border-l-4 p-4 hover:bg-sunk" style={{ borderLeftColor: "var(--outage)" }}>
               <div className="eyebrow">Linked problem</div>
               <div className="mt-1 font-mono text-[13px] font-semibold text-outage">{d.problem.number}</div>

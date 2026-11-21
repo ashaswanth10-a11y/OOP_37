@@ -1,8 +1,7 @@
-import { useState } from "react"
 import { useMutation } from "@tanstack/react-query"
-import { Loader2, Send } from "lucide-react"
 import * as api from "../lib/api"
 import { isTech, useAuth } from "../lib/auth"
+import { ROLE_LABEL } from "../lib/format"
 import { useToast } from "../lib/toast"
 import { ErrorBox, PageHeader } from "../components/ui"
 
@@ -24,23 +23,21 @@ function Toggle({ on, onChange, disabled, label }: { on: boolean; onChange: (v: 
 export default function ProfilePage() {
   const { user, setUser } = useAuth()
   const toast = useToast()
-  const [code, setCode] = useState<string | null>(null)
 
   const prefs = useMutation({
-    mutationFn: (p: { email: boolean; telegram: boolean }) => api.setPreferences(p.email, p.telegram),
+    mutationFn: api.setPreferences,
     onSuccess: (u) => {
       setUser(u)
       toast({ title: "Notification preferences saved", tone: "success" })
     },
   })
-  const tg = useMutation({ mutationFn: api.telegramCode, onSuccess: (r) => setCode(r.code) })
   const avail = useMutation({ mutationFn: api.setAvailability, onSuccess: setUser })
 
   if (!user) return null
 
   return (
     <div className="mx-auto max-w-2xl">
-      <PageHeader eyebrow={user.code} title="Profile" />
+      <PageHeader title="Profile" />
 
       <section className="panel p-5">
         <div className="font-cond text-[18px] font-semibold">{user.fullName}</div>
@@ -48,7 +45,7 @@ export default function ProfilePage() {
         <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 text-[13.5px]">
           <div>
             <dt className="text-[11.5px] text-mute">Role</dt>
-            <dd>{user.roles.map((r) => r.replace("_", " ").toLowerCase()).join(", ")}</dd>
+            <dd>{ROLE_LABEL[user.role]}</dd>
           </div>
           {user.department && (
             <div>
@@ -98,54 +95,16 @@ export default function ProfilePage() {
         <div className="flex items-center justify-between gap-4 px-5 py-4">
           <div>
             <div className="font-medium">Email</div>
-            <div className="text-sm text-mute">Status changes, info requests and fixes, sent to {user.email}.</div>
+            <div className="text-sm text-mute">Copies of ticket updates in the email outbox. You can always see updates in CampusOps.</div>
           </div>
           <Toggle
             label="Email notifications"
             on={user.emailNotifications}
             disabled={prefs.isPending}
-            onChange={(v) => prefs.mutate({ email: v, telegram: user.telegramNotifications })}
+            onChange={(v) => prefs.mutate(v)}
           />
         </div>
-        <div className="flex items-center justify-between gap-4 px-5 py-4">
-          <div>
-            <div className="font-medium">Telegram</div>
-            <div className="text-sm text-mute">
-              {user.telegramLinked ? "Linked. You'll get messages from the CampusOps bot." : "Link your Telegram account below first."}
-            </div>
-          </div>
-          <Toggle
-            label="Telegram notifications"
-            on={user.telegramNotifications}
-            disabled={prefs.isPending}
-            onChange={(v) => prefs.mutate({ email: user.emailNotifications, telegram: v })}
-          />
-        </div>
-        <div className="px-5 py-4">
-          <div className="font-medium">{user.telegramLinked ? "Link a different Telegram account" : "Link Telegram"}</div>
-          <div className="text-sm text-mute">You can also report problems by chatting to the bot.</div>
-          {code ? (
-            <div className="mt-3 rounded-md bg-sunk p-4">
-              <div className="text-sm">Send this message in a private chat with the CampusOps bot on Telegram.</div>
-              <div className="mt-2 flex items-center gap-3">
-                <code className="rounded-md bg-card px-3 py-2 font-mono text-[18px] font-semibold tracking-wider">/start {code}</code>
-                <button
-                  className="text-sm text-signal hover:underline"
-                  onClick={() => navigator.clipboard?.writeText("/start " + code).then(() => toast({ title: "Copied", tone: "info" }))}
-                >
-                  Copy
-                </button>
-              </div>
-              <div className="mt-2 text-xs text-mute">The code works once. Generate a new one if it expires.</div>
-            </div>
-          ) : (
-            <button className="btn btn-ghost mt-3" onClick={() => tg.mutate()} disabled={tg.isPending}>
-              {tg.isPending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />} Get my link code
-            </button>
-          )}
-          {tg.error && <div className="mt-3"><ErrorBox error={tg.error} /></div>}
-          {prefs.error && <div className="mt-3"><ErrorBox error={prefs.error} /></div>}
-        </div>
+        {prefs.error && <div className="px-5 py-3"><ErrorBox error={prefs.error} /></div>}
       </section>
     </div>
   )

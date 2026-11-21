@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Factory pattern: the only place that decides which concrete {@link User} subclass to
- * build for a role, hashes the password and hands out the human-readable code (E101, T201...).
+ * build for a role, hashes the password and hands out the human-readable code (S101, T201...).
  */
 @Component
 public class UserFactory {
@@ -42,7 +42,7 @@ public class UserFactory {
         int max = spec.maxConcurrent() == null ? 5 : spec.maxConcurrent();
         int exp = spec.experienceYears() == null ? 1 : spec.experienceYears();
         return switch (spec.role()) {
-            case EMPLOYEE -> new Employee(code, spec.fullName(), spec.email(), hash, now,
+            case STUDENT -> new Student(code, spec.fullName(), spec.email(), hash, now,
                     spec.department(), spec.location());
             case TECHNICIAN -> new Technician(code, spec.fullName(), spec.email(), hash, now,
                     spec.team(), skills, max, exp);
@@ -56,7 +56,7 @@ public class UserFactory {
     private String nextCode(Role role) {
         sequence.compareAndSet(-1, (int) users.count());
         String prefix = switch (role) {
-            case EMPLOYEE -> "E";
+            case STUDENT -> "S";
             case TECHNICIAN -> "T";
             case TEAM_LEAD -> "L";
             case SYSTEM_ADMIN -> "A";

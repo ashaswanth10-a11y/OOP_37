@@ -14,14 +14,11 @@ class AiAdapterFallbackTest {
     private final List<IncidentCategory> categories = List.of(Fixtures.category("NETWORK"));
 
     @Test
-    @DisplayName("TC40 AI adapters without an API key stay disabled and step aside for the keyword classifier")
+    @DisplayName("TC40 Gemini without an API key stays disabled and steps aside for the keyword classifier")
     void disabledWithoutKey() {
         JsonMapper mapper = JsonMapper.builder().build();
         GeminiCategoryClassifier gemini = new GeminiCategoryClassifier("", "gemini-3.5-flash-lite", mapper);
-        ClaudeCategoryClassifier claude = new ClaudeCategoryClassifier("", "claude-opus-5-5", mapper);
         assertThat(gemini.isEnabled()).isFalse();
-        assertThat(claude.isEnabled()).isFalse();
         assertThat(gemini.classify("wifi down", null, categories)).isEmpty();
-        assertThat(claude.classify("wifi down", null, categories)).isEmpty();
     }
 }

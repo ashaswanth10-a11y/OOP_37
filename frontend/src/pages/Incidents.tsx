@@ -103,7 +103,7 @@ export default function IncidentsPage() {
 
   return (
     <div className="mx-auto max-w-[1400px]">
-      <PageHeader eyebrow={staff ? "Search" : "Your reports"} title={staff ? "Incidents" : "My incidents"}>
+      <PageHeader eyebrow={staff ? "Search" : "Your reports"} title={staff ? "Incidents" : "My tickets"}>
         {!staff && (
           <Link to="/report" className="btn btn-primary">
             Report a problem

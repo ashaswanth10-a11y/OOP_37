@@ -1,6 +1,6 @@
 package in.bits.campusops;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,13 +27,15 @@ class UserUpdateAfterPoolRecycleTest extends ApiSupport {
 
     @Test
     @DisplayName("TC42 Users can still be updated after the pool replaces the connection that created the schema")
-    void telegramCodeAfterPoolRecycle() throws Exception {
+    void savePreferencesAfterPoolRecycle() throws Exception {
         String aarav = bearer("aarav");
         // closes every idle connection, including the one Hibernate used to create the tables
         ((HikariDataSource) dataSource).getHikariPoolMXBean().softEvictConnections();
 
-        mvc.perform(post("/api/users/me/telegram-code").header("Authorization", aarav))
+        mvc.perform(put("/api/users/me/preferences").header("Authorization", aarav)
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .content("{\"emailNotifications\":false}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").isString());
+                .andExpect(jsonPath("$.emailNotifications").value(false));
     }
 }

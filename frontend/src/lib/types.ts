@@ -1,10 +1,10 @@
-export type Role = "EMPLOYEE" | "TECHNICIAN" | "TEAM_LEAD" | "SYSTEM_ADMIN" | "IT_MANAGER"
+export type Role = "STUDENT" | "TECHNICIAN" | "TEAM_LEAD" | "SYSTEM_ADMIN" | "IT_MANAGER"
 export type Priority = "P1" | "P2" | "P3" | "P4"
 export type Level = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
 export type SlaState = "ON_TRACK" | "AT_RISK" | "BREACHED" | "MET"
 export type Health = "OPERATIONAL" | "DEGRADED" | "OUTAGE" | "IMPACTED"
 export type ServiceType = "NETWORK" | "INFRASTRUCTURE" | "PLATFORM" | "APPLICATION" | "END_USER"
-export type Channel = "WEB" | "QR" | "VOICE" | "TELEGRAM" | "SIMULATION"
+export type Channel = "WEB" | "QR" | "VOICE" | "LEGACY" | "SIMULATION"
 export type Status =
   | "NEW"
   | "CLASSIFIED"
@@ -48,9 +48,7 @@ export interface User {
   experienceYears: number | null
   available: boolean | null
   activeIncidents: number | null
-  telegramLinked: boolean
   emailNotifications: boolean
-  telegramNotifications: boolean
   active: boolean
 }
 
@@ -365,10 +363,8 @@ export interface AdminSettings {
   priorityStrategies: { key: string; label: string }[]
   escalationChain: string[]
   integrations: {
-    claude: boolean
     gemini?: boolean
     geminiModel?: string | null
-    telegram: boolean
     liveConnections: number
   }
 }
