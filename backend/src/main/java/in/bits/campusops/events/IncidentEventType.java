@@ -1,0 +1,24 @@
+package in.bits.campusops.events;
+
+public enum IncidentEventType {
+    CREATED,
+    CLASSIFIED,
+    PRIORITY_CALCULATED,
+    PRIORITY_CHANGED,
+    ASSIGNED,
+    ASSIGNMENT_FAILED,
+    STATUS_CHANGED,
+    NOTE_ADDED,
+    INFO_REQUESTED,
+    INFO_PROVIDED,
+    RESOLVED,
+    REOPENED,
+    FEEDBACK_GIVEN,
+    CLOSED,
+    SLA_WARNING,
+    SLA_BREACHED,
+    ESCALATED,
+    DUPLICATE_DETECTED,
+    ME_TOO,
+    PROBLEM_LINKED
+}
