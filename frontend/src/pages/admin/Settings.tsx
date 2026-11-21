@@ -137,10 +137,6 @@ export default function SettingsAdmin() {
             <span className="text-[13.5px]">Live dashboard connections</span>
             <span className="font-mono text-[13px]">{data.integrations.liveConnections}</span>
           </div>
-          <div className="flex items-center justify-between py-2">
-            <span className="text-[13.5px]">Server clock offset</span>
-            <span className="font-mono text-[13px]">+{data.clockOffsetMinutes} min</span>
-          </div>
         </div>
         <div className="panel p-5">
           <div className="eyebrow mb-3">Escalation chain</div>

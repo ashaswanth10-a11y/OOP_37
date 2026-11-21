@@ -32,5 +32,5 @@ Put it in `.env.local` or pass it at build time: `VITE_API_URL=https://... npm r
 
 - QR stickers encode `${window.location.origin}/report?asset=TAG`, so print them from the deployed URL, not from localhost, or phones won't reach them.
 - Voice input uses the browser's Web Speech API (`en-IN`). It works in Chrome and Edge; the mic button is hidden where it isn't supported (Firefox).
-- Demo time warp moves the server clock. Admins and team leads read the offset from `/api/admin/settings`; other roles estimate it from an open incident's SLA, so their countdowns can be a minute off right after a warp until they open an incident.
+- Countdown timers synchronize with the server clock via `/api/public/time`.
 - The PWA manifest and a no-op service worker are in `public/`. The worker is only registered in production builds.

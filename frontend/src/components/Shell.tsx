@@ -26,11 +26,10 @@ import {
   Users,
   Wrench,
   X,
-  Zap,
 } from "lucide-react"
 import * as api from "../lib/api"
 import { isAdmin, isLead, isTech, shellFor, useAuth } from "../lib/auth"
-import { useNow, getServerOffsetMinutes } from "../lib/clock"
+import { useNow } from "../lib/clock"
 import { useLive } from "../lib/live"
 import { useTheme } from "../lib/theme"
 import { initials } from "../lib/format"
@@ -220,7 +219,6 @@ function Annunciator() {
   const outages = nodes.filter((n) => n.health === "OUTAGE").length
   const degraded = nodes.filter((n) => n.health === "DEGRADED" || n.health === "IMPACTED").length
   const open = nodes.reduce((s, n) => s + n.openIncidents, 0)
-  const warp = getServerOffsetMinutes()
   const clock = new Intl.DateTimeFormat("en-IN", {
     hour: "2-digit",
     minute: "2-digit",
@@ -252,11 +250,6 @@ function Annunciator() {
         )}
       </div>
       <div className="ml-auto flex items-center gap-3 font-mono text-[12px]">
-        {warp > 0 && (
-          <span className="rounded bg-beacon/20 px-1.5 py-px font-semibold text-[#8a5d00] dark:text-beacon" title="Server clock fast-forwarded for the demo">
-            +{warp} min
-          </span>
-        )}
         <span className="tnum hidden whitespace-nowrap text-ink-2 sm:inline">{clock} IST</span>
         <span className="flex items-center gap-1.5" title={live ? "Receiving live updates" : "Live updates disconnected"}>
           <span className={"h-2 w-2 rounded-full " + (live ? "bg-ok" : "bg-p4")} />
@@ -337,7 +330,6 @@ export function StaffShell() {
 
   const adminItems: NavItem[] = admin
     ? [
-        { to: "/admin/demo", label: "Demo control", icon: <Zap size={16} /> },
         { to: "/admin/users", label: "Users", icon: <Users size={16} /> },
         { to: "/admin/services", label: "Services", icon: <LayoutGrid size={16} /> },
         { to: "/admin/categories", label: "Categories", icon: <ListChecks size={16} /> },

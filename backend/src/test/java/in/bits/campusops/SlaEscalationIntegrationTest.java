@@ -31,6 +31,9 @@ class SlaEscalationIntegrationTest extends ApiSupport {
     CatalogService catalog;
 
     @Autowired
+    in.bits.campusops.common.TimeProvider time;
+
+    @Autowired
     SlaPolicyRepository policies;
 
     @Test
@@ -45,8 +48,7 @@ class SlaEscalationIntegrationTest extends ApiSupport {
                 .andReturn();
         long id = json(created).at("/summary/id").asLong();
 
-        mvc.perform(post("/api/admin/demo/time-warp").param("minutes", "11").header("Authorization", bearer("kiran")))
-                .andExpect(status().isOk());
+        time.at(time.now().plus(java.time.Duration.ofMinutes(11)), monitor::sweep);
 
         JsonNode d = json(mvc.perform(get("/api/incidents/" + id).header("Authorization", bearer("kiran"))).andReturn());
         assertThat(d.at("/sla/responseBreached").asBoolean()).isTrue();

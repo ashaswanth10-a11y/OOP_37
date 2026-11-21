@@ -42,8 +42,7 @@ class KnownOutageIntegrationTest extends ApiSupport {
     @BeforeEach
     void outage() throws Exception {
         if (json(mvc.perform(get("/api/public/status")).andReturn()).get("problems").isEmpty()) {
-            mvc.perform(post("/api/admin/demo/scenario/core-switch-b").header("Authorization", bearer("kiran")))
-                    .andExpect(status().isOk());
+            reportNetworkOutages("WIFI-GAUTAM", "WIFI-KRISHNA", "WIFI-VYAS", "WIFI-MEERA");
         }
     }
 

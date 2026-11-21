@@ -34,6 +34,8 @@
   th { background: #e3edf5; color: #12324a; text-align: left; font-weight: 600; }
   th, td { border: 1px solid var(--line); padding: 3pt 5pt; vertical-align: top; }
   tbody tr:nth-child(even) td { background: #fafcfd; }
+  .test-cases { table-layout: fixed; overflow-wrap: anywhere; }
+  .test-cases th { box-sizing: border-box; }
   table.small { font-size: 8.2pt; }
   table.small th, table.small td { padding: 2pt 4pt; }
   .figure { text-align: center; margin: 6pt 0 10pt; break-inside: avoid; }
@@ -207,7 +209,6 @@ Its core is a rich <code>Incident</code> aggregate whose lifecycle is a State-pa
 <li>A technician's skills are the incident category codes they can handle (e.g. <code>NETWORK</code>, <code>DATABASE</code>); a team lead is also a working technician.</li>
 <li>The SLA clock starts when the incident is created; "response" means the technician acknowledged it.</li>
 <li>Email delivery is simulated (stored in an outbox the admin can read). Telegram, Gemini and Claude are real integrations that switch on only when their keys are configured; without them the system still works fully offline.</li>
-<li>The demo clock can be fast-forwarded by an administrator ("time warp") so SLA breaches and escalations can be shown in a short video. This control can be disabled with <code>DEMO_ENABLED=false</code>.</li>
 <li>Campus scale: thousands of users and tens to hundreds of incidents a day, which is why analytics are computed in memory (see Section 6, question 9, for what changes at larger scale).</li>
 </ol>
 </section>
@@ -256,7 +257,7 @@ Its core is a rich <code>Incident</code> aggregate whose lifecycle is a State-pa
 <tr><td>EMPLOYEE (<code>Employee</code>)</td><td>Report; view only own incidents; provide info; comment; verify / reopen / cancel own incidents; notifications; Telegram link.</td></tr>
 <tr><td>TECHNICIAN (<code>Technician</code>)</td><td>Everything an employee can do, plus: view all incidents, queue, dashboard, outage map, problems; take; acknowledge / start / request info / resolve / close when assigned; internal notes; set own availability.</td></tr>
 <tr><td>TEAM_LEAD (<code>TeamLead</code>, grants TECHNICIAN + TEAM_LEAD)</td><td>Technician rights on any incident, plus assign/reassign with override, change priority, resolve problem records, view audit log, SLA violations, settings (read), user list, edit technician profiles.</td></tr>
-<tr><td>SYSTEM_ADMIN (<code>Administrator</code>)</td><td>Supervisor rights plus catalogue, SLA, category, asset, user and settings management, email outbox, demo controls.</td></tr>
+<tr><td>SYSTEM_ADMIN (<code>Administrator</code>)</td><td>Supervisor rights plus catalogue, SLA, category, asset, user and settings management, and email outbox.</td></tr>
 <tr><td>IT_MANAGER (<code>ItManager</code>, grants SYSTEM_ADMIN + IT_MANAGER)</td><td>All admin rights; receives level-3 escalations.</td></tr>
 </tbody></table>
 
@@ -336,7 +337,7 @@ IN_PROGRESS, AWAITING_INFO and REOPENED. A manual assignment is refused if the t
 
 <h3>2.4.4 Escalation rules (<code>EscalationService</code>)</h3>
 <p>Chain: level 0 Technician &rarr; 1 Team Lead &rarr; 2 System Administrator &rarr; 3 IT Manager. Levels only go up, and each check climbs <b>at most one level</b>: even after a long gap
-(server restart, large time warp) the incident passes through every level in turn on successive sweeps, so every person in the
+(for example, after a server restart) the incident passes through every level in turn on successive sweeps, so every person in the
 chain is notified.</p>
 <ul>
 <li><b>Not acknowledged:</b> for a P1/P2 incident still in CLASSIFIED, ASSIGNED or REOPENED, the target level is the number of whole response windows that have passed since the SLA start (or since assignment, if later),
@@ -391,7 +392,7 @@ the public <code>/status</code> page needs no login. Telegram users talk to the 
 <code>user</code>, <code>auth</code>, <code>catalog</code>, <code>incident</code>, <code>priority</code>, <code>assignment</code>,
 <code>sla</code>, <code>intelligence</code>, <code>ai</code>, <code>problem</code>, <code>events</code>, <code>audit</code>,
 <code>notification</code>, <code>realtime</code>, <code>telegram</code>, <code>report</code>, <code>settings</code>,
-<code>demo</code>, <code>seed</code>, <code>common</code>. Inside each, controllers are thin (validate, resolve the current user,
+<code>seed</code>, <code>common</code>. Inside each, controllers are thin (validate, resolve the current user,
 call a service, map to a view record); services orchestrate; the rules live in domain objects (<code>Incident</code>, its state
 objects, <code>SlaTracker</code>, <code>SlaPolicy</code>, <code>Technician</code>), strategies and the policy.</p>
 <p><b>Persistence.</b> Spring Data JPA repositories over H2 (default, file-based) or PostgreSQL 16 (Docker / <code>postgres</code> profile).</p>
@@ -697,8 +698,7 @@ public interface IncidentRepository extends JpaRepository&lt;Incident, Long&gt;,
 }</pre>
 <p class="note">Other patterns used in passing: <b>Specification</b> (search filters), <b>Policy</b> object
 (<code>IncidentPolicy</code> keeps "is this person allowed" apart from "does the state allow it"), <b>Registry</b>
-(<code>IncidentStates</code>) and <b>Clock abstraction</b> (<code>TimeProvider</code>, which makes time testable and powers the
-demo time warp).</p>
+(<code>IncidentStates</code>) and <b>Clock abstraction</b> (<code>TimeProvider</code>, which allows tests to pin timestamps).</p>
 </section>
 
 <!-- ======================= 6 ======================= -->
@@ -876,7 +876,7 @@ carries DNS/DHCP, SSO and the database cluster, on which the ERP, CMS and SWD po
 lab PCs, fee portal) sit on top (27 services in total). <code>CatalogService.downstreamOf</code> (the "blast radius") and
 <code>upstreamOf</code> are breadth-first searches; cycles are rejected when dependencies are edited.</p>
 <p><code>CorrelationEngine</code> (rules in Section 2.4.6) looks for the most specific common upstream service of recent
-same-symptom incidents. Two worked examples from the demo scenarios, checked on a freshly seeded instance:</p>
+same-symptom incidents. Two worked examples, checked on a freshly seeded instance:</p>
 <ul>
 <li><b>core-switch-b</b>: Wi-Fi reports from Gautam, Krishna, Vyas and Meera Bhavan. Their shared upstream candidates are Core
 Switch B, the captive portal, the firewall, DNS/DHCP, the DC cluster and the uplink. Core Switch B has the smallest blast radius
@@ -990,7 +990,7 @@ slightly between runs because the history generator uses a fixed random seed but
 <thead><tr><th style="width:20%">Requirement</th><th>Implementation</th></tr></thead>
 <tbody>
 <tr><td>Authentication</td><td><code>POST /api/auth/login</code> checks the BCrypt hash and returns a JWT signed with HS256 (<code>JwtService</code>): subject = user id, claims name, email, roles; 12 h expiry. The backend is an OAuth2 resource server that validates the signature and expiry on every <code>/api/**</code> request. Inactive users cannot log in, and <code>CurrentUser.get()</code> re-checks <code>active</code> on every call, so deactivation takes effect immediately.</td></tr>
-<tr><td>Role-based authorization</td><td>Roles from the token become <code>ROLE_*</code> authorities; endpoints use <code>@PreAuthorize</code>, e.g. dashboard <code>hasAnyRole('TECHNICIAN','SYSTEM_ADMIN')</code>, settings update and catalogue writes <code>hasRole('SYSTEM_ADMIN')</code>, demo controls admin only. Role inheritance is explicit: a TeamLead token carries TECHNICIAN and TEAM_LEAD; an IT manager carries SYSTEM_ADMIN and IT_MANAGER.</td></tr>
+<tr><td>Role-based authorization</td><td>Roles from the token become <code>ROLE_*</code> authorities; endpoints use <code>@PreAuthorize</code>, e.g. dashboard <code>hasAnyRole('TECHNICIAN','SYSTEM_ADMIN')</code>, settings update and catalogue writes <code>hasRole('SYSTEM_ADMIN')</code>. Role inheritance is explicit: a TeamLead token carries TECHNICIAN and TEAM_LEAD; an IT manager carries SYSTEM_ADMIN and IT_MANAGER.</td></tr>
 <tr><td>Object-level authorization</td><td><code>IncidentPolicy</code> checks ownership per action (an employee sees only incidents they reported; only the assignee or a supervisor can resolve; only the reporter answers info requests and verifies). Employee searches are forced to their own incidents (<code>IncidentSearch.forReporter</code>). Internal notes and their audit lines are hidden from non-staff. Notifications can only be marked read by their recipient.</td></tr>
 <tr><td>Password protection</td><td>BCrypt (salted, adaptive); minimum 8 characters (max 72, BCrypt's limit); the hash never leaves the server (<code>UserView</code> omits it).</td></tr>
 <tr><td>Input validation</td><td>Jakarta Bean Validation on every request record (<code>@NotBlank</code>, <code>@Size</code>, <code>@Min/@Max</code>, <code>@Email</code>, <code>@Pattern</code> for codes and tags), plus domain checks in factories and value objects. Enum parameters are type-checked. Sort fields are whitelisted and page size is capped at 100.</td></tr>
@@ -1017,12 +1017,12 @@ slightly between runs because the history generator uses a fixed random seed but
 <p>The backend has 47 automated JUnit 5 tests: 46 documented test cases (display names TC01-TC46) and one Spring context-load test.
 Unit tests construct domain objects directly with the <code>Fixtures</code> helper (no Spring, no database). Integration tests start
 the full application with an in-memory H2 database seeded by <code>DemoDataSeeder</code> and drive it through the REST API with
-MockMvc and real JWTs. <code>SlaEscalationIntegrationTest</code> moves the clock forward and <code>UserUpdateAfterPoolRecycleTest</code> recycles the connection pool, <code>DemoResetIntegrationTest</code> wipes and reseeds the database and <code>KnownOutageIntegrationTest</code> fires an outage, so each gets its own application context.
+MockMvc and real JWTs. The SLA test evaluates a future deadline using a pinned timestamp. The persistence test signs in again to retrieve a submitted incident. The known-outage test creates its reports through the employee API.
 CI (<code>.github/workflows/ci.yml</code>) runs <code>./mvnw -B verify</code> on every push and pull request and uploads the
 Surefire reports and the JaCoCo coverage report. Result of the latest run (21 November 2026): <b>47 tests, 0 failures, 0 errors, 0 skipped</b>.</p>
-<p><b>Coverage</b> (JaCoCo, <code>./mvnw verify</code> writes <code>backend/target/site/jacoco/index.html</code>): <b>78.9 %</b> of lines and <b>63.9 %</b> of branches overall, and <b>87.7 %</b> of lines in the core logic (incident, priority, assignment, sla, intelligence, problem, events, audit). By module: events 100 %, audit 97 %, problem 96 %, intelligence 95 %, assignment 92 %, priority 91 %, sla 91 %, incident 81 %, notification 78 %, user 76 %. The lowest figures are the outside-service adapters (Telegram, Claude, Gemini), which are only exercised through their fallback paths because the tests run without API keys.</p>
+<p><b>Coverage</b> (JaCoCo, <code>./mvnw verify</code> writes <code>backend/target/site/jacoco/index.html</code>): <b>78.5 %</b> of lines and <b>64.0 %</b> of branches overall, and <b>87.5 %</b> of lines in the core logic (incident, priority, assignment, sla, intelligence, problem, events, audit). By module: events 100 %, audit 97 %, problem 96 %, intelligence 95 %, assignment 92 %, priority 91 %, sla 90 %, incident 81 %, notification 78 %, user 76 %. The lowest figures are the outside-service adapters (Telegram, Claude, Gemini), which are only exercised through their fallback paths because the tests run without API keys.</p>
 
-<table class="small">
+<table class="small test-cases">
 <thead><tr><th style="width:5%">ID</th><th style="width:19%">Name</th><th style="width:7%">Type</th><th style="width:10%">Category</th><th style="width:28%">Steps</th><th style="width:25%">Expected</th><th style="width:6%">Result</th></tr></thead>
 <tbody>
 <tr><td>TC01</td><td>NEW cannot jump straight to CLOSED</td><td>Unit</td><td>Business rule / invalid input</td><td>Create a NEW incident; call <code>transitionTo(CLOSED)</code>.</td><td><code>InvalidStateTransitionException</code> "cannot move from NEW to CLOSED"; status stays NEW.</td><td class="ok">PASS</td></tr>
@@ -1049,7 +1049,7 @@ Surefire reports and the JaCoCo coverage report. Result of the latest run (21 No
 <tr><td>TC22</td><td>Keyword classifier suggests the right category with a reason</td><td>Unit</td><td>Normal (intelligent)</td><td>Classify "The hostel wifi router has no internet" against NETWORK and PRINTING.</td><td>NETWORK, confidence 1.0, reason mentions wifi.</td><td class="ok">PASS</td></tr>
 <tr><td>TC23</td><td>Workflow 1+2: report &rarr; auto classify/prioritise/assign &rarr; investigate &rarr; resolve &rarr; verify &rarr; close</td><td>Integration</td><td>Normal</td><td>rohan reports a LAB-NET outage via API; the auto-assigned tech acknowledges, starts, resolves; rohan verifies; tech closes.</td><td>ASSIGNED with category NETWORK, P1/P2, SLA due set; each step 200 with the right status; timeline contains CREATED, CLASSIFIED, PRIORITY_CALCULATED, ASSIGNED, RESOLVED, FEEDBACK_GIVEN, CLOSED.</td><td class="ok">PASS</td></tr>
 <tr><td>TC24</td><td>Reporting the same problem twice is caught; confirming a different problem is allowed</td><td>Integration</td><td>Business rule / exception</td><td>ananya posts the same VPN report twice, then again with <code>confirmedNew</code>.</td><td>200, then 409 DUPLICATE_INCIDENT, then 200.</td><td class="ok">PASS</td></tr>
-<tr><td>TC25</td><td>Workflow 3: Wi-Fi reports from several hostels are correlated to Core Switch B</td><td>Integration</td><td>Normal (intelligent)</td><td>Admin runs scenario core-switch-b; read problems and outage map.</td><td>A problem rooted at Core Switch B with &ge; 3 incidents; CORE-B node is rootCause and OUTAGE.</td><td class="ok">PASS</td></tr>
+<tr><td>TC25</td><td>Workflow 3: Wi-Fi reports from several hostels are correlated to Core Switch B</td><td>Integration</td><td>Normal (intelligent)</td><td>Employees submit reports for four hostel Wi-Fi services; read problems and outage map.</td><td>A problem rooted at Core Switch B with &ge; 3 incidents; CORE-B node is rootCause and OUTAGE.</td><td class="ok">PASS</td></tr>
 <tr><td>TC26</td><td>Search filters by status and priority</td><td>Integration</td><td>Normal</td><td><code>GET /api/incidents?status=CLOSED&amp;priority=P1&amp;priority=P2</code>.</td><td>Non-empty; every item CLOSED and P1/P2.</td><td class="ok">PASS</td></tr>
 <tr><td>TC27</td><td>Unknown service is a 404 with code SERVICE_NOT_FOUND</td><td>Integration</td><td>Exception</td><td>Report against service id 99999.</td><td>404, code SERVICE_NOT_FOUND.</td><td class="ok">PASS</td></tr>
 <tr><td>TC28</td><td>Invalid input is rejected with field errors</td><td>Integration</td><td>Invalid input</td><td>Title "Hi", description "short", affectedUsers 0.</td><td>400 INVALID_INPUT with fieldErrors for title and affectedUsers.</td><td class="ok">PASS</td></tr>
@@ -1059,16 +1059,16 @@ Surefire reports and the JaCoCo coverage report. Result of the latest run (21 No
 <tr><td>TC32</td><td>An employee cannot view another person's incident or resolve their own</td><td>Integration</td><td>Authorization</td><td>diya reports; kabir opens it; diya tries to resolve it.</td><td>403; 403 UNAUTHORIZED_OPERATION.</td><td class="ok">PASS</td></tr>
 <tr><td>TC33</td><td>Closing before the fix is verified is an invalid state transition (409)</td><td>Integration</td><td>Exception / business rule</td><td>sneha reports; admin calls close immediately.</td><td>409 INVALID_STATE_TRANSITION.</td><td class="ok">PASS</td></tr>
 <tr><td>TC34</td><td>Self-registration requires a campus email</td><td>Integration</td><td>Invalid input / business rule</td><td>Register with someone@gmail.com.</td><td>400, message mentions campus email.</td><td class="ok">PASS</td></tr>
-<tr><td>TC35</td><td>An unacknowledged P1 breaches its SLA and is escalated up the chain</td><td>Integration</td><td>Business rule (SLA)</td><td>sneha reports a CRITICAL/CRITICAL fee-portal outage for 900 users; admin time-warps 11 min; read incident and violations.</td><td>P1; responseBreached; escalationLevel &ge; 1 with escalatedTo; ESCALATED in timeline; SLA violations list non-empty.</td><td class="ok">PASS</td></tr>
+<tr><td>TC35</td><td>An unacknowledged P1 breaches its SLA and is escalated up the chain</td><td>Integration</td><td>Business rule (SLA)</td><td>sneha reports a CRITICAL/CRITICAL fee-portal outage for 900 users; the test evaluates the SLA monitor 11 minutes later; read incident and violations.</td><td>P1; responseBreached; escalationLevel &ge; 1 with escalatedTo; ESCALATED in timeline; SLA violations list non-empty.</td><td class="ok">PASS</td></tr>
 <tr><td>TC36</td><td>Manual assignment beyond a technician's limit is refused unless overridden</td><td>Integration</td><td>Boundary / exception</td><td>Admin sets Suresh max = 1; lead assigns two ERP incidents to him, then retries with override.</td><td>Second assignment 409 WORKLOAD_EXCEEDED; with override 200.</td><td class="ok">PASS</td></tr>
 <tr><td>TC37</td><td>A missing SLA policy is reported as MISSING_SLA_CONFIGURATION</td><td>Integration</td><td>Exception</td><td>Delete the campus-default P4 policy (rolled back); ask for the PRINT/P4 policy.</td><td><code>MissingSlaConfigurationException</code>.</td><td class="ok">PASS</td></tr>
 <tr><td>TC38</td><td>'Me too' counts affected people once per person; the reporter cannot me-too their own incident</td><td>Integration</td><td>Business rule / boundary</td><td>diya reports a library printer fault (1 user); kabir says "me too" twice; diya says "me too" on her own incident.</td><td>supporters 1, affectedUsers 2; second click still 1; own incident 409 INVALID_STATE_TRANSITION.</td><td class="ok">PASS</td></tr>
-<tr><td>TC39</td><td>Fest-load scenario: academic-block network reports point at Core Switch A</td><td>Integration</td><td>Normal (intelligent)</td><td>Admin runs scenario fest-load; read problems.</td><td>A problem rooted at Core Switch A exists.</td><td class="ok">PASS</td></tr>
+<tr><td>TC39</td><td>Fest-load scenario: academic-block network reports point at Core Switch A</td><td>Integration</td><td>Normal (intelligent)</td><td>Employees report outages across academic network services; read problems.</td><td>A problem rooted at Core Switch A exists.</td><td class="ok">PASS</td></tr>
 <tr><td>TC40</td><td>AI adapters without an API key stay disabled and step aside for the keyword classifier</td><td>Unit</td><td>Exception (external service)</td><td>Build <code>GeminiCategoryClassifier</code> and <code>ClaudeCategoryClassifier</code> with empty keys; classify "wifi down".</td><td>Both report disabled and return empty, so the chain falls through to keywords.</td><td class="ok">PASS</td></tr>
 <tr><td>TC41</td><td>The scheduled SLA sweep saves its flags, so a breach is alerted and recorded only once</td><td>Integration</td><td>Business rule (SLA)</td><td>Run the scheduled sweep once, then sweep twice more.</td><td>The repeat sweeps fire no new warnings, breaches or escalations and check the same incidents.</td><td class="ok">PASS</td></tr>
 <tr><td>TC42</td><td>Users can still be updated after the pool replaces the connection that created the schema</td><td>Integration</td><td>Robustness (database)</td><td>Evict every pooled connection, then request a Telegram link code (an update to the user row).</td><td>200 with a code. Before the fix, H2 rejected every user update with &ldquo;Check constraint invalid&rdquo; about 30 minutes after a fresh start; <code>H2CheckConstraintFix</code> drops the affected IN constraints on H2 only.</td><td class="ok">PASS</td></tr>
-<tr><td>TC43</td><td>Demo reset restores the seeded campus: same counts, numbering, clock and logins</td><td>Integration</td><td>Business rule (demo) / authorization</td><td>Create an incident, fire a scenario, warp 30 min; a student calls reset (refused), then the admin resets.</td><td>403 for the student; afterwards the incident and problem counts equal the seed, the clock offset is 0, a token issued before the reset still works and the next incident gets the same number as before.</td><td class="ok">PASS</td></tr>
-<tr><td>TC44</td><td>The public status page lists a known outage with every downstream service it affects</td><td>Integration</td><td>Normal (correlation)</td><td>Fire the Core Switch B scenario, then read <code>/api/public/status</code> without logging in.</td><td>The known problem names Core Switch B, gives an incident to follow, and its affected services include Gautam Bhavan Wi-Fi (downstream).</td><td class="ok">PASS</td></tr>
+<tr><td>TC43</td><td>Reported incident survives a new login</td><td>Integration</td><td>Persistence</td><td>Submit a printer ticket as an employee, sign in again, and read it by ID.</td><td>The employee retrieves the same incident number.</td><td class="ok">PASS</td></tr>
+<tr><td>TC44</td><td>The public status page lists a known outage with every downstream service it affects</td><td>Integration</td><td>Normal (correlation)</td><td>Report outages across the four hostel services, then read <code>/api/public/status</code> without logging in.</td><td>The known problem names Core Switch B, gives an incident to follow, and its affected services include Gautam Bhavan Wi-Fi (downstream).</td><td class="ok">PASS</td></tr>
 <tr><td>TC45</td><td>The Telegram bot points a new report on an affected service to /metoo, and /metoo adds the person</td><td>Integration</td><td>Business rule (duplicates)</td><td>A linked student sends <code>/report WIFI-GAUTAM ...</code> during the outage, then <code>/metoo INC-n</code>, then <code>/report WIFI-GAUTAM anyway ...</code>.</td><td>First reply warns about the known outage with the /metoo command; /metoo adds a supporter; "anyway" files a separate incident.</td><td class="ok">PASS</td></tr>
 <tr><td>TC46</td><td>Everyone who said "Me too" is notified when the outage is fixed</td><td>Integration</td><td>Business rule (notifications)</td><td>A student says "Me too" on an outage incident; the team lead resolves the problem and all its linked incidents.</td><td>The supporter receives a "fixed" notification carrying the resolution summary (as promised by the known-outage banner and the Telegram bot).</td><td class="ok">PASS</td></tr>
 <tr><td>-</td><td>contextLoads</td><td>Integration</td><td>Smoke</td><td>Start the Spring context.</td><td>Context starts; seeder runs.</td><td class="ok">PASS</td></tr>
@@ -1102,8 +1102,7 @@ invalid inputs (TC03, 09, 28, 29, 34), exceptions (TC18, 24, 27, 33, 37, 40), au
 <tr><td>Automated incident escalation</td><td class="ok">Done</td><td>Four-level chain driven by the SLA monitor (Section 2.4.4).</td></tr>
 </tbody></table>
 <p>Extras not in the list: "Me too" crowd confirmation that feeds the priority formula (inspired by SU Connect voting), QR stickers on physical assets (printable sticker sheet; scanning opens the report form with the service,
-location and category prefilled), a public campus status page, an incident replay slider built from audit snapshots, a demo control
-panel (time warp, scripted scenarios, one-click reset and a presenter script) and runtime-switchable strategies.</p>
+location and category prefilled), a public campus status page, an incident replay slider built from audit snapshots and runtime-switchable strategies.</p>
 <p><b>Known-outage deflection.</b> While a root-cause problem is open, the report form shows it before the student types anything. When the chosen service (or the service of a scanned QR sticker) sits anywhere downstream of the failed component, the form says "This is probably a known outage" and offers <b>Me too</b> on the problem's oldest open incident. The affected set is the root plus <code>CatalogService.downstreamOf(root)</code>, so a hostel nobody has reported yet is still recognised. The same data drives the public status page and the Telegram bot. Duplicates are stopped before they are filed, instead of being detected afterwards.</p>
 <p><b>Resilience for a sleeping host.</b> If the backend cannot be reached (stopped, or a free host waking up), the frontend keeps the user's session, shows a "server is starting up" banner, polls until the server answers and then refetches everything.</p>
 </section>
@@ -1195,7 +1194,7 @@ that matches the brief's example and the code's package structure. Every member 
 <tr><td>[Member 2 name, ID]</td><td>Backend / APIs</td><td>controllers, <code>auth</code> (JWT, <code>SecurityConfig</code>), <code>realtime</code> (SSE), <code>telegram</code>, <code>notification</code>, OpenAPI</td><td>Workflow 2, Telegram</td></tr>
 <tr><td>[Member 3 name, ID]</td><td>Domain model / OOP</td><td><code>user</code>, <code>incident</code> (aggregate, State pattern, <code>IncidentPolicy</code>), <code>priority</code>, <code>assignment</code>, <code>events</code>, <code>common</code> exceptions, UML</td><td>OOP walk-through</td></tr>
 <tr><td>[Member 4 name, ID]</td><td>Database / persistence</td><td>JPA mapping, repositories and specifications, <code>catalog</code> (services graph, SLA policies), <code>audit</code>, <code>seed/DemoDataSeeder</code>, Postgres profile, ER diagram</td><td>Admin config, database</td></tr>
-<tr><td>[Member 5 name, ID]</td><td>Testing / DevOps / intelligent features</td><td><code>intelligence</code>, <code>ai</code>, <code>problem</code> (correlation), <code>sla</code> (monitor, escalation), <code>demo</code>, JUnit tests, Docker, CI</td><td>Workflow 3, tests and CI</td></tr>
+<tr><td>[Member 5 name, ID]</td><td>Testing / DevOps / intelligent features</td><td><code>intelligence</code>, <code>ai</code>, <code>problem</code> (correlation), <code>sla</code> (monitor, escalation), JUnit tests, Docker, CI</td><td>Workflow 3, tests and CI</td></tr>
 </tbody></table>
 </section>
 
@@ -1208,7 +1207,7 @@ that matches the brief's example and the code's package structure. Every member 
 <li><b>Email is simulated</b> (outbox table). No SMS. No Web Push.</li>
 <li><b>SLA clock is 24x7</b>; there are no business hours, holidays or "paused while awaiting info".</li>
 <li><b>Escalation recipients</b> are the first matching lead/admin/manager; there is no on-call rota.</li>
-<li><b>Keyword classifier mistakes.</b> Because "OTP" folds into the login synonym group, a payment report mentioning an OTP can be classified as Authentication when no AI key is configured (seen in the payment-down scenario). AI classification avoids this, and staff can see the classification reason.</li>
+<li><b>Keyword classifier mistakes.</b> Because "OTP" folds into the login synonym group, a payment report mentioning an OTP can be classified as Authentication when no AI key is configured. AI classification avoids this, and staff can see the classification reason.</li>
 <li><b>Correlation step 1 has no time limit.</b> A new incident attaches to any open problem that explains it, however old; stale problems must be resolved by a lead.</li>
 <li><b>Analytics in memory</b> (<code>ReportService</code> loads all incidents); fine for campus scale only.</li>
 <li><b>Schema management</b> uses Hibernate <code>ddl-auto=update</code>, not versioned migrations.</li>
@@ -1241,8 +1240,7 @@ cd frontend
 npm install
 npm run dev</pre>
 <p>Or start both with one command: double-click <code>run.cmd</code> (Windows) or run <code>./run.sh</code> (macOS/Linux). The script checks Java 21+ and Node 20+, installs the frontend packages on first run, starts the backend, waits for it to be healthy, then starts the frontend and opens the browser; Ctrl+C stops both.</p>
-<p>On first start the seeder builds the demo campus (Section 8.3). To start again from scratch, use <b>Reset demo data</b> on the admin Demo page (or stop the backend and delete
-<code>backend/data/</code>). API documentation: <code>http://localhost:8080/swagger-ui.html</code>. Health:
+<p>On first start the seeder builds the demo campus (Section 8.3). API documentation: <code>http://localhost:8080/swagger-ui.html</code>. Health:
 <code>/actuator/health</code>.</p>
 <h2>15.2 Docker</h2>
 <pre>docker compose up --build
@@ -1257,7 +1255,7 @@ npm run dev</pre>
 <tr><td><code>CAMPUSOPS_AI_MODEL</code></td><td>Claude model id (default <code>claude-opus-5-5</code>).</td></tr>
 <tr><td><code>TELEGRAM_BOT_TOKEN</code></td><td>Turns on the Telegram bot and channel.</td></tr>
 <tr><td><code>JWT_SECRET</code></td><td>Token signing key, at least 32 characters (commented out in <code>.env.example</code>; a development default is used locally). Set it for any shared deployment.</td></tr>
-<tr><td><code>ALLOWED_DOMAIN</code>, <code>CORS_ORIGINS</code>, <code>DEMO_ENABLED</code>, <code>SEED_ENABLED</code>, <code>PORT</code>, <code>DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD</code></td><td>Campus email domain for registration, allowed browser origins, demo controls, seeding, port and PostgreSQL connection (with <code>SPRING_PROFILES_ACTIVE=postgres</code>).</td></tr>
+<tr><td><code>ALLOWED_DOMAIN</code>, <code>CORS_ORIGINS</code>, <code>SEED_ENABLED</code>, <code>PORT</code>, <code>DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD</code></td><td>Campus email domain for registration, allowed browser origins, seeding, port and PostgreSQL connection (with <code>SPRING_PROFILES_ACTIVE=postgres</code>).</td></tr>
 </tbody></table>
 <h2>15.4 Demo accounts (password <code>Campus@123</code>, domain <code>@hyderabad.bits-pilani.ac.in</code>)</h2>
 <table class="small">
@@ -1269,17 +1267,7 @@ npm run dev</pre>
 <tr><td>System administrator</td><td>kiran</td></tr>
 <tr><td>IT manager</td><td>anil</td></tr>
 </tbody></table>
-<h2>15.5 Demo controls (admin only, <code>/admin/demo</code>)</h2>
-<ul>
-<li><b>Time warp</b> <code>POST /api/admin/demo/time-warp?minutes=N</code> (1-1440): moves the system clock forward and runs an SLA sweep immediately, so warnings, breaches and escalations appear in seconds. The panel offers +5, +15 and +60 minute buttons; pressing +5 repeatedly shows an unacknowledged P1 climb one level at a time; after a larger warp it still climbs one level per sweep, so every level is notified.</li>
-<li><b>Scenario "core-switch-b"</b>: four HIGH/HIGH Wi-Fi reports from Gautam, Krishna, Vyas and Meera Bhavan (120 users each) &rarr; correlated into a Core Switch B problem.</li>
-<li><b>Scenario "fest-load"</b>: four HIGH/HIGH reports from the Academic Blocks LAN (two), Library Wi-Fi and the D+F lab network (250 users each) &rarr; correlated into a Core Switch A problem.</li>
-<li><b>Scenario "payment-down"</b>: the brief's three payment reports on the Fee Payment Portal (HIGH/CRITICAL, 300 users) &rarr; P1, duplicates flagged.</li>
-<li><b>Sweep now</b> <code>POST /api/admin/demo/sweep</code>.</li>
-<li><b>Reset</b> <code>POST /api/admin/demo/reset</code>: empties every table (identities restart, so logins and tokens keep working), clears in-memory state through the <code>DemoResettable</code> interface (clock offset, number counters, round-robin cursor, SLA-risk cache), reseeds and tells open browsers to refresh. Takes about 10 seconds.</li>
-<li><b>Presenter script</b>: a checklist on the Demo page that follows the video script step by step, with the scenario, time-warp and reset buttons inline and one-click copy of each demo login.</li>
-</ul>
-<h2>15.6 Tests</h2>
+<h2>15.5 Tests</h2>
 <pre>cd backend
 ./mvnw test        <span class="cm"># 47 tests (TC01-TC46 + context load); ./mvnw verify also writes the coverage report, in-memory H2</span></pre>
 </section>

@@ -52,12 +52,6 @@ export function LiveProvider({ children }: { children: ReactNode }) {
     es.onopen = () => setConnected(true)
     es.onerror = () => setConnected(false)
     es.addEventListener("incident", refresh)
-    es.addEventListener("reset", () => {
-      syncServerClock()
-      seen.current.clear()
-      qc.invalidateQueries()
-      toast({ title: "Demo data was reset", body: "Everything is back to the freshly seeded campus.", tone: "info" })
-    })
     const clockTimer = setInterval(syncServerClock, 60000)
     es.addEventListener("notification", (e) => {
       const n = JSON.parse((e as MessageEvent).data)

@@ -28,7 +28,6 @@ const SettingsAdmin = lazy(() => import("./pages/admin/Settings"))
 const AuditAdmin = lazy(() => import("./pages/admin/Audit"))
 const OutboxAdmin = lazy(() => import("./pages/admin/Outbox"))
 const ViolationsAdmin = lazy(() => import("./pages/admin/Violations"))
-const DemoAdmin = lazy(() => import("./pages/admin/Demo"))
 
 function Protected() {
   const { user, token, loading } = useAuth()
@@ -95,7 +94,6 @@ export default function App() {
           <Route path="map" element={<Gate allow={staff}><MapPage /></Gate>} />
           <Route path="problems" element={<Gate allow={staff}><ProblemsPage /></Gate>} />
           <Route path="problems/:id" element={<Gate allow={staff}><ProblemPage /></Gate>} />
-          <Route path="admin/demo" element={<Gate allow={admin}><DemoAdmin /></Gate>} />
           <Route path="admin/users" element={<Gate allow={admin}><UsersAdmin /></Gate>} />
           <Route path="admin/services" element={<Gate allow={admin}><ServicesAdmin /></Gate>} />
           <Route path="admin/categories" element={<Gate allow={admin}><CategoriesAdmin /></Gate>} />
@@ -105,7 +103,7 @@ export default function App() {
           <Route path="admin/audit" element={<Gate allow={oversight}><AuditAdmin /></Gate>} />
           <Route path="admin/outbox" element={<Gate allow={admin}><OutboxAdmin /></Gate>} />
           <Route path="admin/violations" element={<Gate allow={oversight}><ViolationsAdmin /></Gate>} />
-          <Route path="admin" element={<Navigate to="/admin/demo" replace />} />
+          <Route path="admin" element={<Navigate to="/admin/settings" replace />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

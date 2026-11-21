@@ -3,7 +3,6 @@ package in.bits.campusops.settings;
 import in.bits.campusops.ai.ClaudeCategoryClassifier;
 import in.bits.campusops.ai.GeminiCategoryClassifier;
 import in.bits.campusops.assignment.AssignmentService;
-import in.bits.campusops.common.TimeProvider;
 import in.bits.campusops.priority.PriorityService;
 import in.bits.campusops.realtime.SseHub;
 import in.bits.campusops.sla.EscalationService;
@@ -34,11 +33,10 @@ public class AdminController {
     private final GeminiCategoryClassifier gemini;
     private final TelegramAdapter telegram;
     private final SseHub hub;
-    private final TimeProvider time;
 
     public AdminController(SettingsService settings, AssignmentService assignment, PriorityService priority,
                            SlaMonitor.SlaViolationRepository violations, ClaudeCategoryClassifier ai,
-                           GeminiCategoryClassifier gemini, TelegramAdapter telegram, SseHub hub, TimeProvider time) {
+                           GeminiCategoryClassifier gemini, TelegramAdapter telegram, SseHub hub) {
         this.settings = settings;
         this.assignment = assignment;
         this.priority = priority;
@@ -47,7 +45,6 @@ public class AdminController {
         this.gemini = gemini;
         this.telegram = telegram;
         this.hub = hub;
-        this.time = time;
     }
 
     public record SettingsRequest(@NotBlank String assignmentStrategy, @NotBlank String priorityStrategy,
@@ -69,7 +66,6 @@ public class AdminController {
         out.put("integrations", Map.of("claude", ai.isEnabled(), "gemini", gemini.isEnabled(),
                 "geminiModel", gemini.model(), "telegram", telegram.isEnabled(),
                 "liveConnections", hub.connections()));
-        out.put("clockOffsetMinutes", time.offset().toMinutes());
         return out;
     }
 

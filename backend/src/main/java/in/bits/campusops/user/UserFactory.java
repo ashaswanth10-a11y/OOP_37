@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  * build for a role, hashes the password and hands out the human-readable code (E101, T201...).
  */
 @Component
-public class UserFactory implements in.bits.campusops.common.DemoResettable {
+public class UserFactory {
 
     private final PasswordEncoder passwordEncoder;
     private final TimeProvider time;
@@ -51,11 +51,6 @@ public class UserFactory implements in.bits.campusops.common.DemoResettable {
             case SYSTEM_ADMIN -> new Administrator(code, spec.fullName(), spec.email(), hash, now);
             case IT_MANAGER -> new ItManager(code, spec.fullName(), spec.email(), hash, now);
         };
-    }
-
-    @Override
-    public void resetForDemo() {
-        sequence.set(-1);
     }
 
     private String nextCode(Role role) {

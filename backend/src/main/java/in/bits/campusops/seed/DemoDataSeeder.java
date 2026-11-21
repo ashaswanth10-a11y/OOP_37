@@ -43,7 +43,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Order(1)
-public class DemoDataSeeder implements ApplicationRunner, in.bits.campusops.common.DemoResettable {
+public class DemoDataSeeder implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DemoDataSeeder.class);
     public static final String DEMO_PASSWORD = "Campus@123";
@@ -91,15 +91,8 @@ public class DemoDataSeeder implements ApplicationRunner, in.bits.campusops.comm
         seed();
     }
 
-    @Override
-    public void resetForDemo() {
-        cat.clear();
-        svc.clear();
-        people.clear();
-    }
-
-    /** Builds the whole demo campus into an empty database (also used by the demo reset). */
-    public void seed() {
+    /** Builds the whole demo campus into an empty database. */
+    private void seed() {
         log.info("Seeding the CampusOps demo campus...");
         settings.get();
         seedCategories();

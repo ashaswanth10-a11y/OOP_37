@@ -1,21 +1,16 @@
 package in.bits.campusops.common;
 
 import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.function.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-/**
- * Single source of "now" for the whole system. Wrapping the clock lets tests pin
- * time and lets the demo fast-forward SLA clocks without waiting real minutes.
- */
+/** Supplies server time and supports timestamped seed data and tests. */
 @Component
-public class TimeProvider implements DemoResettable {
+public class TimeProvider {
 
     private final Clock clock;
-    private volatile Duration offset = Duration.ZERO;
     private final ThreadLocal<Instant> pinned = new ThreadLocal<>();
 
     @Autowired
@@ -29,7 +24,7 @@ public class TimeProvider implements DemoResettable {
 
     public Instant now() {
         Instant p = pinned.get();
-        return p != null ? p : clock.instant().plus(offset);
+        return p != null ? p : clock.instant();
     }
 
     /** Runs {@code action} with "now" pinned to {@code when} on this thread (used to seed history). */
@@ -40,22 +35,5 @@ public class TimeProvider implements DemoResettable {
         } finally {
             pinned.remove();
         }
-    }
-
-    public void advance(Duration by) {
-        if (by.isNegative()) {
-            throw new Exceptions.InvalidInputException("Time can only move forward");
-        }
-        offset = offset.plus(by);
-    }
-
-    public Duration offset() {
-        return offset;
-    }
-
-    /** Back to real time. */
-    @Override
-    public void resetForDemo() {
-        offset = Duration.ZERO;
     }
 }

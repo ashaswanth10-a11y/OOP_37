@@ -49,7 +49,6 @@ rectangle "CampusOps" {
     usecase "Manage services, assets,\ndependencies, categories" as UC_CATALOG
     usecase "Configure SLA policies" as UC_SLA
     usecase "Configure strategies\n& thresholds" as UC_CONFIG
-    usecase "Demo controls:\ntime warp, scenarios" as UC_DEMO
   }
   package "Automatic (system)" {
     usecase "Classify, prioritise,\nstart SLA, auto-assign" as UC_TRIAGE
@@ -89,7 +88,6 @@ ADMIN --> UC_USERS
 ADMIN --> UC_CATALOG
 ADMIN --> UC_SLA
 ADMIN --> UC_CONFIG
-ADMIN --> UC_DEMO
 ADMIN --> UC_DASH
 ADMIN --> UC_ESC
 MGR --> UC_ESC

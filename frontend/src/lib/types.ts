@@ -371,7 +371,6 @@ export interface AdminSettings {
     telegram: boolean
     liveConnections: number
   }
-  clockOffsetMinutes: number
 }
 
 export interface Notification {
@@ -403,11 +402,4 @@ export interface SlaViolation {
   assigneeName: string | null
   dueAt: string
   detectedAt: string
-}
-
-export interface SweepResult {
-  checked: number
-  warnings: number
-  breaches: number
-  escalations: number
 }

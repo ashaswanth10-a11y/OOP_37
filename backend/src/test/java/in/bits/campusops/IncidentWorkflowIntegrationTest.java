@@ -83,8 +83,7 @@ class IncidentWorkflowIntegrationTest extends ApiSupport {
     @DisplayName("TC25 Workflow 3: Wi-Fi reports from several hostels are correlated to Core Switch B")
     void rootCauseCorrelation() throws Exception {
         String admin = bearer("kiran");
-        mvc.perform(post("/api/admin/demo/scenario/core-switch-b").header("Authorization", admin))
-                .andExpect(status().isOk());
+        reportNetworkOutages("WIFI-GAUTAM", "WIFI-KRISHNA", "WIFI-VYAS", "WIFI-MEERA");
         MvcResult problems = mvc.perform(get("/api/problems").header("Authorization", admin))
                 .andExpect(status().isOk()).andReturn();
         JsonNode coreB = null;
@@ -162,7 +161,7 @@ class IncidentWorkflowIntegrationTest extends ApiSupport {
     @DisplayName("TC39 Fest-load scenario: academic-block network reports point at Core Switch A")
     void festLoad() throws Exception {
         String admin = bearer("kiran");
-        mvc.perform(post("/api/admin/demo/scenario/fest-load").header("Authorization", admin)).andExpect(status().isOk());
+        reportNetworkOutages("LAN-ACAD", "WIFI-LIB", "LAB-NET");
         boolean found = false;
         for (JsonNode p : json(mvc.perform(get("/api/problems").header("Authorization", admin)).andReturn())) {
             found |= p.get("rootService").asString().startsWith("Core Switch A");

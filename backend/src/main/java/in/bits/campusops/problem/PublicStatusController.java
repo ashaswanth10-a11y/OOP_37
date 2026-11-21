@@ -21,10 +21,10 @@ public class PublicStatusController {
         this.time = time;
     }
 
-    /** The server's clock (including any demo time warp), so every screen's SLA timers agree. */
+    /** The server's clock, so every screen's SLA timers agree. */
     @GetMapping("/api/public/time")
     public java.util.Map<String, Object> time() {
-        return java.util.Map.of("now", time.now(), "offsetMinutes", time.offset().toMinutes());
+        return java.util.Map.of("now", time.now());
     }
 
     public record ServiceStatus(Long id, String name, String type, String location, String health) {

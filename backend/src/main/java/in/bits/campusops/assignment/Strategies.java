@@ -64,13 +64,8 @@ public final class Strategies {
 
     /** Takes turns among skilled technicians (or everyone if nobody is skilled). */
     @Component
-    public static class RoundRobin implements AssignmentStrategy, in.bits.campusops.common.DemoResettable {
+    public static class RoundRobin implements AssignmentStrategy {
         private final AtomicLong lastAssignedId = new AtomicLong(0);
-
-        @Override
-        public void resetForDemo() {
-            lastAssignedId.set(0);
-        }
 
         @Override
         public String key() {

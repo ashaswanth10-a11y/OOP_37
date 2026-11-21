@@ -1,18 +1,18 @@
 # CampusOps demo video script
 
 **File name required by the brief:** `[GroupNo]_OOP_S1_2025-2026_Project` (for example `7_OOP_S1_2025-2026_Project.mp4`; the brief writes the year as 2025-2026, keep it exactly).
-**Target length:** 18 minutes (hard range 17-19). **Deadline:** upload with the report on or before 22 Nov 2026.
+**Target length:** 18 minutes (the brief allows 15–20). **Deadline:** upload with the report on or before 22 Nov 2026.
 **Speakers:** Member 1 ... Member 5 (replace with names). Every member introduces themselves on camera or by voice and explains at least one module, as the brief requires.
 
 ## Before recording (10 minutes, off camera)
 
-1. Start everything with `run.cmd` (Windows) or `./run.sh` (macOS/Linux). Log in as **kiran**, open **Demo control** and click **Reset demo data**, so incident numbers match this script. The **Presenter script** panel on that page lists every step below with its buttons; tick steps off as you record. Reset again before each new take.
+1. Start everything with `run.cmd` (Windows) or `./run.sh` (macOS/Linux). Keep the ticket IDs visible as you record.
 2. Optional keys in `.env`: `GEMINI_API_KEY` (free, shows "AI" classification), `TELEGRAM_BOT_TOKEN` (for the Telegram segment). Without keys the keyword classifier and the other features still work.
 3. Open four browser profiles (or one normal + three private windows), all at `http://localhost:5173`, and log in (password `Campus@123`, domain `@hyderabad.bits-pilani.ac.in`):
    - A: **aarav** (student, Gautam Bhavan)
    - B: **ravi** (technician, Network Ops) - keep a second tab for **arjun** (Apps & Data)
    - C: **priya** (team lead, Network Ops)
-   - D: **kiran** (system admin) - open `/admin/demo`
+   - D: **kiran** (system admin) - open the Overview dashboard
 4. Keep a phone with Telegram open if the bot is configured; link it beforehand from aarav's Profile page ("Link Telegram", send `/start CODE` to the bot).
 5. Print or open the QR sticker sheet (`/admin/assets/print`) and keep the phone camera ready.
 6. Screen at 1080p, browser zoom 110 %, notifications muted. Record each segment separately and join them.
@@ -97,8 +97,8 @@ Note on numbers: the seeded campus has INC-1001 to INC-1048. New incidents in th
 
 ## Segment 3 - Workflow 3: many incidents, duplicates and related incidents, correlation and escalation (7:30-11:00)
 
-**Window D (kiran) on `/admin/demo`:**
-1. Click **Payment portal down**. Three reports from different students hit the Fee Payment Portal: "Payment application unavailable", "Payment transaction failing", "Unable to make payment" (the brief's own example).
+**Window A (employee), then Window D (admin):**
+1. As employees, submit three reports for the Fee Payment Portal with similar titles describing a failed fee payment. Choose high impact and critical urgency. Confirm a separate report when prompted so the admin can compare related tickets.
 2. Open the second and third incidents: show "Possible duplicate of INC-1050" (the first payment incident on a fresh seed; read the number off the screen) with the score and reason ("78% text match, same service, reported 0 min ago").
 - **Member 5:** "Duplicate detection uses TF-IDF with synonym folding: unavailable, failing and unable all become the token 'fail', payment and transaction become 'payment'. Score is 0.6 text similarity plus 0.25 for the same service plus 0.15 for recency."
 
@@ -108,7 +108,7 @@ Note on numbers: the seeded campus has INC-1001 to INC-1048. New incidents in th
 - **Member 5:** "Instead of a fourth duplicate, the student confirms the existing one. It is the up-vote idea from SU Connect, but here the vote feeds the priority formula: more affected people can raise the priority automatically, and each person counts once."
 
 **Correlation, Window D:**
-5. Click **Core Switch B outage**. Four Wi-Fi reports arrive from Gautam, Krishna, Vyas and Meera Bhavan.
+5. Use the employee report form to submit Wi-Fi outages for the Gautam, Krishna, Vyas and Meera hostel services within the correlation window. Use the affected hostel as the service on each report.
 6. Open **Outage map**: Core Switch B is marked as the root cause, the four hostel Wi-Fi services are red. Open **Problems**: "Suspected Core Switch B (Hostels) failure" with the four incidents and the analysis text.
 - **Member 5:** "The correlation engine walks the service dependency graph. All four hostels depend on Core Switch B, the captive portal, the Sophos firewall and the uplink. Core Switch B is the most specific shared dependency, so it is the likely root cause. A fifth Wi-Fi report would be attached to the same problem straight away."
 
@@ -116,8 +116,8 @@ Note on numbers: the seeded campus has INC-1001 to INC-1048. New incidents in th
 - **Member 5:** "We stop duplicates before they are filed. The form knows everything downstream of the failed switch, so even a hostel that hasn't complained yet is told it's a known outage. The Telegram bot does the same: /report on an affected service answers with /metoo."
 
 **Escalation, Window D:**
-7. In **Time warp**, click **+5 min**. Nobody has acknowledged the P1 payment incident, so its response SLA is breached and it escalates to the Team Lead. Show the result log and the incident timeline (SLA_BREACHED, ESCALATED).
-8. Click **+5 min** again: escalated to the System Administrator (kiran's bell shows "Escalated to you"). Optionally once more: IT Manager (log in as **anil** to show it).
+7. Open the P1 payment ticket. Show its actual first-response deadline. Once that time passes without acknowledgement, show the recorded violation and escalation in its timeline.
+8. For a short recording, prepare the overdue ticket before filming and show its timestamped history.
 - **Member 5:** "Escalation follows Technician, Team Lead, System Administrator, IT Manager. An urgent incident climbs one level for every response window it stays unacknowledged, and never skips a level, so everyone in the chain is told."
 
 **Window C (priya, team lead):** open the Core Switch B problem, click **Resolve problem + all linked incidents** with *"Replaced the failed line card in Core Switch B"*. All four linked incidents move to RESOLVED at once and each reporter is notified.
@@ -163,7 +163,7 @@ Note on numbers: the seeded campus has INC-1001 to INC-1048. New incidents in th
 
 ## Optional extra - Fest-load scenario (about 45 s)
 
-- **Member 4** on `/admin/demo`: click **Fest traffic surge (Atmos)**. Four reports from the Academic Blocks LAN, Library Wi-Fi and the D+F lab network arrive; the outage map marks **Core Switch A (Academic)** as the root cause.
+- As employees, report internet failures for Academic Blocks LAN, Library Wi-Fi and the D+F lab network. As Kiran, open the outage map and inspect the shared dependency.
 - "This is modelled on the Atmos complaints: one saturated academic uplink, many different-looking reports."
 
 ## Fallbacks during recording

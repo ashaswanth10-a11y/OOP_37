@@ -55,19 +55,9 @@ public class SlaMonitor {
      * Runs through the Spring proxy (the scheduler calls the bean, not "this"), so the
      * transaction is real and the warned/breached flags are saved: each alert fires once.
      */
-    private volatile boolean paused;
-
-    /** Stops the background sweep while the demo data is being rebuilt. */
-    public void setPaused(boolean paused) {
-        this.paused = paused;
-    }
-
     @Scheduled(fixedDelayString = "${campusops.sla.monitor-interval-ms:15000}", initialDelay = 3000)
     @Transactional
     public void scheduled() {
-        if (paused) {
-            return;
-        }
         SweepResult r = sweep();
         if (r.warnings() + r.breaches() + r.escalations() > 0) {
             log.info("SLA sweep: {}", r);

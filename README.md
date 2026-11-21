@@ -15,8 +15,8 @@ a live queue; team leads and admins see dashboards, an outage map and the full a
 | ![Outage map](docs/screenshots/outage-map.png) | ![Known outage warning on the report form](docs/screenshots/known-outage.png) |
 | **Incident**: lifecycle, live SLA clocks, breach risk, priority rationale | **Overview** dashboard for team leads and managers |
 | ![Incident page](docs/screenshots/incident.png) | ![Dashboard](docs/screenshots/dashboard.png) |
-| **Demo control** with the presenter script, scenarios and time warp | **Public status page**, no login needed |
-| ![Demo control](docs/screenshots/demo-control.png) | ![Status page](docs/screenshots/status.png) |
+| **Student report form** with a known outage | **Public status page**, no login needed |
+| ![Student reporting screen](docs/screenshots/known-outage.png) | ![Status page](docs/screenshots/status.png) |
 
 <p>
 <img src="docs/screenshots/phone-qr-report.png" alt="Report from a QR sticker on a phone" width="260">
@@ -35,7 +35,7 @@ On a phone: scanning the QR sticker on a Wi-Fi access point opens the report for
 - **SLA management**: campus-default and per-service policies, warnings at 75 %, breach records, escalation Technician, Team Lead, System Administrator, IT Manager.
 - **Intelligence**: category suggestion (Anthropic Claude, then Google Gemini, then an offline keyword classifier), TF-IDF duplicate detection, "Me too" crowd confirmation that can raise priority, smart technician recommendation, SLA-risk prediction, root-cause correlation (for example Core Switch B behind four hostel Wi-Fi outages), suggested fixes from past resolutions.
 - **Notifications** over in-app (live via Server-Sent Events), simulated email outbox and Telegram.
-- **Audit trail** with a replay slider, dashboards, outage map (React Flow), search with 11 filters, QR sticker sheet, demo control panel (time warp and scenarios), PWA.
+- **Audit trail** with a replay slider, dashboards, outage map (React Flow), search with 11 filters, QR sticker sheet, PWA.
 
 ## Architecture
 
@@ -76,8 +76,6 @@ Docker (PostgreSQL + backend + nginx frontend on http://localhost:3000):
 docker compose up --build
 ```
 
-To start again from a clean demo campus, log in as the admin and click **Reset demo data** on the Demo page (or stop the backend and delete `backend/data/`).
-
 - API documentation: http://localhost:8080/swagger-ui.html
 - Health: http://localhost:8080/actuator/health
 
@@ -93,8 +91,6 @@ Password `Campus@123` for everyone, emails are `<login>@hyderabad.bits-pilani.ac
 | System administrator | kiran |
 | IT manager | anil |
 
-Demo controls (admin, `/admin/demo`): scenarios **Core Switch B outage**, **Payment portal down**, **Fest traffic surge (Atmos)**, and time warp (+5, +15, +60 minutes) to show SLA breaches and escalation on camera.
-
 ## Configuration
 
 Copy `.env.example` to `.env` in the repo root (never commit it). Everything is optional for a local demo.
@@ -107,7 +103,7 @@ Copy `.env.example` to `.env` in the repo root (never commit it). Everything is 
 | `CAMPUSOPS_AI_MODEL` | Claude model, default `claude-opus-5-5`. |
 | `TELEGRAM_BOT_TOKEN` | Token from @BotFather: enables the Telegram bot and channel. |
 | `JWT_SECRET` | Token signing key, at least 32 characters (commented out in `.env.example`; a development default is used locally). Set it for any shared deployment. |
-| `ALLOWED_DOMAIN`, `CORS_ORIGINS`, `DEMO_ENABLED`, `SEED_ENABLED`, `PORT` | Registration domain, allowed origins, demo controls, seeding, port. |
+| `ALLOWED_DOMAIN`, `CORS_ORIGINS`, `SEED_ENABLED`, `PORT` | Registration domain, allowed origins, seeding, port. |
 | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` | PostgreSQL connection, used with `SPRING_PROFILES_ACTIVE=postgres`. |
 
 Without any AI key the keyword classifier is used; without a Telegram token the bot is simply off.
@@ -120,10 +116,10 @@ cd backend && ./mvnw test
 
 47 JUnit 5 tests (TC01-TC46 plus a context-load test): unit tests for the state machine, SLA tracker, priority and assignment
 strategies, text intelligence and AI adapter fallback; integration tests through the REST API for the three demo workflows,
-security, SLA escalation (including an idempotent scheduled sweep), "Me too", the fest-load correlation, demo reset and known-outage deflection (web and Telegram). CI (`.github/workflows/ci.yml`) runs `./mvnw verify` and the
+security, SLA escalation (including an idempotent scheduled sweep), "Me too", the fest-load correlation, incident persistence and known-outage deflection (web and Telegram). CI (`.github/workflows/ci.yml`) runs `./mvnw verify` and the
 frontend build on every push.
 
-Coverage (JaCoCo, `./mvnw verify` writes `backend/target/site/jacoco/index.html`, also uploaded by CI): **78.9 % of lines** overall and **87.7 %** in the core logic (incident, priority, assignment, SLA, intelligence, problem, events, audit).
+Coverage (JaCoCo, `./mvnw verify` writes `backend/target/site/jacoco/index.html`, also uploaded by CI): **78.5 % of lines** overall and **87.5 %** in the core logic (incident, priority, assignment, SLA, intelligence, problem, events, audit).
 
 ## Project structure
 

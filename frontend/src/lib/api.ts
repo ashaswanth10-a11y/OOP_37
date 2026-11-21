@@ -23,7 +23,6 @@ import type {
   Settings,
   SlaPolicy,
   SlaViolation,
-  SweepResult,
   User,
 } from "./types"
 
@@ -298,11 +297,6 @@ export const dashboard = () => get<Dashboard>("/reports/dashboard")
 export const adminSettings = () => get<AdminSettings>("/admin/settings")
 export const updateSettings = (s: Settings) => put<Settings>("/admin/settings", s)
 export const slaViolations = () => get<SlaViolation[]>("/admin/sla-violations")
-export const timeWarp = (minutes: number) =>
-  post<{ offsetMinutes: number; sweep: SweepResult }>("/admin/demo/time-warp?minutes=" + minutes)
-export const runScenario = (name: string) => post<{ scenario: string; created: string[] }>("/admin/demo/scenario/" + name)
-export const runSweep = () => post<SweepResult>("/admin/demo/sweep")
-export const resetDemo = () => post<{ tables: number; millis: number }>("/admin/demo/reset")
 export const auditLog = (page: number, size: number) => get<Page<AuditEntry>>("/audit?page=" + page + "&size=" + size)
 
 // notifications

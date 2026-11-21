@@ -48,6 +48,18 @@ public abstract class ApiSupport {
         throw new IllegalStateException("No service " + code);
     }
 
+    protected void reportNetworkOutages(String... serviceCodes) throws Exception {
+        String[] reporters = {"aarav", "diya", "kabir", "ananya"};
+        for (int i = 0; i < serviceCodes.length; i++) {
+            String service = serviceCodes[i];
+            String body = report("Network unavailable at " + service, "Students cannot connect to the network at " + service,
+                    serviceId(service), "HIGH", "HIGH", 120, true);
+            mvc.perform(post("/api/incidents").header("Authorization", bearer(reporters[i]))
+                            .contentType(MediaType.APPLICATION_JSON).content(body))
+                    .andExpect(status().isOk());
+        }
+    }
+
     protected static String report(String title, String description, long serviceId, String impact, String urgency,
                                    int users, boolean confirmedNew) {
         return """

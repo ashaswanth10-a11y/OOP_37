@@ -20,15 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional(readOnly = true)
-public class SlaRiskAnalyzer implements in.bits.campusops.common.DemoResettable {
+public class SlaRiskAnalyzer {
 
     public enum Level { LOW, MEDIUM, HIGH }
-
-    @Override
-    public void resetForDemo() {
-        typicalCache = Map.of();
-        cachedAt = Instant.EPOCH;
-    }
 
     public record Risk(Level level, double score, String reason) {
     }
