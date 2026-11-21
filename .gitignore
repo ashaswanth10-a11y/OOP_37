@@ -15,3 +15,8 @@ frontend/dist/
 *.iml
 .DS_Store
 Thumbs.db
+
+# local working notes and tooling, not part of the project
+HANDOFF.md
+.claude/
+handover/
