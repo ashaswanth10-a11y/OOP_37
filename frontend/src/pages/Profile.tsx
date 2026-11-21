@@ -126,7 +126,7 @@ export default function ProfilePage() {
           <div className="text-sm text-mute">You can also report problems by chatting to the bot.</div>
           {code ? (
             <div className="mt-3 rounded-md bg-sunk p-4">
-              <div className="text-sm">Send this message to the CampusOps bot on Telegram:</div>
+              <div className="text-sm">Send this message in a private chat with the CampusOps bot on Telegram.</div>
               <div className="mt-2 flex items-center gap-3">
                 <code className="rounded-md bg-card px-3 py-2 font-mono text-[18px] font-semibold tracking-wider">/start {code}</code>
                 <button

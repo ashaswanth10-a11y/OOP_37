@@ -95,9 +95,26 @@ Password `Campus@123` for everyone, emails are `<login>@hyderabad.bits-pilani.ac
 
 Copy `.env.example` to `.env` in the repo root (never commit it). Everything is optional for a local demo.
 
+### Enable Gemini and Telegram locally
+
+1. Create a Gemini API key in [Google AI Studio](https://aistudio.google.com/apikey).
+2. Message [@BotFather](https://t.me/BotFather) on Telegram, run `/newbot`, and keep the bot username and token it gives you.
+3. Put the values in `.env` beside `run.sh`. Create the file from `.env.example` if it is missing. Use plain values without quotes and keep the file out of Git.
+
+   ```dotenv
+   GEMINI_API_KEY=your_gemini_key
+   TELEGRAM_BOT_TOKEN=your_bot_token
+   ```
+
+4. Stop CampusOps with Ctrl+C, then run `./run.sh` again. On Windows, reopen `run.cmd`. With Docker, rebuild and restart with `docker compose up --build`. Run one CampusOps backend per Telegram bot token so the polling instances don't compete.
+5. In CampusOps, sign in as Kiran, open **Settings**, and check that both integrations show **Configured** and **AI triage** is enabled. Submit a report with automatic category selection and check for **gemini** beside the category on the incident detail page. The report preview uses the local keyword classifier.
+6. Open **Profile → Link Telegram**, get a link code, and send the displayed `/start CODE` to your bot in a private chat. Send `/services` to see service codes, then try `/report WIFI-GAUTAM No internet since this morning`.
+
+### Configuration reference
+
 | Variable | Purpose |
 |----------|---------|
-| `GEMINI_API_KEY` | Google Gemini API key (free tier, Google AI Studio): enables AI category suggestion. |
+| `GEMINI_API_KEY` | Google AI Studio key for Gemini incident classification. |
 | `GEMINI_MODEL` | Gemini model, default `gemini-3.5-flash-lite` (commented out in `.env.example`). |
 | `ANTHROPIC_API_KEY` | Claude API key: tried before Gemini when set. |
 | `CAMPUSOPS_AI_MODEL` | Claude model, default `claude-opus-5-5`. |
@@ -114,7 +131,7 @@ Without any AI key the keyword classifier is used; without a Telegram token the 
 cd backend && ./mvnw test
 ```
 
-47 JUnit 5 tests (TC01-TC46 plus a context-load test): unit tests for the state machine, SLA tracker, priority and assignment
+The JUnit 5 suite includes unit tests for the state machine, SLA tracker, priority and assignment
 strategies, text intelligence and AI adapter fallback; integration tests through the REST API for the three demo workflows,
 security, SLA escalation (including an idempotent scheduled sweep), "Me too", the fest-load correlation, incident persistence and known-outage deflection (web and Telegram). CI (`.github/workflows/ci.yml`) runs `./mvnw verify` and the
 frontend build on every push.

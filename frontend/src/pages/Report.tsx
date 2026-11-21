@@ -121,7 +121,7 @@ function Suggestions({ preview, loading, typed, staff }: { preview: Preview | un
         )}
         {preview && (
           <div className="mt-2 flex items-center gap-1 font-mono text-[10.5px] text-mute">
-            <Sparkles size={11} /> {preview.aiAvailable ? "AI triage on" : "keyword classifier (offline)"}
+            <Sparkles size={11} /> {preview.aiAvailable ? "AI triage runs on submission" : "Keyword classifier"}
           </div>
         )}
       </div>

@@ -126,7 +126,7 @@ export default function SettingsAdmin() {
               </span>
               <span className="flex shrink-0 items-center gap-1.5 whitespace-nowrap text-[12.5px]" style={{ color: i.on ? "var(--ok)" : "var(--mute)" }}>
                 <span className={"h-2 w-2 shrink-0 rounded-full " + (i.on ? "bg-ok" : "bg-p4")} />
-                {i.on ? "Connected" : "Not configured (add key to .env)"}
+                {i.on ? "Configured" : "Not configured (add key to .env)"}
               </span>
             </div>
           ))}

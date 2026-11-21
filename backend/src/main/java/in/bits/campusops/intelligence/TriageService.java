@@ -50,7 +50,7 @@ public class TriageService {
     }
 
     public boolean aiAvailable() {
-        return claude.isEnabled() || gemini.isEnabled();
+        return (claude.isEnabled() || gemini.isEnabled()) && settings.get().isAiTriage();
     }
 
     private List<CategoryClassifier> chain() {

@@ -9,11 +9,13 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
@@ -32,14 +34,20 @@ public class GeminiCategoryClassifier implements CategoryClassifier {
     private final String apiKey;
     private final String model;
     private final ObjectMapper mapper;
-    private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
+    private final HttpClient http;
 
+    @Autowired
     public GeminiCategoryClassifier(@Value("${campusops.gemini.api-key:}") String apiKey,
                                     @Value("${campusops.gemini.model:gemini-3.5-flash-lite}") String model,
                                     ObjectMapper mapper) {
+        this(apiKey, model, mapper, HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build());
+    }
+
+    GeminiCategoryClassifier(String apiKey, String model, ObjectMapper mapper, HttpClient http) {
         this.apiKey = apiKey == null ? "" : apiKey.trim();
         this.model = model;
         this.mapper = mapper;
+        this.http = http;
     }
 
     public boolean isEnabled() {
@@ -96,15 +104,21 @@ public class GeminiCategoryClassifier implements CategoryClassifier {
                 log.warn("Gemini returned HTTP {}; using keyword classifier", res.statusCode());
                 return Optional.empty();
             }
-            String reply = mapper.readTree(res.body()).path("candidates").path(0).path("content").path("parts")
-                    .path(0).path("text").asString("");
+            JsonNode parts = mapper.readTree(res.body()).path("candidates").path(0).path("content").path("parts");
+            StringBuilder answer = new StringBuilder();
+            for (JsonNode part : parts) {
+                if (!part.path("thought").asBoolean(false)) {
+                    answer.append(part.path("text").asString(""));
+                }
+            }
+            String reply = answer.toString();
             int start = reply.indexOf('{');
             int end = reply.lastIndexOf('}');
             if (start < 0 || end <= start) {
                 return Optional.empty();
             }
             JsonNode json = mapper.readTree(reply.substring(start, end + 1));
-            String code = json.path("code").asString("").trim().toUpperCase();
+            String code = json.path("code").asString("").trim().toUpperCase(Locale.ROOT);
             double confidence = Math.max(0, Math.min(1, json.path("confidence").asDouble(0.7)));
             String reason = json.path("reason").asString("");
             return categories.stream().filter(c -> c.getCode().equals(code)).findFirst()
@@ -113,7 +127,7 @@ public class GeminiCategoryClassifier implements CategoryClassifier {
             Thread.currentThread().interrupt();
             return Optional.empty();
         } catch (Exception ex) {
-            log.warn("Gemini classification failed, using keyword classifier: {}", ex.getMessage());
+            log.warn("Gemini classification failed, using keyword classifier ({})", ex.getClass().getSimpleName());
             return Optional.empty();
         }
     }

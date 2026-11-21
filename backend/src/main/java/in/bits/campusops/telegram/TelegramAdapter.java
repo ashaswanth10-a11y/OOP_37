@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
@@ -30,11 +31,17 @@ public class TelegramAdapter {
 
     private final String token;
     private final ObjectMapper mapper;
-    private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
+    private final HttpClient http;
 
+    @Autowired
     public TelegramAdapter(@Value("${campusops.telegram.bot-token:}") String token, ObjectMapper mapper) {
+        this(token, mapper, HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build());
+    }
+
+    TelegramAdapter(String token, ObjectMapper mapper, HttpClient http) {
         this.token = token == null ? "" : token.trim();
         this.mapper = mapper;
+        this.http = http;
     }
 
     public boolean isEnabled() {
@@ -43,7 +50,7 @@ public class TelegramAdapter {
 
     /** Fire-and-forget so a slow Telegram API never holds up a web request. */
     public void sendMessage(String chatId, String text) {
-        if (!isEnabled() || chatId == null) {
+        if (!isEnabled() || chatId == null || chatId.startsWith("-")) {
             return;
         }
         String form = "chat_id=" + enc(chatId) + "&text=" + enc(text);
@@ -55,9 +62,9 @@ public class TelegramAdapter {
         http.sendAsync(req, HttpResponse.BodyHandlers.ofString())
                 .whenComplete((res, err) -> {
                     if (err != null) {
-                        log.warn("Telegram send failed: {}", err.getMessage());
+                        log.warn("Telegram send failed ({})", err.getClass().getSimpleName());
                     } else if (res.statusCode() != 200) {
-                        log.warn("Telegram send returned {}: {}", res.statusCode(), res.body());
+                        log.warn("Telegram send returned HTTP {}", res.statusCode());
                     }
                 });
     }
@@ -69,7 +76,8 @@ public class TelegramAdapter {
             return updates;
         }
         try {
-            HttpRequest req = HttpRequest.newBuilder(URI.create(base() + "/getUpdates?timeout=0&offset=" + offset))
+            HttpRequest req = HttpRequest.newBuilder(URI.create(base() + "/getUpdates?timeout=0&offset=" + offset
+                            + "&allowed_updates=" + enc("[\"message\"]")))
                     .timeout(Duration.ofSeconds(10)).GET().build();
             HttpResponse<String> res = http.send(req, HttpResponse.BodyHandlers.ofString());
             if (res.statusCode() != 200) {
@@ -79,7 +87,8 @@ public class TelegramAdapter {
             JsonNode root = mapper.readTree(res.body());
             for (JsonNode u : root.path("result")) {
                 JsonNode msg = u.path("message");
-                if (msg.isMissingNode() || !msg.has("text")) {
+                // A group chat must never be linked to a CampusOps user or receive ticket updates.
+                if (!"private".equals(msg.path("chat").path("type").asString("")) || !msg.has("text")) {
                     updates.add(new Update(u.path("update_id").asLong(), null, null, null));
                     continue;
                 }
@@ -91,7 +100,7 @@ public class TelegramAdapter {
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         } catch (Exception ex) {
-            log.debug("Telegram poll failed: {}", ex.getMessage());
+            log.debug("Telegram poll failed ({})", ex.getClass().getSimpleName());
         }
         return updates;
     }
