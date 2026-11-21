@@ -1,0 +1,1273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CampusOps - Project Report</title>
+<style>
+  @page {
+    size: A4;
+    margin: 18mm 17mm 20mm 17mm;
+    @bottom-right { content: "Page " counter(page); font: 9pt "Segoe UI", Arial, sans-serif; color: #555; }
+    @bottom-left { content: "CampusOps - CS F213 OOP Project Report - [Group No.]"; font: 9pt "Segoe UI", Arial, sans-serif; color: #777; }
+  }
+  @page :first {
+    @bottom-right { content: none; }
+    @bottom-left { content: none; }
+  }
+  :root { --ink:#1b2631; --mute:#5d6d7e; --accent:#0f4c75; --line:#d5dde5; --soft:#f3f6f9; --code:#f6f8fa; }
+  html { font-family: "Segoe UI", "Calibri", Arial, sans-serif; font-size: 10.3pt; color: var(--ink); line-height: 1.45; }
+  body { margin: 0; background: #fff; }
+  h1, h2, h3, h4 { color: var(--accent); line-height: 1.2; page-break-after: avoid; break-after: avoid; }
+  h1 { font-size: 19pt; margin: 0 0 10pt; padding-bottom: 5pt; border-bottom: 2px solid var(--accent); break-before: page; }
+  h2 { font-size: 13.5pt; margin: 16pt 0 6pt; }
+  h3 { font-size: 11.3pt; margin: 12pt 0 4pt; color: #1f618d; }
+  h4 { font-size: 10.5pt; margin: 10pt 0 3pt; color: #2c3e50; }
+  p { margin: 0 0 7pt; text-align: justify; }
+  ul, ol { margin: 0 0 7pt 0; padding-left: 18pt; }
+  li { margin-bottom: 2pt; }
+  code { font-family: "Cascadia Mono", Consolas, "Courier New", monospace; font-size: 8.8pt; background: var(--code); padding: 0 2px; border-radius: 2px; }
+  pre { font-family: "Cascadia Mono", Consolas, "Courier New", monospace; font-size: 8.1pt; line-height: 1.35; background: var(--code); border: 1px solid var(--line); border-left: 3px solid var(--accent); padding: 6pt 8pt; margin: 4pt 0 9pt; white-space: pre-wrap; word-break: break-word; break-inside: avoid; }
+  pre .cm { color: #6a737d; }
+  table { border-collapse: collapse; width: 100%; margin: 4pt 0 10pt; font-size: 8.9pt; }
+  thead { display: table-header-group; }
+  tr { break-inside: avoid; }
+  th { background: #e3edf5; color: #12324a; text-align: left; font-weight: 600; }
+  th, td { border: 1px solid var(--line); padding: 3pt 5pt; vertical-align: top; }
+  tbody tr:nth-child(even) td { background: #fafcfd; }
+  table.small { font-size: 8.2pt; }
+  table.small th, table.small td { padding: 2pt 4pt; }
+  .figure { text-align: center; margin: 6pt 0 10pt; break-inside: avoid; }
+  .figure img { width: 100%; height: auto; }
+  .figure.tall img { width: auto; height: 218mm; max-width: 100%; }
+  .caption { font-size: 8.8pt; color: var(--mute); margin-top: 3pt; font-style: italic; }
+  .note { background: var(--soft); border-left: 3px solid #8aa9c1; padding: 5pt 8pt; margin: 4pt 0 9pt; font-size: 9.4pt; break-inside: avoid; }
+  .warn { background: #fff8e6; border-left: 3px solid #d4a017; padding: 5pt 8pt; margin: 4pt 0 9pt; font-size: 9.4pt; break-inside: avoid; }
+  .ok { color: #1e7e34; font-weight: 600; }
+  .partial { color: #b9770e; font-weight: 600; }
+  .no { color: #a93226; font-weight: 600; }
+  .formula { font-family: "Cambria Math", Cambria, serif; font-size: 11pt; text-align: center; margin: 6pt 0 8pt; }
+  .landscape { break-before: page; break-after: page; }
+  .landscape .figure img { display: block; margin: 0 auto; width: 100%; height: 238mm; max-height: none; object-fit: contain; }
+  .pagebreak { break-before: page; }
+  .avoid { break-inside: avoid; }
+
+  /* cover */
+  .cover { height: 255mm; display: flex; flex-direction: column; justify-content: space-between; }
+  .cover .top { border-top: 6px solid var(--accent); padding-top: 14mm; }
+  .cover .course { font-size: 11pt; color: var(--mute); letter-spacing: .5px; text-transform: uppercase; }
+  .cover h1.title { font-size: 30pt; border: 0; margin: 10mm 0 3mm; padding: 0; break-before: auto; color: #0b3954; }
+  .cover .subtitle { font-size: 15pt; color: #1f618d; margin-bottom: 12mm; }
+  .cover .tag { font-size: 11pt; color: var(--ink); max-width: 150mm; }
+  .cover table { width: 120mm; font-size: 10pt; margin-top: 8mm; }
+  .cover table td { border: 0; border-bottom: 1px solid var(--line); padding: 4pt 2pt; background: none !important; }
+  .cover .bottom { font-size: 10pt; color: var(--mute); border-top: 1px solid var(--line); padding-top: 4mm; }
+
+  /* toc */
+  .toc h1 { break-before: page; }
+  .toc ol { list-style: none; padding: 0; margin: 0; }
+  .toc li { display: flex; align-items: baseline; margin: 0 0 3pt; font-size: 10.5pt; }
+  .toc li.sub { padding-left: 14pt; font-size: 9.6pt; color: #34495e; }
+  .toc li .t { flex: 0 0 auto; }
+  .toc li .dots { flex: 1 1 auto; border-bottom: 1px dotted #9aa8b5; margin: 0 4pt; transform: translateY(-3pt); }
+  .toc li .pg { flex: 0 0 auto; min-width: 14pt; text-align: right; }
+  .toc a { color: inherit; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<!-- ======================= COVER ======================= -->
+<section class="cover">
+  <div class="top">
+    <div class="course">CS F213 / MAC F212 Object-Oriented Programming &middot; Semester I, 2026-2027</div>
+    <div class="course">BITS Pilani, Hyderabad Campus</div>
+    <h1 class="title">CampusOps</h1>
+    <div class="subtitle">Intelligent IT Service Management &amp; Incident Resolution System</div>
+    <div class="tag">Project report: problem analysis, requirements, architecture, UML, object-oriented design,
+      technology selection, intelligent features, database design, security, testing, traceability and run guide.</div>
+    <table>
+      <tr><td><b>Group</b></td><td>[Group No.]</td></tr>
+      <tr><td><b>Member 1</b></td><td>[Member 1 name, ID]</td></tr>
+      <tr><td><b>Member 2</b></td><td>[Member 2 name, ID]</td></tr>
+      <tr><td><b>Member 3</b></td><td>[Member 3 name, ID]</td></tr>
+      <tr><td><b>Member 4</b></td><td>[Member 4 name, ID]</td></tr>
+      <tr><td><b>Member 5</b></td><td>[Member 5 name, ID]</td></tr>
+      <tr><td><b>Repository</b></td><td>[repository URL]</td></tr>
+      <tr><td><b>Demo video</b></td><td>[GroupNo]_OOP_S1_2025-2026_Project</td></tr>
+    </table>
+  </div>
+  <div class="bottom">Submitted 22 November 2026 &middot; Java 21 + Spring Boot 4 backend, React + TypeScript frontend, PostgreSQL / H2</div>
+</section>
+
+<!-- ======================= TOC ======================= -->
+<section class="toc">
+  <h1>Contents</h1>
+  <ol>
+    <li><a href="#s1"><span class="t">1. Problem analysis</span></a><span class="dots"></span><span class="pg" data-for="s1">3</span></li>
+    <li><a href="#s2"><span class="t">2. Requirements specification</span></a><span class="dots"></span><span class="pg" data-for="s2">5</span></li>
+    <li class="sub"><span class="t">2.4 Business rules (priority, SLA, lifecycle, escalation, duplicates, correlation)</span><span class="dots"></span><span class="pg" data-for="s2-4">5</span></li>
+    <li><a href="#s3"><span class="t">3. System architecture</span></a><span class="dots"></span><span class="pg" data-for="s3">8</span></li>
+    <li><a href="#s4"><span class="t">4. UML diagrams</span></a><span class="dots"></span><span class="pg" data-for="s4">10</span></li>
+    <li><a href="#s5"><span class="t">5. Object-oriented design</span></a><span class="dots"></span><span class="pg" data-for="s5">18</span></li>
+    <li class="sub"><span class="t">5.2 Design patterns</span><span class="dots"></span><span class="pg" data-for="s5-2">20</span></li>
+    <li><a href="#s6"><span class="t">6. Technology stack and technology selection report</span></a><span class="dots"></span><span class="pg" data-for="s6">22</span></li>
+    <li><a href="#s7"><span class="t">7. Intelligent features</span></a><span class="dots"></span><span class="pg" data-for="s7">24</span></li>
+    <li><a href="#s8"><span class="t">8. Database design</span></a><span class="dots"></span><span class="pg" data-for="s8">26</span></li>
+    <li><a href="#s9"><span class="t">9. Security considerations</span></a><span class="dots"></span><span class="pg" data-for="s9">29</span></li>
+    <li><a href="#s10"><span class="t">10. Testing</span></a><span class="dots"></span><span class="pg" data-for="s10">30</span></li>
+    <li><a href="#s11"><span class="t">11. Innovation features</span></a><span class="dots"></span><span class="pg" data-for="s11">32</span></li>
+    <li><a href="#s12"><span class="t">12. Requirement traceability matrix</span></a><span class="dots"></span><span class="pg" data-for="s12">33</span></li>
+    <li><a href="#s13"><span class="t">13. Team and responsibilities</span></a><span class="dots"></span><span class="pg" data-for="s13">35</span></li>
+    <li><a href="#s14"><span class="t">14. Limitations and future work</span></a><span class="dots"></span><span class="pg" data-for="s14">36</span></li>
+    <li><a href="#s15"><span class="t">15. How to run</span></a><span class="dots"></span><span class="pg" data-for="s15">37</span></li>
+  </ol>
+  <p style="margin-top:14pt" class="note">Notation. Class names are written in <code>monospace</code> exactly as they appear in the
+    source tree (<code>backend/src/main/java/in/bits/campusops/...</code>). Every number, threshold and formula in this report is
+    copied from the code, not from the brief. Where something is partial or only simulated we say so.</p>
+</section>
+
+<!-- ======================= 1 ======================= -->
+<section>
+<h1 id="s1">1. Problem analysis</h1>
+
+<h2>1.1 Problem</h2>
+<p>BITS Pilani, Hyderabad Campus runs a dense set of IT services: hostel Wi-Fi in every Bhavan, the Academic Blocks LAN
+(A, B+G, C, D+F and the LTC), the lab network and lab PCs in D+F Block, the Internet login (Sophos captive portal), the ERP,
+the CMS (Moodle), the SWD portal, BITS Mail, the campus SSO, the VPN, print stations and classroom AV. Almost all of it sits
+behind one Internet uplink, the Sophos firewall and web filter, and two core switches (one for the academic side, one for the
+hostels); CCIT's office is in B Block. When one of these fails, nobody can see how many people are affected, whether ten
+complaints are one fault, which technician is free, or whether an urgent issue has been sitting unacknowledged for an hour.</p>
+<h3>What we observed on campus</h3>
+<p>Before designing anything we read a semester of IT complaints on the BPHC Shoutbox Facebook group. They are summarised here
+in aggregate only (no individual is named) because they shaped both the problem statement and the seeded demo data:</p>
+<ul>
+<li><b>Reports are scattered.</b> CCIT Nucleus asks students to report LAN and internet problems in WhatsApp groups, so the same
+fault turns up in WhatsApp chats, Shoutbox posts and word of mouth, with no number, no owner and no deadline.</li>
+<li><b>Load collapses during fests.</b> During Atmos'26 there were repeated complaints that the internet in the academic blocks was unusable.</li>
+<li><b>Policy looks like an outage.</b> YouTube and other educational video blocked by the web filter; confusion about LAN
+restrictions and access to AI tools that needed a CCIT clarification; a 10 GB per user per day data limit and LAN gaming allowed
+only on weekends, which students experience as "the internet stopped".</li>
+<li><b>Self-inflicted lock-outs.</b> Students were locked out after changing their password through an unofficial Sophos user-portal guide.</li>
+<li><b>Cross-team faults.</b> CMS mobile push notifications broke because of a configuration issue between CCIT and the Timetable Division.</li>
+<li><b>Predictable peaks.</b> The ERP slows down or times out during the add/swap and course-withdrawal windows.</li>
+<li><b>Security incidents with no channel.</b> A student-built website was deliberately taken down by traffic, with no obvious place to report it.</li>
+</ul>
+<p>The seeded history in CampusOps contains incidents modelled on these patterns ("YouTube lectures blocked on campus network",
+"Locked out after changing internet password", "Internet stops every evening", "Internet unusable in academic block during fest",
+"CMS app push notifications not arriving", "ERP timing out during add/swap"), and the demo has a "fest-load" scenario.</p>
+<p><b>Related campus system.</b> The Students' Union portal SU Connect (su.bits-hyderabad.ac.in) already handles general
+grievances (numbered GRV-YYYY-NNN and routed to SU positions) and lets students up-vote and down-vote them. It has no IT-specific
+priority, SLA, technician assignment or root-cause analysis. CampusOps is meant as the IT-specific counterpart: its "Me too" button
+borrows SU Connect's voting idea, and receiving IT grievances forwarded from SU Connect is listed as future work.</p>
+<p>The brief asks for an Intelligent IT Service Management (I-ITSM) system that takes an incident through
+<b>Report &rarr; Classify &rarr; Prioritise &rarr; Assign &rarr; Investigate &rarr; Resolve &rarr; Verify &rarr; Close</b>
+and fixes the problems it lists: delayed response, wrong prioritisation, poor technician allocation, SLA violations, poor
+visibility, duplicate reports, incomplete history and recurring problems. We built <b>CampusOps</b> for that, modelled on our
+own campus.</p>
+
+<h2>1.2 Stakeholders</h2>
+<table>
+<thead><tr><th style="width:24%">Stakeholder</th><th>Interest</th><th style="width:22%">Role in CampusOps</th></tr></thead>
+<tbody>
+<tr><td>Students, faculty, office staff</td><td>Report a problem quickly (from a phone, by voice, by scanning a sticker or over Telegram), know that it was received, see progress, confirm the fix.</td><td><code>Employee</code></td></tr>
+<tr><td>Support technicians (Network Ops, Apps &amp; Data, Desktop Support)</td><td>A clear queue ordered by urgency, the context needed to start work, similar past fixes, a fair workload.</td><td><code>Technician</code></td></tr>
+<tr><td>Team leads</td><td>See their team's load, reassign work, take escalations, fix one root cause behind many tickets.</td><td><code>TeamLead</code> (a technician)</td></tr>
+<tr><td>System administrator (CCIT)</td><td>Configure services, dependencies, SLAs, categories, users and strategies; watch SLA violations and the audit log.</td><td><code>Administrator</code></td></tr>
+<tr><td>IT manager</td><td>Top of the escalation chain; campus-wide reports.</td><td><code>ItManager</code> (an administrator)</td></tr>
+<tr><td>Anyone on campus (no login)</td><td>Check whether a service is already known to be down before reporting it.</td><td>Public <code>/status</code> page</td></tr>
+<tr><td>External services</td><td>Anthropic Claude API and Google Gemini API (category suggestion), Telegram Bot API (chat reporting and messages).</td><td>Secondary actors</td></tr>
+</tbody></table>
+
+<h2>1.3 Existing challenges</h2>
+<ul>
+<li><b>No single intake.</b> Reports come through WhatsApp groups, Shoutbox posts and personal contacts, so they are lost, duplicated or unattributed.</li>
+<li><b>Priority by loudness.</b> A one-person printer issue and a fee-portal outage hitting hundreds of students during fee week are handled in the order they arrive.</li>
+<li><b>Allocation by memory.</b> The lead remembers who knows networking; workload and past experience with a service are not considered.</li>
+<li><b>No clock.</b> There are no response/resolution targets, so nobody notices an incident going stale and nothing escalates.</li>
+<li><b>Duplicates and hidden root causes.</b> When Core Switch B (hostels) fails, every Bhavan reports "Wi-Fi down" separately and each gets investigated separately.</li>
+<li><b>No count of who is affected.</b> Fifty students writing "same here" under one post are invisible to whoever prioritises the work.</li>
+<li><b>No history.</b> Fixes are not recorded, so the same problem is solved from scratch next month and no analytics are possible.</li>
+</ul>
+
+<h2>1.4 Proposed solution</h2>
+<p>CampusOps is a full-stack web application (installable as a PWA) with a Spring Boot backend and a React frontend.
+Its core is a rich <code>Incident</code> aggregate whose lifecycle is a State-pattern object graph. Around it:</p>
+<ul>
+<li><b>Intake</b> through the web form (with voice dictation and QR-sticker prefill), Telegram chat, and a scripted simulation channel for demos.</li>
+<li><b>Crowd confirmation</b>: instead of filing a duplicate, a student presses "Me too" on an existing incident; the affected-user count and, when it matters, the priority go up automatically.</li>
+<li><b>Automatic triage</b> on every report: category (a chain: Claude, then Google Gemini, then an offline keyword classifier), priority (two interchangeable strategies), SLA deadlines from a service-specific or campus-default policy, duplicate check, auto-assignment (five interchangeable strategies) and root-cause correlation on the service dependency graph.</li>
+<li><b>Monitoring</b>: a scheduled SLA sweep raises warnings at a configurable percentage, records breaches and escalates Technician &rarr; Team Lead &rarr; System Administrator &rarr; IT Manager.</li>
+<li><b>Communication</b>: every change is an <code>IncidentEvent</code>; observers write the audit trail, send notifications over in-app, (simulated) email and Telegram channels, and push live updates to open browsers over Server-Sent Events.</li>
+<li><b>Insight</b>: dashboard, technician workload, service and category analysis, SLA-risk list, live outage map and a public status page.</li>
+</ul>
+
+<h2>1.5 Assumptions</h2>
+<ol>
+<li>One campus, one organisation; all users have an <code>@hyderabad.bits-pilani.ac.in</code> address. Self-registration is only for employees/students; staff accounts are created by an administrator.</li>
+<li>Times are stored in UTC (<code>Instant</code>) and shown in IST (<code>Asia/Kolkata</code>). SLA clocks run 24x7 (no business-hours calendar).</li>
+<li>A technician's skills are the incident category codes they can handle (e.g. <code>NETWORK</code>, <code>DATABASE</code>); a team lead is also a working technician.</li>
+<li>The SLA clock starts when the incident is created; "response" means the technician acknowledged it.</li>
+<li>Email delivery is simulated (stored in an outbox the admin can read). Telegram, Gemini and Claude are real integrations that switch on only when their keys are configured; without them the system still works fully offline.</li>
+<li>The demo clock can be fast-forwarded by an administrator ("time warp") so SLA breaches and escalations can be shown in a short video. This control can be disabled with <code>DEMO_ENABLED=false</code>.</li>
+<li>Campus scale: thousands of users and tens to hundreds of incidents a day, which is why analytics are computed in memory (see Section 6, question 9, for what changes at larger scale).</li>
+</ol>
+</section>
+
+<!-- ======================= 2 ======================= -->
+<section>
+<h1 id="s2">2. Requirements specification</h1>
+
+<h2>2.1 Functional requirements</h2>
+<table class="small">
+<thead><tr><th style="width:7%">ID</th><th>Requirement</th></tr></thead>
+<tbody>
+<tr><td>FR-1</td><td>Users log in with email and password; employees can self-register with a campus email. Admins create staff accounts, edit technician profiles (team, skills, capacity, experience, availability) and activate/deactivate users.</td></tr>
+<tr><td>FR-2</td><td>An employee reports an incident with title, description, affected service (or an asset tag from a QR sticker), optional category, impact, urgency, number of affected users and location, through web, voice, QR or Telegram.</td></tr>
+<tr><td>FR-3</td><td>While typing, the reporter sees a suggested category with confidence and reason, similar open incidents and known fixes from past incidents.</td></tr>
+<tr><td>FR-4</td><td>On submission the system creates the incident (<code>INC-nnnn</code>), classifies it, calculates priority, determines the SLA, checks for duplicates, assigns a technician, correlates it with other incidents and notifies the people involved.</td></tr>
+<tr><td>FR-5</td><td>Technicians see their queue, take unassigned incidents, acknowledge, start investigation, add internal or public notes, request information from the reporter, resolve with a summary, root cause and code, and close verified incidents.</td></tr>
+<tr><td>FR-6</td><td>Reporters see their incidents, answer information requests, add comments, verify the fix with a 1-5 rating and comment, reopen with a reason, or cancel before work starts.</td></tr>
+<tr><td>FR-7</td><td>Team leads and admins reassign (optionally overriding the workload limit), change priority with a reason, resolve a problem record (which walks every linked incident to RESOLVED), and see the dashboard, outage map, SLA violations and audit log.</td></tr>
+<tr><td>FR-8</td><td>Admins manage services (with dependency graph and map position), assets (QR stickers), categories (with keywords), SLA policies (campus default and per service) and runtime settings: assignment strategy, priority strategy, SLA warning %, duplicate threshold, correlation window and minimum, auto-escalation and AI triage switches.</td></tr>
+<tr><td>FR-9</td><td>A background job monitors SLA clocks, warns before deadlines, records violations and escalates.</td></tr>
+<tr><td>FR-10</td><td>Every important action is stored in an append-only audit trail with timestamp, actor, action, incident, previous state, new state, description and a snapshot of priority/assignee/category/SLA state, which drives a replay slider on the incident page.</td></tr>
+<tr><td>FR-11</td><td>Search incidents by free text/number, status, priority, category, service, technician, SLA state, date range, escalated-only, problem and open-only, with sorting and paging.</td></tr>
+<tr><td>FR-12</td><td>Reports: incident overview, technician workload, service analysis, category analysis, priority/status/channel breakdowns, 14-day trend and an at-risk list.</td></tr>
+<tr><td>FR-13</td><td>A public status page (no login) shows each service's health and known problems.</td></tr>
+<tr><td>FR-14</td><td>Telegram: link an account with a one-time 6-digit code, then <code>/report</code>, <code>/status</code>, <code>/mine</code>, <code>/services</code>; receive notifications in chat.</td></tr>
+<tr><td>FR-15</td><td>Any logged-in user can say "Me too" on an open incident they did not report. Each person counts once; the affected-user count becomes at least reporter + supporters and the priority is re-assessed (it can only rise automatically).</td></tr>\n</tbody></table>
+
+<h2>2.2 Non-functional requirements</h2>
+<table class="small">
+<thead><tr><th style="width:18%">Quality</th><th>How CampusOps meets it</th></tr></thead>
+<tbody>
+<tr><td>Maintainability / extensibility</td><td>New categories, services and SLA policies are data, not code. New priority/assignment strategies, notification channels and classifiers are one new class implementing an interface; Spring discovers it.</td></tr>
+<tr><td>Reliability</td><td>Audit rows are written in the same transaction as the change (<code>@Order(0)</code> synchronous listener). A failing notification channel or AI call is caught and never breaks the workflow. Optimistic locking (<code>@Version</code>) on incidents.</td></tr>
+<tr><td>Security</td><td>JWT authentication, BCrypt passwords, role-based <code>@PreAuthorize</code>, ownership checks, validation on all request DTOs, uniform JSON errors (Section 9).</td></tr>
+<tr><td>Usability</td><td>Role-specific navigation, live updates over SSE, plain-language state descriptions, PWA install, voice input.</td></tr>
+<tr><td>Performance</td><td>Indexed columns (<code>status</code>, <code>createdAt</code>, <code>priority</code> on incidents; <code>incidentId</code>, <code>at</code> on audit). Paged search (max 100 per page). TF-IDF only over the last 24 h of open incidents for duplicates.</td></tr>
+<tr><td>Portability</td><td>Zero-setup H2 file database locally; PostgreSQL 16 with the <code>postgres</code> profile; one-command Docker Compose.</td></tr>
+<tr><td>Testability</td><td>A single <code>TimeProvider</code> clock lets tests pin and advance time; strategies and state objects are plain classes unit-tested without Spring.</td></tr>
+</tbody></table>
+
+<h2>2.3 User roles</h2>
+<table class="small">
+<thead><tr><th style="width:18%">Role (class)</th><th>Main permissions (enforced by <code>@PreAuthorize</code> and <code>IncidentPolicy</code>)</th></tr></thead>
+<tbody>
+<tr><td>EMPLOYEE (<code>Employee</code>)</td><td>Report; view only own incidents; provide info; comment; verify / reopen / cancel own incidents; notifications; Telegram link.</td></tr>
+<tr><td>TECHNICIAN (<code>Technician</code>)</td><td>Everything an employee can do, plus: view all incidents, queue, dashboard, outage map, problems; take; acknowledge / start / request info / resolve / close when assigned; internal notes; set own availability.</td></tr>
+<tr><td>TEAM_LEAD (<code>TeamLead</code>, grants TECHNICIAN + TEAM_LEAD)</td><td>Technician rights on any incident, plus assign/reassign with override, change priority, resolve problem records, view audit log, SLA violations, settings (read), user list, edit technician profiles.</td></tr>
+<tr><td>SYSTEM_ADMIN (<code>Administrator</code>)</td><td>Supervisor rights plus catalogue, SLA, category, asset, user and settings management, email outbox, demo controls.</td></tr>
+<tr><td>IT_MANAGER (<code>ItManager</code>, grants SYSTEM_ADMIN + IT_MANAGER)</td><td>All admin rights; receives level-3 escalations.</td></tr>
+</tbody></table>
+
+<h2 id="s2-4">2.4 Business rules</h2>
+
+<h3>2.4.1 Priority (default strategy <code>WeightedScoreStrategy</code>)</h3>
+<div class="formula">score = impact &times; urgency &times; criticality &times; reach, &nbsp;&nbsp; reach = 1 + log<sub>10</sub>(max(1, affectedUsers)) / 2</div>
+<p>Impact and urgency use <code>Level</code> weights LOW = 1, MEDIUM = 2, HIGH = 3, CRITICAL = 4. Criticality is the affected
+service's 1-5 business criticality. Reach grows slowly with the number of affected users (1 user = 1.0, 100 = 2.0, 1000 = 2.5),
+so a big audience raises priority without swamping the other factors. The score is rounded to one decimal.</p>
+<table class="small" style="width:70%">
+<thead><tr><th>Band</th><th>Score</th><th>Example from the code / seed</th></tr></thead>
+<tbody>
+<tr><td>P1 Critical</td><td>&ge; 60</td><td>Fee portal, HIGH &times; CRITICAL, criticality 5, 200 users: 3&times;4&times;5&times;2.15 = 129.0 (TC10)</td></tr>
+<tr><td>P2 High</td><td>&ge; 30</td><td>HIGH &times; CRITICAL, criticality 4, 1 user: 48.0 (TC12)</td></tr>
+<tr><td>P3 Medium</td><td>&ge; 10</td><td>Wi-Fi slow, MEDIUM &times; MEDIUM, criticality 4, 40 users: 16&times;1.80 = 28.8</td></tr>
+<tr><td>P4 Low</td><td>&lt; 10</td><td>Library printer, LOW &times; LOW, criticality 2, 10 users: 2&times;1.5 = 3.0</td></tr>
+</tbody></table>
+<p><b>Alternative strategy <code>RuleBasedStrategy</code></b> (switchable at runtime): an ITIL impact &times; urgency matrix, then two business rules:
+a criticality-5 service raises the result one level, and 500 or more affected users make it at least P2. Its score is
+(4 &minus; ordinal) &times; 25.</p>
+<table class="small" style="width:70%">
+<thead><tr><th>Impact \ Urgency</th><th>LOW</th><th>MEDIUM</th><th>HIGH</th><th>CRITICAL</th></tr></thead>
+<tbody>
+<tr><td>LOW</td><td>P4</td><td>P4</td><td>P3</td><td>P3</td></tr>
+<tr><td>MEDIUM</td><td>P4</td><td>P3</td><td>P3</td><td>P2</td></tr>
+<tr><td>HIGH</td><td>P3</td><td>P3</td><td>P2</td><td>P1</td></tr>
+<tr><td>CRITICAL</td><td>P3</td><td>P2</td><td>P1</td><td>P1</td></tr>
+</tbody></table>
+<p>Rationale: the brief's suggested Impact &times; Urgency &times; Criticality product is kept as the core, and the number of
+affected users is added as a dampened multiplier so the brief's factor list (impact, urgency, business criticality, number of
+affected users, affected service) is fully covered. The rationale string is stored on the incident and shown to staff,
+e.g. <i>"HIGH impact (3) x HIGH urgency (3) x criticality 5 of CMS (Moodle LMS) x reach 2.09 for 150 users = 94.0 -&gt; P1"</i>.
+A supervisor can reassess impact/urgency/users with a reason; the SLA deadlines are then recomputed from the original SLA start.
+"Me too" confirmations raise the affected-user count; if the active strategy then gives a higher priority, it is applied
+automatically ("Raised automatically after N me-too reports"). Priority is never lowered automatically.</p>
+
+<h3>2.4.2 SLA policies (seeded)</h3>
+<table class="small" style="width:80%">
+<thead><tr><th>Scope</th><th>Priority</th><th>Response target</th><th>Resolution target</th></tr></thead>
+<tbody>
+<tr><td>Campus default</td><td>P1</td><td>5 min</td><td>30 min</td></tr>
+<tr><td>Campus default</td><td>P2</td><td>15 min</td><td>2 h</td></tr>
+<tr><td>Campus default</td><td>P3</td><td>1 h</td><td>8 h</td></tr>
+<tr><td>Campus default</td><td>P4</td><td>4 h</td><td>24 h</td></tr>
+<tr><td>Fee Payment Portal</td><td>P1</td><td>5 min</td><td>20 min</td></tr>
+<tr><td>ERP Portal</td><td>P2</td><td>10 min</td><td>90 min</td></tr>
+</tbody></table>
+<ul>
+<li><code>CatalogService.policyFor</code> picks the service-specific policy if it exists, otherwise the campus default; if neither exists it throws <code>MissingSlaConfigurationException</code> (422). During reporting this is caught and recorded as a warning in the audit trail so the incident is still created.</li>
+<li>Targets must be positive and resolution &ge; response (<code>SlaPolicy.update</code>). Campus defaults can be edited but not deleted.</li>
+<li><code>SlaTracker</code> states: ON_TRACK &rarr; AT_RISK (a warning fired) &rarr; BREACHED; MET once resolved in time. A warning fires once when the used fraction of a window reaches the configured percentage (default 75 %); a breach fires once after the deadline. Response is met at ACKNOWLEDGED, resolution at RESOLVED; reopening clears the resolved time so the clock resumes.</li>
+</ul>
+
+<h3>2.4.3 Lifecycle rules</h3>
+<table class="small">
+<thead><tr><th style="width:18%">From</th><th style="width:28%">Allowed next</th><th>Guard / side effect</th></tr></thead>
+<tbody>
+<tr><td>NEW</td><td>CLASSIFIED, CANCELLED</td><td>CLASSIFIED requires a category.</td></tr>
+<tr><td>CLASSIFIED</td><td>ASSIGNED, CANCELLED</td><td>ASSIGNED requires an assignee.</td></tr>
+<tr><td>ASSIGNED</td><td>ACKNOWLEDGED</td><td>Entering ACKNOWLEDGED stamps the response time.</td></tr>
+<tr><td>ACKNOWLEDGED</td><td>IN_PROGRESS</td><td></td></tr>
+<tr><td>IN_PROGRESS</td><td>AWAITING_INFO, RESOLVED</td><td>RESOLVED requires a non-blank resolution summary; stamps resolution time.</td></tr>
+<tr><td>AWAITING_INFO</td><td>IN_PROGRESS, RESOLVED</td><td></td></tr>
+<tr><td>RESOLVED</td><td>VERIFIED, REOPENED</td><td>VERIFIED stores a 1-5 rating. REOPENED clears the resolved time.</td></tr>
+<tr><td>VERIFIED</td><td>CLOSED</td><td>CLOSED stamps <code>closedAt</code>.</td></tr>
+<tr><td>REOPENED</td><td>ASSIGNED</td><td>Goes back to the same technician if still available, else auto-assign.</td></tr>
+<tr><td>CLOSED, CANCELLED</td><td>none</td><td>Terminal. Any other move throws <code>InvalidStateTransitionException</code> (409).</td></tr>
+</tbody></table>
+<p>Who may trigger each action is checked separately by <code>IncidentPolicy</code>: acknowledge/start/request-info/resolve
+by the assignee or a supervisor (team lead or admin); provide-info by the reporter; verify/reopen/cancel by the reporter or an
+admin; close by the assignee or a supervisor; assign/change priority by supervisors; take by any technician who is not already
+the assignee; notes by the reporter or any staff member. Reassignment is allowed in CLASSIFIED, ASSIGNED, ACKNOWLEDGED,
+IN_PROGRESS, AWAITING_INFO and REOPENED. A manual assignment is refused if the technician is inactive or unavailable
+(<code>TechnicianUnavailableException</code>) or already at <code>maxConcurrent</code> active incidents
+(<code>WorkloadExceededException</code>) unless the supervisor sets <code>override</code>.</p>
+
+<h3>2.4.4 Escalation rules (<code>EscalationService</code>)</h3>
+<p>Chain: level 0 Technician &rarr; 1 Team Lead &rarr; 2 System Administrator &rarr; 3 IT Manager. Levels only go up.</p>
+<ul>
+<li><b>Not acknowledged:</b> for a P1/P2 incident still in CLASSIFIED, ASSIGNED or REOPENED, the level is the number of whole response windows that have passed since the SLA start (or since assignment, if later), capped at 3. With the default P1 policy (5 min response) an unacknowledged P1 reaches the team lead after 5 min, the admin after 10 and the IT manager after 15.</li>
+<li><b>Resolution breached:</b> any priority, once the resolution deadline has passed and it is not resolved: level &ge; 1 + min(2, overdue &divide; half the resolution window).</li>
+<li>Recipients: level 1 is the team lead of the assignee's team (or the first team lead), level 2 the first active System Administrator, level 3 the first active IT Manager. Each escalation is an <code>ESCALATED</code> event, an audit row and a CRITICAL notification. Auto-escalation can be switched off in settings.</li>
+</ul>
+
+<h3>2.4.5 Duplicate rules (<code>SimilarityService.findDuplicates</code>)</h3>
+<ul>
+<li>Pool: open incidents created in the last 24 hours.</li>
+<li>Score = 0.6 &times; TF-IDF cosine text similarity + 0.25 if the same service + 0.15 &times; recency (1.0 if reported within 2 h, falling linearly to 0 at 24 h). Candidates with text similarity &lt; 0.15 are ignored (same service alone is not a duplicate).</li>
+<li>A match needs score &ge; the duplicate threshold (default <b>0.45</b>, admin-adjustable 0.10-0.95). The best match is stored on the new incident (<code>possibleDuplicateOf</code>, <code>duplicateScore</code>) and a <code>DUPLICATE_DETECTED</code> event is raised; up to 5 are shown.</li>
+<li>If the reporter already has an open incident scoring &ge; <b>0.75</b>, the report is rejected with <code>DuplicateIncidentException</code> (409) unless the user confirms it is a different problem (<code>confirmedNew</code>).</li>
+<li>On the staff incident page similar incidents are listed with a slightly lower threshold (max(0.3, threshold &minus; 0.1)).</li>
+<li><b>Me too</b> (<code>Incident.addSupporter</code>, <code>IncidentService.meToo</code>, <code>POST /api/incidents/{id}/me-too</code>):
+the reporter cannot "me too" their own incident and a closed incident cannot be confirmed (both 409 INVALID_STATE_TRANSITION);
+a second click by the same person changes nothing (supporters are a set of user ids); affected users = max(current estimate,
+reporter + supporters); a <code>ME_TOO</code> event is audited and the priority is re-assessed.</li>
+</ul>
+
+<h3>2.4.6 Correlation rules (<code>CorrelationEngine</code>)</h3>
+<ul>
+<li>Runs after every report. Ignored if the new incident is P4 or has no category.</li>
+<li><b>Step 1 - existing explanation.</b> If an open <code>ProblemRecord</code> already explains the new incident (its root is the
+incident's service or upstream of it, and it already holds incidents of the same category), the incident is simply linked to it.
+If several qualify, the most specific root (smallest blast radius) wins.</li>
+<li><b>Step 2 - new hypothesis.</b> Otherwise the candidate roots are the incident's service and every service it depends on.
+Evidence is the open P1-P3 incidents of the same category created within the correlation window (default <b>60 min</b>) that are
+not already explained by an open problem.</li>
+<li>A root "explains" the evidence on itself and everything downstream of it, and must explain the trigger. It qualifies when it
+explains at least <b>3</b> incidents (setting <code>correlationMinIncidents</code>) and either they are spread over &ge; 2 services
+with no single service holding more than half, or they pile up on one service with at least minimum + 2 incidents.</li>
+<li>Among qualifying roots the one with the smallest blast radius (most specific shared dependency) wins, ties broken by more
+incidents. An open problem on that root is reused, otherwise a new one (<code>PRB-1xx</code>) is created; the explained incidents
+are linked and leads/admins get a "Possible root cause found" notification.</li>
+</ul>
+</section>
+
+<!-- ======================= 3 ======================= -->
+<section>
+<h1 id="s3">3. System architecture</h1>
+<div class="figure"><img src="../uml/architecture.svg" alt="Architecture diagram"><div class="caption">Figure 3.1 - Component and deployment view (docs/uml/architecture.puml)</div></div>
+
+<h2>3.1 Explanation</h2>
+<p><b>Clients.</b> A React + TypeScript single-page app (installable PWA) serves every role with different navigation;
+the public <code>/status</code> page needs no login. Telegram users talk to the same backend through the bot.</p>
+<p><b>Edge.</b> In Docker the SPA is served by nginx, which also reverse-proxies <code>/api</code> to the backend and passes
+<code>/api/stream</code> unbuffered for Server-Sent Events. In development Vite proxies <code>/api</code> to port 8080.</p>
+<p><b>Backend.</b> One Spring Boot application organised by business capability, not by technical layer:
+<code>user</code>, <code>auth</code>, <code>catalog</code>, <code>incident</code>, <code>priority</code>, <code>assignment</code>,
+<code>sla</code>, <code>intelligence</code>, <code>ai</code>, <code>problem</code>, <code>events</code>, <code>audit</code>,
+<code>notification</code>, <code>realtime</code>, <code>telegram</code>, <code>report</code>, <code>settings</code>,
+<code>demo</code>, <code>seed</code>, <code>common</code>. Inside each, controllers are thin (validate, resolve the current user,
+call a service, map to a view record); services orchestrate; the rules live in domain objects (<code>Incident</code>, its state
+objects, <code>SlaTracker</code>, <code>SlaPolicy</code>, <code>Technician</code>), strategies and the policy.</p>
+<p><b>Persistence.</b> Spring Data JPA repositories over H2 (default, file-based) or PostgreSQL 16 (Docker / <code>postgres</code> profile).</p>
+<p><b>Integrations.</b> Each external system sits behind an adapter: <code>ClaudeCategoryClassifier</code> (official Anthropic Java SDK),
+<code>GeminiCategoryClassifier</code> (Google Gemini REST API, <code>generateContent</code>),
+<code>TelegramAdapter</code> (Telegram Bot HTTP API via <code>java.net.http.HttpClient</code>) and <code>EmailGateway</code>
+(simulated outbox).</p>
+
+<h2>3.2 Modular monolith with event-driven internals</h2>
+<p>Services never call the audit or notification code directly. They publish an <code>IncidentEvent</code> through
+<code>IncidentEventPublisher</code> (Spring's <code>ApplicationEventPublisher</code>) and three observers react:</p>
+<ul>
+<li><code>AuditListener</code> (<code>@EventListener @Order(0)</code>) runs synchronously inside the same transaction, so a change and its audit row commit or roll back together: the history cannot disagree with the data.</li>
+<li><code>NotificationListener</code> (<code>@Order(10)</code>) decides who hears about what and fans out over every channel that applies to the recipient. Channel failures are logged and swallowed.</li>
+<li><code>RealtimeListener</code> (<code>@TransactionalEventListener(AFTER_COMMIT)</code>) broadcasts a small "incident changed" message over SSE only after the commit, so browsers never refetch uncommitted data.</li>
+</ul>
+<p>Background work runs on Spring's scheduler: <code>SlaMonitor</code> (every 15 s), <code>TelegramBot.poll</code> (every 3 s) and an SSE heartbeat (every 25 s).</p>
+
+<h2>3.3 Why not microservices yet</h2>
+<p>We considered splitting incidents, notifications, intelligence and SLA monitoring into services and decided against it for now:</p>
+<ul>
+<li><b>Consistency matters more than independent scaling.</b> Creating an incident touches classification, priority, SLA, assignment, audit and correlation; in one process this is one ACID transaction. Across services it would need sagas or an outbox for a problem that does not exist at campus scale.</li>
+<li><b>Team and timeline.</b> Five students, one semester; one deployable, one database and one CI job keep the effort on the domain model, which is what the course grades.</li>
+<li><b>The seams are already there.</b> Packages are capability modules that talk through interfaces and events. Moving notifications out later means replacing the in-process publisher with a message broker; the listener code stays the same.</li>
+</ul>
+</section>
+
+<!-- ======================= 4 ======================= -->
+<section>
+<h1 id="s4">4. UML diagrams</h1>
+<p>All diagrams are PlantUML sources in <code>docs/uml/*.puml</code>, rendered to SVG and PNG. They were drawn from the code,
+so names, attributes and multiplicities match the classes. The architecture diagram is in Section 3 and the ER diagram in
+Section 8. Wide diagrams are printed on landscape pages; the SVG files in <code>docs/uml/</code> can be zoomed without loss.</p>
+<div class="figure tall"><img src="../uml/use-case.svg" alt="Use case diagram"><div class="caption">Figure 4.1 - Use case diagram: five human roles, a public visitor, and Telegram, the SLA scheduler and the Claude / Gemini APIs as secondary actors. Team Lead and IT Manager inherit the use cases of Technician and System Administrator.</div></div>
+<div class="figure tall"><img src="../uml/class-users.svg" alt="Users class diagram"><div class="caption">Figure 4.2 - Class diagram 1: user hierarchy (inheritance only where "is-a" holds), Role enum, UserFactory.</div></div>
+<div class="landscape"><div class="figure"><img src="img/class-incident-rotated.png" alt="Incident class diagram"><div class="caption">Figure 4.3 - Class diagram 2: the Incident aggregate. Filled diamonds are composition (SlaTracker, Resolution, Feedback, WorkNote live and die with the incident); hollow diamonds are aggregation (ProblemRecord groups incidents it does not own; services aggregate their dependencies); plain arrows are associations.</div></div></div>
+<div class="figure"><img src="../uml/class-state.svg" alt="State pattern class diagram"><div class="caption">Figure 4.4 - Class diagram 3: State pattern. Eleven immutable state objects registered in an EnumMap.</div></div>
+<div class="landscape"><div class="figure"><img src="img/class-strategies-rotated.png" alt="Strategies class diagram"><div class="caption">Figure 4.5 - Class diagram 4: Strategy pattern for priority (2), assignment (5) and categorisation (3: Claude and Gemini adapters, keyword classifier, run as a chain).</div></div></div>
+<div class="figure"><img src="../uml/class-observer.svg" alt="Observer class diagram"><div class="caption">Figure 4.6 - Class diagram 5: Observer (event publisher and three listeners), notification channels created by a factory, and adapters for email and Telegram.</div></div>
+<div class="figure tall"><img src="../uml/state-lifecycle.svg" alt="State diagram"><div class="caption">Figure 4.7 - State machine of the incident lifecycle exactly as encoded in IncidentStates.</div></div>
+<div class="landscape"><div class="figure"><img src="img/sequence-report-rotated.png" alt="Sequence diagram"><div class="caption">Figure 4.8 - Sequence: report &rarr; duplicate check &rarr; classify &rarr; prioritise &rarr; SLA &rarr; assign &rarr; correlate &rarr; notify (IncidentService.report).</div></div></div>
+</section>
+
+<!-- ======================= 5 ======================= -->
+<section>
+<h1 id="s5">5. Object-oriented design</h1>
+<h2>5.1 OOP concepts</h2>
+
+<h3>Encapsulation</h3>
+<p><code>Incident</code> has no public setters. Its state changes only through intention-revealing methods
+(<code>classify</code>, <code>applyPriority</code>, <code>assignTo</code>, <code>resolve</code>, <code>verify</code>,
+<code>escalate</code>), and every status change funnels through one method that consults the state object. Collections are
+returned read-only, and the hooks the state objects need (<code>sla()</code>, <code>recordClosure()</code>) are package-private.</p>
+<pre><span class="cm">// incident/Incident.java</span>
+public void transitionTo(IncidentStatus target, Instant now) {
+    IncidentState current = state();
+    if (!current.canTransitionTo(target)) {
+        ...
+        throw new InvalidStateTransitionException(
+                number + " cannot move from " + status + " to " + target + ". Allowed next: " + allowed);
+    }
+    IncidentState next = IncidentStates.of(target);
+    next.validateEntry(this);
+    this.status = target;
+    this.updatedAt = now;
+    next.onEnter(this, now);
+}
+public List&lt;WorkNote&gt; getNotes() { return Collections.unmodifiableList(notes); }
+SlaTracker sla() { return sla; }            <span class="cm">// package-private: only state objects use it</span></pre>
+<p>The same idea appears in <code>Technician.getSkills()</code> (unmodifiable set), <code>SlaPolicy.update()</code> (validates
+before assigning) and <code>UserView</code>, which never exposes the password hash.</p>
+
+<h3>Abstraction</h3>
+<p>Complex operations are hidden behind small abstractions. <code>User</code> is abstract and declares what every kind of user
+must answer; <code>CampusOpsException</code> is abstract and makes every business error say its own HTTP status and code, so the
+global handler is one generic method. Callers of <code>SlaTracker.evaluate(now, warnPercent)</code> get back a list of signals and
+never see the deadline arithmetic.</p>
+<pre><span class="cm">// common/CampusOpsException.java</span>
+public abstract class CampusOpsException extends RuntimeException {
+    public abstract HttpStatus status();
+    public abstract String code();
+}
+<span class="cm">// user/User.java</span>
+public abstract class User {
+    public abstract Role getRole();
+    public Set&lt;Role&gt; grantedRoles() { return EnumSet.of(getRole()); }
+    public boolean isStaff() { return getRole().tier() &gt;= Role.TECHNICIAN.tier(); }
+}</pre>
+
+<h3>Inheritance</h3>
+<p>Inheritance is used only for real "is-a" relations: an <code>Employee</code>, <code>Technician</code> and
+<code>Administrator</code> are users; a <code>TeamLead</code> is a technician (gets auto-assigned work and has skills) who also
+supervises; an <code>ItManager</code> is an administrator at the top of the chain. JPA maps the hierarchy to one table with a
+<code>user_type</code> discriminator. Exceptions form a second hierarchy (e.g. <code>ServiceNotFoundException extends
+ResourceNotFoundException</code>, overriding only its code). The eleven state classes extend <code>AbstractState</code>, which
+holds the shared transition table. Where "is-a" did not hold we used composition instead (an incident <i>has</i> an SLA tracker).</p>
+<pre><span class="cm">// user/TeamLead.java</span>
+@Entity @DiscriminatorValue("TEAM_LEAD")
+public class TeamLead extends Technician {
+    @Override public Role getRole() { return Role.TEAM_LEAD; }
+    @Override public Set&lt;Role&gt; grantedRoles() { return EnumSet.of(Role.TECHNICIAN, Role.TEAM_LEAD); }
+}</pre>
+
+<h3>Polymorphism</h3>
+<p>The same call does different things depending on the runtime object. <code>AssignmentService.choose</code> calls
+<code>select</code> on whichever <code>AssignmentStrategy</code> the admin chose; <code>NotificationService</code> calls
+<code>send</code> on each <code>NotificationChannel</code>; <code>Incident.transitionTo</code> calls <code>validateEntry</code>
+and <code>onEnter</code> on whichever state object it is entering; <code>JwtService</code> puts <code>user.grantedRoles()</code>
+into the token, which a <code>TeamLead</code> overrides.</p>
+<pre><span class="cm">// notification/NotificationService.java</span>
+for (NotificationChannel channel : factory.channelsFor(recipient)) {
+    try {
+        channel.send(message);              <span class="cm">// InApp, Email or Telegram: dynamic dispatch</span>
+    } catch (RuntimeException ex) {
+        log.warn("{} notification to {} failed: {}", channel.type(), recipient.getCode(), ex.getMessage());
+    }
+}</pre>
+
+<h3>Interfaces</h3>
+<p>Contracts are interfaces: <code>IncidentState</code>, <code>PriorityStrategy</code>, <code>AssignmentStrategy</code>,
+<code>CategoryClassifier</code>, <code>NotificationChannel</code>, <code>EmailGateway</code> and every repository. Default
+methods carry shared behaviour (<code>IncidentState.canTransitionTo</code>, <code>AssignmentStrategy.select</code>).</p>
+<pre><span class="cm">// notification/NotificationChannel.java</span>
+public interface NotificationChannel {
+    enum Type { IN_APP, EMAIL, TELEGRAM }
+    record Message(User recipient, String title, String body, Long incidentId, String incidentNumber,
+                   Notification.Severity severity) { }
+    Type type();
+    boolean supports(User user);     <span class="cm">// linked account, user preferences</span>
+    void send(Message message);
+}</pre>
+
+<h3>Composition</h3>
+<p>An incident is composed of parts that have no meaning on their own: <code>SlaTracker</code>, <code>Resolution</code> and
+<code>Feedback</code> are <code>@Embeddable</code> value objects stored in the incident row, and <code>WorkNote</code>s are owned
+with <code>cascade = ALL, orphanRemoval = true</code>. Notes can only be created through <code>Incident.addNote</code>
+(the <code>WorkNote</code> constructor is package-private).</p>
+<pre><span class="cm">// incident/Incident.java</span>
+@Embedded private SlaTracker sla = new SlaTracker();
+@Embedded private Resolution resolution;
+@Embedded private Feedback feedback;
+@OneToMany(mappedBy = "incident", cascade = CascadeType.ALL, orphanRemoval = true)
+@OrderBy("createdAt ASC")
+private List&lt;WorkNote&gt; notes = new ArrayList&lt;&gt;();</pre>
+
+<h3>Association and aggregation</h3>
+<p>Associations connect independent objects: an incident refers to its reporter (<code>User</code>), assignee
+(<code>Technician</code>), <code>ItService</code>, <code>IncidentCategory</code> and optional <code>Asset</code>, all
+<code>@ManyToOne</code>; deleting an incident does not delete any of them. Aggregation: a <code>ProblemRecord</code> groups
+incidents it does not own (<code>Incident.linkProblem</code>), and an <code>ItService</code> aggregates the services it depends on
+(<code>@ManyToMany dependsOn</code>), forming the dependency graph. A self-association marks <code>possibleDuplicateOf</code>.</p>
+<pre><span class="cm">// catalog/ItService.java</span>
+@ManyToMany(fetch = FetchType.EAGER)
+@JoinTable(name = "service_dependencies",
+        joinColumns = @JoinColumn(name = "service_id"),
+        inverseJoinColumns = @JoinColumn(name = "depends_on_id"))
+private Set&lt;ItService&gt; dependsOn = new HashSet&lt;&gt;();</pre>
+
+<h3>Exception handling</h3>
+<p>A custom unchecked hierarchy rooted at <code>CampusOpsException</code> covers every case the brief lists. A single
+<code>@RestControllerAdvice</code> turns any of them into a uniform JSON <code>ApiError</code> (status, code, message, path,
+timestamp, field errors). Validation errors, unreadable bodies, Spring Security denials, database failures and unexpected errors
+get their own handlers so no stack trace reaches the client.</p>
+<table class="small">
+<thead><tr><th>Brief's situation</th><th>Exception / mechanism</th><th>HTTP / code</th></tr></thead>
+<tbody>
+<tr><td>Invalid login</td><td><code>InvalidLoginException</code></td><td>401 INVALID_LOGIN</td></tr>
+<tr><td>Unauthorized operation</td><td><code>UnauthorizedOperationException</code>, <code>AccessDeniedException</code> handler</td><td>403 UNAUTHORIZED_OPERATION</td></tr>
+<tr><td>Invalid incident / invalid input</td><td><code>InvalidInputException</code>, Bean Validation (<code>MethodArgumentNotValidException</code>)</td><td>400 INVALID_INPUT (+ fieldErrors)</td></tr>
+<tr><td>Invalid state transition (also: "Me too" on your own or a closed incident)</td><td><code>InvalidStateTransitionException</code></td><td>409 INVALID_STATE_TRANSITION</td></tr>
+<tr><td>Technician unavailable</td><td><code>TechnicianUnavailableException</code> (auto-assign catches it and leaves the incident queued)</td><td>409 TECHNICIAN_UNAVAILABLE</td></tr>
+<tr><td>Technician workload exceeded</td><td><code>WorkloadExceededException</code></td><td>409 WORKLOAD_EXCEEDED</td></tr>
+<tr><td>Service not found</td><td><code>ServiceNotFoundException</code> (subclass of <code>ResourceNotFoundException</code>)</td><td>404 SERVICE_NOT_FOUND</td></tr>
+<tr><td>Missing SLA configuration</td><td><code>MissingSlaConfigurationException</code></td><td>422 MISSING_SLA_CONFIGURATION</td></tr>
+<tr><td>Duplicate incident</td><td><code>DuplicateIncidentException</code> (carries the existing number)</td><td>409 DUPLICATE_INCIDENT</td></tr>
+<tr><td>Database failure</td><td><code>DataAccessException</code> handler</td><td>503 DATABASE_FAILURE</td></tr>
+<tr><td>Network failure (Claude, Gemini, Telegram, channels)</td><td>Caught inside the adapters / <code>NotificationService</code>; the AI chain falls through to keywords (TC40); <code>ExternalServiceException</code> (502) is defined for future synchronous calls</td><td>workflow continues</td></tr>
+</tbody></table>
+<pre><span class="cm">// common/GlobalExceptionHandler.java</span>
+@ExceptionHandler(CampusOpsException.class)
+public ResponseEntity&lt;ApiError&gt; business(CampusOpsException ex, HttpServletRequest req) {
+    return build(ex.status(), ex.code(), ex.getMessage(), req, Map.of());
+}</pre>
+<p>Domain value objects throw <code>IllegalArgumentException</code> for broken invariants (e.g. <code>new Feedback(6, ..)</code>);
+services translate these into <code>InvalidInputException</code> so the domain stays free of HTTP concerns.</p>
+
+<h3>Collections and data structures</h3>
+<table class="small">
+<thead><tr><th style="width:30%">Structure</th><th style="width:28%">Where</th><th>Why this one</th></tr></thead>
+<tbody>
+<tr><td><code>EnumMap&lt;IncidentStatus, IncidentState&gt;</code></td><td><code>IncidentStates</code></td><td>Array-backed O(1) lookup of the state object for a status; keys are a closed enum.</td></tr>
+<tr><td><code>EnumSet</code></td><td>allowed transitions, <code>IncidentStatus.OPEN/ACTIVE_WORK/FIXED</code>, roles</td><td>Bit-vector sets: fast <code>contains</code>, ordered, compact.</td></tr>
+<tr><td><code>EnumMap&lt;Type, NotificationChannel&gt;</code></td><td><code>NotificationChannelFactory</code></td><td>One channel per type, predictable order.</td></tr>
+<tr><td><code>ArrayDeque</code> + <code>LinkedHashSet</code> (BFS)</td><td><code>CatalogService.downstreamOf / upstreamOf</code></td><td>Breadth-first traversal of the dependency graph; the set doubles as "visited" and keeps a stable order.</td></tr>
+<tr><td><code>HashMap&lt;String, Double&gt;</code> sparse vectors</td><td><code>TextAnalyzer.Corpus</code></td><td>TF-IDF vectors are sparse; cosine iterates only shared terms.</td></tr>
+<tr><td><code>ConcurrentHashMap&lt;Long, CopyOnWriteArrayList&lt;SseEmitter&gt;&gt;</code></td><td><code>SseHub</code></td><td>Many request threads subscribe while the scheduler broadcasts; copy-on-write suits rare writes and frequent iteration.</td></tr>
+<tr><td><code>Set&lt;Long&gt;</code> (<code>@ElementCollection</code>)</td><td><code>Incident.supporterIds</code></td><td>"Me too" must count each person once; <code>Set.add</code> returning false is exactly the "already confirmed" check.</td></tr>
+<tr><td><code>LinkedHashMap</code></td><td><code>NotificationService.notifyAll</code></td><td>De-duplicates recipients by id while preserving order (a reporter who is also an admin is notified once).</td></tr>
+<tr><td><code>AtomicInteger</code> / <code>AtomicLong</code></td><td>incident and user number sequences, round-robin cursor</td><td>Thread-safe counters without locks.</td></tr>
+<tr><td>Sorted <code>List</code> + median</td><td><code>SlaRiskAnalyzer</code></td><td>Median fix time per (category, priority), robust to outliers; cached for 5 min in a <code>volatile</code> map.</td></tr>
+<tr><td>Java <code>record</code>s</td><td>views, commands, <code>Candidate</code>, <code>Recommendation</code>, <code>IncidentEvent</code></td><td>Immutable data carriers with value semantics.</td></tr>
+</tbody></table>
+
+<h2 id="s5-2">5.2 Design patterns</h2>
+
+<h3>State - incident lifecycle</h3>
+<p><b>Classes:</b> <code>IncidentState</code> (interface), <code>IncidentStates.AbstractState</code> and eleven concrete states
+(<code>NewState</code> ... <code>CancelledState</code>), registry <code>IncidentStates</code>, context <code>Incident</code>.
+Each state knows its allowed next states, whether assignment is allowed, the precondition for entering it and the side effect
+of entering it. Adding a state (e.g. ON_HOLD) means one class plus an enum constant; nothing in the services changes.</p>
+<pre><span class="cm">// incident/IncidentStates.java</span>
+static final class ResolvedState extends AbstractState {
+    ResolvedState() { super(IncidentStatus.RESOLVED, EnumSet.of(IncidentStatus.VERIFIED, IncidentStatus.REOPENED)); }
+    @Override public void validateEntry(Incident incident) {
+        if (incident.getResolution() == null || !incident.getResolution().isPresent()) {
+            throw new InvalidStateTransitionException("Add resolution details before resolving");
+        }
+    }
+    @Override public void onEnter(Incident incident, Instant now) { incident.sla().markResolved(now); }
+    @Override public String describe() { return "Fixed, waiting for the reporter to confirm"; }
+}</pre>
+
+<h3>Strategy - priority, assignment, categorisation</h3>
+<p><b>Classes:</b> <code>PriorityStrategy</code> &rarr; <code>WeightedScoreStrategy</code>, <code>RuleBasedStrategy</code>;
+<code>AssignmentStrategy</code> &rarr; <code>Strategies.SkillBased</code>, <code>LoadBased</code>, <code>RoundRobin</code>,
+<code>ExperienceBased</code>, <code>Smart</code>; contexts <code>PriorityService</code> and <code>AssignmentService</code>.
+Spring injects every implementation as a list; the context indexes them by <code>key()</code> and picks the one named in
+<code>SystemSettings</code>, so the admin switches strategy at runtime with no redeploy. <code>CategoryClassifier</code> is a
+third family (<code>ClaudeCategoryClassifier</code>, <code>GeminiCategoryClassifier</code>, <code>KeywordCategoryClassifier</code>), which
+<code>TriageService</code> runs as a chain of responsibility: each classifier either answers or returns empty and the next one is asked.</p>
+<pre><span class="cm">// assignment/AssignmentService.java</span>
+public AssignmentService(List&lt;AssignmentStrategy&gt; strategies, SettingsService settings, ...) {
+    this.strategies = strategies.stream()
+            .collect(Collectors.toMap(AssignmentStrategy::key, Function.identity()));
+}
+public Recommendation choose(Incident incident) {
+    AssignmentStrategy strategy = active();          <span class="cm">// from settings, e.g. "SKILL_BASED"</span>
+    return strategy.select(incident, candidates(incident, true))
+            .orElseThrow(() -&gt; new TechnicianUnavailableException(
+                    "No available technician can take " + incident.getNumber() + " right now; it stays queued"));
+}</pre>
+
+<h3>Observer - audit, notifications, live updates</h3>
+<p><b>Subject:</b> <code>IncidentEventPublisher</code> publishing <code>IncidentEvent</code> records (20 event types).
+<b>Observers:</b> <code>AuditListener</code>, <code>NotificationListener</code>, <code>RealtimeController.RealtimeListener</code>.
+<code>IncidentService</code>, <code>SlaMonitor</code>, <code>EscalationService</code> and <code>CorrelationEngine</code> publish
+without knowing who listens; adding, say, a metrics observer is one new class.</p>
+<pre><span class="cm">// audit/AuditListener.java</span>
+@EventListener
+@Order(0)
+public void on(IncidentEvent event) {
+    Incident i = event.incident();
+    User actor = event.actor();
+    audit.save(new AuditRecord(event.at(), actor == null ? null : actor.getId(),
+            actor == null ? "CampusOps (automatic)" : actor.getFullName(), ...,
+            event.type(), i.getId(), i.getNumber(), event.fromStatus(), event.toStatus(), event.description(), ...));
+}</pre>
+
+<h3>Factory - users, incidents, notification channels</h3>
+<p><code>UserFactory</code> is the only place that decides which <code>User</code> subclass to build for a role, hashes the
+password and assigns the readable code (E/T/L/A/M + number). <code>IncidentFactory</code> validates raw report input and builds
+a NEW incident with the next <code>INC-nnnn</code> number. <code>NotificationChannelFactory</code> hands out the channel objects
+that apply to a recipient.</p>
+<pre><span class="cm">// user/UserFactory.java</span>
+return switch (spec.role()) {
+    case EMPLOYEE -&gt; new Employee(code, spec.fullName(), spec.email(), hash, now, spec.department(), spec.location());
+    case TECHNICIAN -&gt; new Technician(code, spec.fullName(), spec.email(), hash, now, spec.team(), skills, max, exp);
+    case TEAM_LEAD -&gt; new TeamLead(code, spec.fullName(), spec.email(), hash, now, spec.team(), skills, max, exp);
+    case SYSTEM_ADMIN -&gt; new Administrator(code, spec.fullName(), spec.email(), hash, now);
+    case IT_MANAGER -&gt; new ItManager(code, spec.fullName(), spec.email(), hash, now);
+};</pre>
+
+<h3>Adapter - Claude, Gemini, Telegram, email</h3>
+<p><code>ClaudeCategoryClassifier</code> adapts the Anthropic Java SDK (<code>MessageCreateParams</code>, JSON reply parsing) and
+<code>GeminiCategoryClassifier</code> adapts the Google Gemini REST API (<code>POST /v1beta/models/{model}:generateContent</code> with an
+<code>x-goog-api-key</code> header and JSON response mode) to the same <code>CategoryClassifier</code> interface; any failure, HTTP error,
+refusal or unknown category returns <code>Optional.empty()</code> and <code>TriageService</code> moves to the next classifier. <code>TelegramAdapter</code> hides the Telegram Bot HTTP API behind
+<code>sendMessage</code> and <code>getUpdates</code>. <code>EmailGateway</code> is the target interface for outgoing mail;
+<code>SimulatedEmailGateway</code> stores messages in an outbox, and an SMTP or SendGrid adapter can replace it without touching
+<code>EmailChannel</code>.</p>
+<pre><span class="cm">// ai/ClaudeCategoryClassifier.java (abridged)</span>
+MessageCreateParams params = MessageCreateParams.builder()
+        .model(model).maxTokens(1024L)
+        .outputConfig(OutputConfig.builder().effort(OutputConfig.Effort.LOW).build())
+        .addUserMessage(prompt).build();
+Message response = client.messages().create(params);
+...
+return categories.stream().filter(c -&gt; c.getCode().equals(code)).findFirst()
+        .map(c -&gt; new Suggestion(c, Math.round(confidence * 100) / 100.0, name(), reason));</pre>
+
+<h3>Repository - persistence</h3>
+<p>Every aggregate has a Spring Data repository interface (<code>IncidentRepository</code>, <code>UserRepository</code>,
+<code>CatalogRepositories.*</code>, <code>AuditRepository</code>, <code>ProblemRepository</code>, ...). Services depend on these
+interfaces, never on SQL. Search uses the Specification pattern on top (<code>IncidentSpecifications.matching</code>) to build
+the query from whichever filters are present.</p>
+<pre><span class="cm">// incident/IncidentRepository.java</span>
+public interface IncidentRepository extends JpaRepository&lt;Incident, Long&gt;, JpaSpecificationExecutor&lt;Incident&gt; {
+    Optional&lt;Incident&gt; findByNumberIgnoreCase(String number);
+    List&lt;Incident&gt; findByStatusInAndCreatedAtAfter(Collection&lt;IncidentStatus&gt; statuses, Instant after);
+    @Query("select i.assignee.id, count(i) from Incident i where i.assignee is not null and i.status in :statuses "
+            + "group by i.assignee.id")
+    List&lt;Object[]&gt; countByAssignee(@Param("statuses") Collection&lt;IncidentStatus&gt; statuses);
+}</pre>
+<p class="note">Other patterns used in passing: <b>Specification</b> (search filters), <b>Policy</b> object
+(<code>IncidentPolicy</code> keeps "is this person allowed" apart from "does the state allow it"), <b>Registry</b>
+(<code>IncidentStates</code>) and <b>Clock abstraction</b> (<code>TimeProvider</code>, which makes time testable and powers the
+demo time warp).</p>
+</section>
+
+<!-- ======================= 6 ======================= -->
+<section>
+<h1 id="s6">6. Technology stack and technology selection report</h1>
+<h2>6.1 Stack</h2>
+<table class="small">
+<thead><tr><th style="width:18%">Layer</th><th>Technology (version from pom.xml / package.json)</th></tr></thead>
+<tbody>
+<tr><td>Language</td><td>Java 21 (backend), TypeScript ~7.0 (frontend)</td></tr>
+<tr><td>Backend framework</td><td>Spring Boot 4.0.10: Web MVC, Data JPA (Hibernate), Security + OAuth2 Resource Server (Nimbus JWT, HS256), Validation (Jakarta Bean Validation), Actuator (health), scheduling</td></tr>
+<tr><td>API docs</td><td>springdoc-openapi 3.2.0 (Swagger UI at <code>/swagger-ui.html</code>)</td></tr>
+<tr><td>AI</td><td>Google Gemini API (free tier, REST via <code>java.net.http.HttpClient</code>; model via <code>GEMINI_MODEL</code>, default <code>gemini-3.5-flash-lite</code>); optional Anthropic Claude API through the official Anthropic Java SDK 3.12.0 (<code>com.anthropic:anthropic-java</code>; model via <code>CAMPUSOPS_AI_MODEL</code>, default <code>claude-opus-5-5</code>)</td></tr>
+<tr><td>Messaging</td><td>Telegram Bot HTTP API via <code>java.net.http.HttpClient</code>; Server-Sent Events (<code>SseEmitter</code>)</td></tr>
+<tr><td>Database</td><td>H2 (embedded file DB, default) and PostgreSQL 16 (Docker, <code>postgres</code> profile)</td></tr>
+<tr><td>Frontend</td><td>React 18.3, Vite 8, React Router 6, TanStack Query 5, Tailwind CSS 4, React Flow (<code>@xyflow/react</code> 13) for the outage map, Recharts 3, <code>qrcode.react</code> 4 for stickers, lucide-react icons, Web Speech API for voice input, PWA manifest + service worker</td></tr>
+<tr><td>Testing</td><td>JUnit 5, AssertJ, Spring Boot Test, MockMvc, H2 in-memory test database</td></tr>
+<tr><td>DevOps</td><td>Maven wrapper, Docker (multi-stage, non-root runtime user), Docker Compose (Postgres + backend + nginx 1.27), GitHub Actions CI (Temurin 21 <code>mvnw verify</code>, Node 22 <code>npm ci &amp;&amp; npm run build</code>)</td></tr>
+<tr><td>Diagrams</td><td>PlantUML</td></tr>
+</tbody></table>
+
+<p><b>Third-party APIs.</b> CampusOps integrates three external services, each behind an adapter and each optional: the
+<b>Google Gemini API</b> (free-tier category suggestion), the <b>Telegram Bot API</b> (chat reporting and notifications) and the
+<b>Anthropic Claude API</b> (category suggestion through the official Java SDK). Without keys the system runs fully offline.</p>
+<h2>6.2 Technology selection report</h2>
+<h3>Q1. Why this programming language?</h3>
+<p>Java 21 is the course language, so every member can read and defend every class, which the brief explicitly requires. It is
+also a good fit on its merits: a strong static type system for a rule-heavy domain; <b>records</b> for immutable views, commands
+and events; <b>sealed-style enums with behaviour</b> (<code>Level.weight()</code>, <code>Role.tier()</code>); <b>switch
+expressions</b> that the compiler checks for exhaustiveness (adding a new <code>Role</code> breaks <code>UserFactory</code> until
+it is handled); <b>pattern matching for instanceof</b>; and a mature ecosystem for web, persistence, security and testing.
+TypeScript on the frontend gives the same compile-time checking for the API types (<code>lib/types.ts</code> mirrors the backend
+view records).</p>
+<h3>Q2. Why this frontend technology?</h3>
+<p>React with TypeScript and Vite: component model suited to many role-specific screens, a large library ecosystem we needed
+(React Flow for the dependency-graph outage map, Recharts for analytics, QR rendering), fast dev server with an <code>/api</code>
+proxy, and it builds to static files nginx can serve. TanStack Query caches server data and lets the SSE stream simply invalidate
+queries for live updates. A PWA manifest makes it installable on phones without building a separate mobile app (Option B), and
+the Web Speech API gives voice input for free.</p>
+<h3>Q3. Why this backend technology?</h3>
+<p>Spring Boot gives us, without boilerplate, the exact mechanisms our OOP design relies on: dependency injection of
+<i>all implementations of an interface</i> (the basis of our runtime-switchable strategies and channel factory), an in-process
+event bus with ordering and transaction phases (our Observer), declarative transactions, method-level security
+(<code>@PreAuthorize</code>), Bean Validation, scheduling for the SLA monitor and Spring Data repositories. It also has an
+official, maintained Anthropic SDK for Java, and Java 21's built-in HTTP client is enough for the Gemini and Telegram REST APIs.</p>
+<h3>Q4. Why this database?</h3>
+<p>The data is relational and integrity-heavy: incidents reference users, services, categories, assets and problems; services
+form a many-to-many dependency graph; SLA policies are unique per (service, priority). A relational database with foreign keys
+and transactions is the natural fit, and it lets us write the audit row in the same transaction as the change.
+<b>PostgreSQL</b> is the production choice (robust, free, rich indexing, room for full-text search or <code>pgvector</code> later).
+<b>H2</b> is the zero-setup default for development and tests, so any evaluator can run the app with one command and no database
+install. We rejected MongoDB because our core queries are joins and aggregates across related entities, and multi-document
+consistency would be harder.</p>
+<h3>Q5. Why this architecture?</h3>
+<p>A modular monolith with an internal event bus (Section 3). It keeps one ACID transaction per business operation, one deployable
+and one CI pipeline, while packages by capability and event-based communication keep modules decoupled enough to extract later.</p>
+<h3>Q6. What alternatives did we consider?</h3>
+<table class="small">
+<thead><tr><th style="width:18%">Decision</th><th style="width:30%">Alternatives</th><th>Why not (for this project)</th></tr></thead>
+<tbody>
+<tr><td>Backend</td><td>Node.js/Express, Django/FastAPI</td><td>Weaker fit for a graded Java OOP design; less built-in support for DI of interface implementations, method security and transactional events.</td></tr>
+<tr><td>Frontend</td><td>Angular, Vue, Android/Kotlin, Flutter</td><td>Angular is heavier for a small team; a native app would split effort across two clients. A PWA covers phones.</td></tr>
+<tr><td>Database</td><td>MySQL, MongoDB, SQLite, Firebase</td><td>MySQL would also work; PostgreSQL chosen for features and Docker image size. MongoDB/Firebase poorly suited to relational integrity.</td></tr>
+<tr><td>Architecture</td><td>Microservices, serverless</td><td>Distributed transactions, more infrastructure and slower development with no scaling need at campus size.</td></tr>
+<tr><td>Real-time</td><td>WebSockets, polling</td><td>Updates flow one way (server to browser), so SSE is simpler, works through nginx and reconnects automatically.</td></tr>
+<tr><td>Auth</td><td>Server sessions, OAuth with Google</td><td>Stateless JWT scales horizontally and suits the SPA; campus Google SSO is listed as future work.</td></tr>
+<tr><td>Categorisation</td><td>Train our own ML model; a single LLM provider</td><td>No labelled data; LLMs with a keyword fallback work from day one and the fallback is fully explainable. Two providers (Gemini free tier first choice for cost, Claude optional) avoid depending on one vendor.</td></tr>
+</tbody></table>
+<h3>Q7. Advantages and limitations of the stack</h3>
+<p><b>Advantages:</b> strong typing end to end; mature security and persistence; one command to run (H2) or deploy (Compose);
+testable domain classes with no framework dependency; official SDKs for the integrations; free and open-source throughout.</p>
+<p><b>Limitations:</b> the JVM has a higher memory footprint and slower cold start than Node or Go; JPA can hide inefficient queries
+(we keep eager associations small and index hot columns); <code>ddl-auto=update</code> is convenient but is not a migration tool;
+Spring's annotation "magic" has a learning curve; SSE connections hold a thread each in Spring MVC, which limits very large numbers
+of simultaneous dashboards per instance.</p>
+<h3>Q8. How does the stack support object-oriented design?</h3>
+<ul>
+<li>JPA maps the user class hierarchy (single-table inheritance), value objects (<code>@Embeddable</code>) and composition (<code>cascade, orphanRemoval</code>) directly, so the persistence model is the object model.</li>
+<li>Spring DI programs to interfaces: services receive <code>List&lt;AssignmentStrategy&gt;</code>, <code>List&lt;NotificationChannel&gt;</code>, repository interfaces, and never construct their collaborators.</li>
+<li>Spring's event mechanism is the Observer pattern; <code>@Order</code> and transaction phases give observers well-defined behaviour.</li>
+<li>Java features (interfaces with default methods, abstract classes, records, enums with fields and methods, exhaustive switch) express the design concisely.</li>
+<li>TypeScript discriminated unions and interfaces model the API views on the frontend.</li>
+</ul>
+<h3>Q9. How would the system evolve if the number of users increased significantly?</h3>
+<p>The API is stateless (JWT), so the first step is running several backend instances behind a load balancer with a managed
+PostgreSQL. To make that correct we would change the parts that currently assume one instance:</p>
+<ol>
+<li><b>Number sequences</b> (<code>IncidentFactory</code>, <code>UserFactory</code> use an in-memory <code>AtomicInteger</code>) &rarr; database sequences.</li>
+<li><b>Scheduled jobs</b> (<code>SlaMonitor</code>, <code>TelegramBot.poll</code>) would run on every instance &rarr; a distributed lock (e.g. ShedLock) or a dedicated worker; the Telegram bot would move to webhooks.</li>
+<li><b>SSE fan-out</b> (<code>SseHub</code> is per instance) &rarr; Redis pub/sub or a message broker so an event on one instance reaches browsers connected to another; possibly WebFlux for many idle connections.</li>
+<li><b>Round-robin cursor and SLA-risk cache</b> (in memory) &rarr; shared store.</li>
+<li><b>Analytics</b> (<code>ReportService</code> loads all incidents) &rarr; SQL aggregates, materialised views or a read replica; archive closed incidents.</li>
+<li><b>Similarity</b> &rarr; precomputed vectors (PostgreSQL full-text or <code>pgvector</code> embeddings) instead of rebuilding TF-IDF per request.</li>
+<li><b>Events</b> &rarr; transactional outbox + Kafka/RabbitMQ, at which point notifications, intelligence and reporting can become separate services along the existing package boundaries.</li>
+<li>Rate limiting, caching of catalogue data, observability (metrics, tracing) and Flyway migrations.</li>
+</ol>
+</section>
+
+<!-- ======================= 7 ======================= -->
+<section>
+<h1 id="s7">7. Intelligent features</h1>
+<p>The brief requires at least two intelligent/automated features; CampusOps implements seven, all running on every relevant
+request without manual steps.</p>
+
+<h2>7.1 Category suggestion (Claude / Gemini with keyword fallback)</h2>
+<p><code>TriageService.suggest</code> runs a chain of classifiers. When AI triage is switched on in settings it first asks
+<code>ClaudeCategoryClassifier</code> (if <code>ANTHROPIC_API_KEY</code> is set), then <code>GeminiCategoryClassifier</code> (if
+<code>GEMINI_API_KEY</code> is set); <code>KeywordCategoryClassifier</code> is always last and always answers. Any failure, HTTP error,
+refusal or unknown category code makes a classifier return empty, so the next one is asked and reporting never stops. The live
+preview while typing always uses keywords so typing never calls an external API.</p>
+<ul>
+<li><b>Claude and Gemini:</b> the prompt lists the active categories (code, name, description), the affected service and the report inside
+<code>&lt;report&gt;</code> tags, and asks for a one-line JSON object <code>{"code", "confidence", "reason"}</code>. The reply is
+parsed defensively (first <code>{</code> to last <code>}</code>), confidence is clamped to 0-1 and the code must match an active
+category. Claude uses the SDK with a 20 s timeout and one retry; Gemini uses <code>generateContent</code> with <code>responseMimeType: application/json</code>, temperature 0 and a 15 s timeout. The Gemini prompt marks the report as data, not instructions.</li>
+<li><b>Keywords:</b> text is normalised by <code>TextAnalyzer.terms</code> (below). Each category scores +1 per configured keyword
+present (each keyword counted once) plus a prior of +1.5 if it is the affected service's default category. The best positive score
+wins; confidence = best score &divide; sum of all scores; the reason lists the matched words. Categories and keywords are
+admin-editable data, so new categories work with no code change.</li>
+<li>Order of precedence when reporting: a category chosen by the user (confidence 1.0), then the asset's category from a QR sticker
+(0.95), then the classifier, then the service default (0.3). <code>classifiedBy</code> and the confidence are stored and shown.</li>
+</ul>
+
+<h2>7.2 Duplicate detection (TF-IDF)</h2>
+<p><code>TextAnalyzer</code> lowercases, splits on non-alphanumerics, drops ~100 stop words, folds synonyms into one token
+("unavailable", "down", "not working", "error", "timeout" &rarr; <code>fail</code>; "wifi", "wi-fi", "wlan", "hotspot" &rarr;
+<code>wifi</code>; "payment", "transaction", "fee", "upi" &rarr; <code>payment</code>; and groups for slow, network, login, printer,
+pc, email, cms) and strips simple suffixes (-ing, -ed, -es, -s). <code>TextAnalyzer.Corpus</code> builds a TF-IDF model over the
+candidate pool plus the new text with smoothed IDF = ln((1 + N) / (1 + df)) + 1, and compares sparse vectors with cosine similarity.
+The final duplicate score and thresholds are in Section 2.4.5. Because of synonym folding, the brief's own example
+("Payment application unavailable", "Payment transaction failing", "Unable to make payment") all reduce to
+{payment, fail, ...} and score above 0.5 against each other, while an unrelated projector report scores 0 (TC20).</p>
+
+<h3>"Me too" instead of duplicates</h3>
+<p>Detection only helps if people stop filing duplicates. The live preview shows similar open incidents while the user is typing,
+and each one has a "Me too" button. A confirmation adds the person to the incident's supporter set, raises the affected-user count
+to at least reporter + supporters and re-runs the active priority strategy; through the reach factor (Section 2.4.1) a growing crowd
+can lift a P3 to P2 without anyone changing impact or urgency. This is the SU Connect up-vote idea applied to IT, with the difference
+that the vote feeds a priority formula and an SLA.</p>
+
+<h2>7.3 Smart technician recommendation</h2>
+<p>For every candidate <code>AssignmentService</code> computes the active load (ASSIGNED, ACKNOWLEDGED, IN_PROGRESS, AWAITING_INFO),
+the number of incidents they fixed on this exact service and whether they have the category skill. Unavailable, inactive or full
+technicians are filtered out. The <code>Smart</code> strategy scores:</p>
+<div class="formula">score = w<sub>s</sub>&middot;skill + w<sub>l</sub>&middot;(1 &minus; load/max) + w<sub>h</sub>&middot;min(1, fixesOnService/5) + w<sub>e</sub>&middot;min(1, years/10)</div>
+<p>with weights 0.40 / 0.25 / 0.20 / 0.15 normally and 0.40 / 0.15 / 0.28 / 0.17 for P1/P2 incidents (urgent work leans on
+history and seniority rather than spare capacity). The incident page always shows the top four Smart recommendations with
+reasons ("skill yes, 1/5 busy, 3 fixes on this service, 6 yrs"), whichever strategy is used for automatic assignment.
+The other four strategies: <b>Skill-based</b> (skilled only, least active first, then most experienced; the default),
+<b>Load-based</b> (lowest load ratio, skill as tie-break), <b>Round robin</b> (rotates through the skilled pool by id) and
+<b>Experience-based</b> (most fixes on this service, then years).</p>
+
+<h2>7.4 SLA risk prediction</h2>
+<p><code>SlaRiskAnalyzer</code> predicts a breach before it happens. It learns the <b>median</b> historical fix time (creation to
+resolution) for each (category, priority) pair from fixed incidents, cached for 5 minutes; without history it assumes half the
+resolution window. Then:</p>
+<div class="formula">projected = spent + max(typical &minus; spent, typical/4) &times; factor, &nbsp;&nbsp; risk = projected / window</div>
+<p>where factor = 1 + 0.5 if unassigned, or 1 + 0.15 &times; (assignee's active incidents &minus; 1), plus 0.25 while awaiting the
+reporter. Risk &ge; 1.0 is HIGH, &ge; 0.75 MEDIUM, otherwise LOW; an already breached incident is HIGH. The dashboard lists the eight
+riskiest open incidents with reasons, e.g. <i>"Typical fix 37 min, 117% used, Arjun Rao has 2 active"</i>.</p>
+
+<h2>7.5 Automatic SLA monitoring and escalation</h2>
+<p><code>SlaMonitor.sweep</code> runs every 15 seconds (configurable) over all open incidents: <code>SlaTracker.evaluate</code>
+returns newly fired signals (response/resolution warning at the configured % and breach after the deadline, each at most once);
+warnings publish <code>SLA_WARNING</code>, breaches publish <code>SLA_BREACHED</code> and store an <code>SlaViolation</code> row;
+then <code>EscalationService.check</code> applies the rules in Section 2.4.4. Notifications go to the assignee and team lead
+(warnings) or lead, assignee and admins (breaches), and the escalation target.</p>
+
+<h2>7.6 Root-cause correlation on the dependency graph</h2>
+<p>The catalogue is a directed graph built from the real campus layout: the Internet uplink (NKN + ISP) feeds the Sophos
+Firewall &amp; Web Filter, which feeds Core Switch A (academic) and Core Switch B (hostels) and the Internet login (Sophos captive
+portal); Core Switch A serves the Academic Blocks LAN (A, B+G, C, D+F, LTC), Library Wi-Fi and the D+F Block lab network; Core
+Switch B and the captive portal serve hostel Wi-Fi for Gautam, Krishna, Ram, Vyas, Gandhi and Meera Bhavan; the DC VM cluster
+carries DNS/DHCP, SSO and the database cluster, on which the ERP, CMS and SWD portal depend; end-user services (classroom AV, print,
+lab PCs, fee portal) sit on top (27 services in total). <code>CatalogService.downstreamOf</code> (the "blast radius") and
+<code>upstreamOf</code> are breadth-first searches; cycles are rejected when dependencies are edited.</p>
+<p><code>CorrelationEngine</code> (rules in Section 2.4.6) looks for the most specific common upstream service of recent
+same-symptom incidents. Two worked examples from the demo scenarios, checked on a freshly seeded instance:</p>
+<ul>
+<li><b>core-switch-b</b>: Wi-Fi reports from Gautam, Krishna, Vyas and Meera Bhavan. Their shared upstream candidates are Core
+Switch B, the captive portal, the firewall, DNS/DHCP, the DC cluster and the uplink. Core Switch B has the smallest blast radius
+(itself + six hostels = 7), so on the third report <code>PRB-101 "Suspected Core Switch B (Hostels) failure"</code> is created;
+the fourth report is attached to it by step 1.</li>
+<li><b>fest-load</b> (modelled on the Atmos'26 complaints): two Academic Blocks LAN reports, one Library Wi-Fi and one D+F lab
+network report. After three reports the LAN holds two of three (more than half), so no hypothesis yet; the fourth makes the spread
+valid and <code>"Suspected Core Switch A (Academic) failure"</code> is opened with all four incidents (blast radius 7).</li>
+</ul>
+<p>On the outage map the root is drawn as the root cause (OUTAGE); a service with open P1/P2 incidents is OUTAGE, one with only
+lower-priority incidents DEGRADED, and a downstream service with no reports of its own IMPACTED. A lead can resolve the problem
+once, which walks each linked, assigned incident through ACKNOWLEDGED &rarr; IN_PROGRESS &rarr; RESOLVED with the shared fix
+(<code>IncidentService.resolveLinked</code>).</p>
+
+<h2>7.7 Suggested resolutions (knowledge base)</h2>
+<p>Every resolution (summary, root cause, code) is stored on the incident, so fixed incidents form a knowledge base.
+<code>SimilarityService.suggestFixes</code> compares the new text with RESOLVED/VERIFIED/CLOSED incidents from the last 365 days
+using the same TF-IDF cosine, adds 0.1 for the same service (capped at 1), keeps matches &ge; 0.25 and returns the top three with
+their fix and root cause. They appear in the reporter's live preview on the report form and on the staff incident page.</p>
+</section>
+
+<!-- ======================= 8 ======================= -->
+<section>
+<h1 id="s8">8. Database design</h1>
+
+<h2>8.1 Schema</h2>
+<table class="small">
+<thead><tr><th style="width:17%">Table</th><th style="width:15%">Entity</th><th>Key columns</th></tr></thead>
+<tbody>
+<tr><td>users</td><td>User hierarchy</td><td>id PK, user_type (discriminator), code UQ, email UQ, password_hash, active, telegram_chat_id; employee: department, location; technician: team, max_concurrent, experience_years, available</td></tr>
+<tr><td>technician_skills</td><td><code>@ElementCollection</code></td><td>technician_id FK, category_code</td></tr>
+<tr><td>incident_category</td><td>IncidentCategory</td><td>id PK, code UQ, name, keywords, color, active</td></tr>
+<tr><td>it_service</td><td>ItService</td><td>id PK, code UQ, name, type, criticality, user_base, default_category_id FK, mapx, mapy, active</td></tr>
+<tr><td>service_dependencies</td><td>join table</td><td>service_id FK, depends_on_id FK (directed edge "service depends on")</td></tr>
+<tr><td>asset</td><td>Asset</td><td>id PK, tag UQ (printed on the QR sticker), service_id FK, category_id FK, location</td></tr>
+<tr><td>sla_policy</td><td>SlaPolicy</td><td>id PK, service_id FK (null = campus default), priority, response_minutes, resolution_minutes; unique (service_id, priority)</td></tr>
+<tr><td>incident</td><td>Incident (+ embedded SlaTracker, Resolution, Feedback)</td><td>id PK, number UQ, reporter_id, service_id, category_id, asset_id, assignee_id, escalated_to_id, problem_id, possible_duplicate_of_id (FKs), impact, urgency, affected_users, priority, priority_score, status, channel, escalation_level, SLA columns, resolution columns, feedback columns, created_at, updated_at, closed_at, version; indexes on status, created_at, priority</td></tr>
+<tr><td>incident_supporters</td><td><code>@ElementCollection</code> of Incident</td><td>incident_id FK, user_id ("Me too" confirmations; one row per person)</td></tr>
+<tr><td>work_note</td><td>WorkNote</td><td>id PK, incident_id FK, author_id FK, type, text, internal, created_at</td></tr>
+<tr><td>problem_record</td><td>ProblemRecord</td><td>id PK, number UQ, root_service_id FK, title, analysis, status, detected_at, resolved_at</td></tr>
+<tr><td>audit_record</td><td>AuditRecord</td><td>id PK, at, actor_id/name/code, action, incident_id, incident_number, previous_state, new_state, description, snapshot columns; indexes on incident_id, at. No FK on purpose: the log is append-only and must survive any change to the incident.</td></tr>
+<tr><td>sla_violation</td><td>SlaViolation</td><td>id PK, incident_id, incident_number, kind, priority, service_name, assignee_name, due_at, detected_at (denormalised for reporting)</td></tr>
+<tr><td>notification</td><td>Notification</td><td>id PK, recipient_id FK (indexed), title, body, incident_id, severity, read_flag, created_at</td></tr>
+<tr><td>email_outbox_message</td><td>EmailOutboxMessage</td><td>id PK, to_address, subject, body, sent_at</td></tr>
+<tr><td>system_settings</td><td>SystemSettings</td><td>single row id = 1: strategies, thresholds, switches</td></tr>
+</tbody></table>
+
+<h2>8.2 Important relationships</h2>
+<ul>
+<li>users 1 &mdash; * incident (as reporter); users (technician) 0..1 &mdash; * incident (as assignee); users 0..1 &mdash; * incident (escalated to).</li>
+<li>it_service 1 &mdash; * incident; it_service * &mdash; * it_service via service_dependencies (the dependency graph); it_service 1 &mdash; * asset; it_service 0..1 &mdash; * sla_policy.</li>
+<li>incident 1 &mdash; * incident_supporters (value collection); incident 1 &mdash; * work_note (composition, cascade delete); incident * &mdash; 0..1 problem_record (aggregation); incident * &mdash; 0..1 incident (possible duplicate of).</li>
+<li>incident 1 &mdash; * audit_record and sla_violation by incident id (logical link, no FK).</li>
+</ul>
+
+<div class="landscape"><div class="figure"><img src="img/er-diagram-rotated.png" alt="ER diagram"><div class="caption">Figure 8.1 - ER diagram of the tables Hibernate generates from the JPA entities (verified against the running H2 schema).</div></div></div>
+<h2>8.3 Sample data (seeded by <code>DemoDataSeeder</code>)</h2>
+<p>On first start with an empty database the seeder creates 10 categories, 27 services with their dependency edges, 7 QR
+assets, 6 SLA policies, 17 users and 48 incidents: 42 history incidents spread over the last 14 days (28 templates, every second one
+repeated so recurring problems show in the analytics), driven through the real <code>IncidentService</code> so audit trails, SLA
+outcomes and ratings are genuine, plus 6 open incidents in different states.</p>
+<table class="small">
+<thead><tr><th>Code</th><th>Service</th><th>Type</th><th>Crit.</th><th>Users</th><th>Depends on</th></tr></thead>
+<tbody>
+<tr><td>ISP-UPLINK</td><td>Internet Uplink (NKN + ISP)</td><td>NETWORK</td><td>5</td><td>6000</td><td>-</td></tr>
+<tr><td>FIREWALL</td><td>Sophos Firewall &amp; Web Filter</td><td>INFRASTRUCTURE</td><td>5</td><td>6000</td><td>ISP-UPLINK</td></tr>
+<tr><td>CORE-A</td><td>Core Switch A (Academic)</td><td>NETWORK</td><td>5</td><td>3000</td><td>FIREWALL</td></tr>
+<tr><td>CORE-B</td><td>Core Switch B (Hostels)</td><td>NETWORK</td><td>5</td><td>3500</td><td>FIREWALL</td></tr>
+<tr><td>CAPTIVE-PORTAL</td><td>Internet Login (Sophos Captive Portal)</td><td>PLATFORM</td><td>5</td><td>6000</td><td>FIREWALL, DNS-DHCP</td></tr>
+<tr><td>LAN-ACAD</td><td>Academic Blocks LAN (A, B+G, C, D+F, LTC)</td><td>NETWORK</td><td>4</td><td>1500</td><td>CORE-A, DNS-DHCP</td></tr>
+<tr><td>WIFI-GAUTAM</td><td>Hostel Wi-Fi: Gautam Bhavan (also Krishna, Ram, Vyas, Gandhi, Meera)</td><td>NETWORK</td><td>4</td><td>450</td><td>CORE-B, CAPTIVE-PORTAL</td></tr>
+<tr><td>ERP</td><td>ERP Portal</td><td>APPLICATION</td><td>5</td><td>6000</td><td>DB-CLUSTER, DC-CLUSTER, SSO</td></tr>
+<tr><td>SWD-PORTAL</td><td>SWD Portal</td><td>APPLICATION</td><td>3</td><td>5000</td><td>DB-CLUSTER, SSO</td></tr>
+<tr><td>FEE-PORTAL</td><td>Fee Payment Portal</td><td>APPLICATION</td><td>5</td><td>5000</td><td>ERP, FIREWALL</td></tr>
+<tr><td>PRINT</td><td>Print Station (Library)</td><td>END_USER</td><td>2</td><td>600</td><td>LAN-ACAD</td></tr>
+</tbody></table>
+<table class="small">
+<thead><tr><th>User</th><th>Role / code prefix</th><th>Team</th><th>Skills</th><th>Max</th><th>Years</th></tr></thead>
+<tbody>
+<tr><td>Ravi Kumar (ravi)</td><td>Technician (T)</td><td>Network Ops</td><td>NETWORK</td><td>5</td><td>6</td></tr>
+<tr><td>Priya Sharma (priya)</td><td>Team Lead (L)</td><td>Network Ops</td><td>NETWORK, SECURITY, CLOUD</td><td>3</td><td>10</td></tr>
+<tr><td>Arjun Rao (arjun)</td><td>Technician (T)</td><td>Apps &amp; Data</td><td>APPLICATION, DATABASE, AUTH</td><td>5</td><td>5</td></tr>
+<tr><td>Vikram Nair (vikram)</td><td>Team Lead (L)</td><td>Apps &amp; Data</td><td>APPLICATION, DATABASE, AUTH, CLOUD</td><td>3</td><td>12</td></tr>
+<tr><td>Suresh Babu (suresh)</td><td>Technician (T)</td><td>Desktop Support</td><td>HARDWARE, PRINTING, SOFTWARE</td><td>6</td><td>8</td></tr>
+<tr><td>Kiran Desai (kiran)</td><td>System Admin (A)</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>Dr. Anil Kapoor (anil)</td><td>IT Manager (M)</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+</tbody></table>
+<table class="small">
+<thead><tr><th>Number</th><th>Title</th><th>Service</th><th>Cat.</th><th>Pri.</th><th>Status</th><th>Assignee</th></tr></thead>
+<tbody>
+<tr><td>INC-1005</td><td>ERP login failing with invalid session</td><td>ERP</td><td>APPLICATION</td><td>P1</td><td>CLOSED</td><td>Vikram Nair</td></tr>
+<tr><td>INC-1011</td><td>No network in F-Block lab</td><td>LAB-NET</td><td>NETWORK</td><td>P1</td><td>CLOSED (SLA breached)</td><td>Priya Sharma</td></tr>
+<tr><td>INC-1022</td><td>YouTube lectures blocked on campus network</td><td>FIREWALL</td><td>NETWORK</td><td>P1</td><td>CLOSED</td><td>Priya Sharma</td></tr>
+<tr><td>INC-1023</td><td>Locked out after changing internet password</td><td>CAPTIVE-PORTAL</td><td>AUTH</td><td>P3</td><td>CLOSED (SLA breached)</td><td>Vikram Nair</td></tr>
+<tr><td>INC-1025</td><td>Internet unusable in academic block during fest</td><td>LAN-ACAD</td><td>NETWORK</td><td>P1</td><td>CLOSED</td><td>Priya Sharma</td></tr>
+<tr><td>INC-1027</td><td>ERP timing out during add/swap</td><td>ERP</td><td>APPLICATION</td><td>P1</td><td>CLOSED</td><td>Vikram Nair</td></tr>
+<tr><td>INC-1043</td><td>Quiz submission error on CMS</td><td>CMS</td><td>APPLICATION</td><td>P1</td><td>ASSIGNED</td><td>Vikram Nair</td></tr>
+<tr><td>INC-1044</td><td>ERP grades page very slow</td><td>ERP</td><td>APPLICATION</td><td>P2</td><td>IN_PROGRESS</td><td>Arjun Rao</td></tr>
+<tr><td>INC-1045</td><td>Email attachments not downloading</td><td>MAIL</td><td>NETWORK</td><td>P4</td><td>AWAITING_INFO</td><td>Priya Sharma</td></tr>
+<tr><td>INC-1046</td><td>Keyboard not working on lab PC (QR)</td><td>LAB-PCS</td><td>HARDWARE</td><td>P4</td><td>ASSIGNED</td><td>Suresh Babu</td></tr>
+<tr><td>INC-1048</td><td>Wi-Fi weak in room 305</td><td>WIFI-KRISHNA</td><td>NETWORK</td><td>P4</td><td>RESOLVED</td><td>Ravi Kumar</td></tr>
+</tbody></table>
+<p class="note">Rows above were read from a freshly seeded instance through the API. Incident numbers and some assignees can differ
+slightly between runs because the history generator uses a fixed random seed but auto-assignment depends on workload at that moment.</p>
+</section>
+
+<!-- ======================= 9 ======================= -->
+<section>
+<h1 id="s9">9. Security considerations</h1>
+<table class="small">
+<thead><tr><th style="width:20%">Requirement</th><th>Implementation</th></tr></thead>
+<tbody>
+<tr><td>Authentication</td><td><code>POST /api/auth/login</code> checks the BCrypt hash and returns a JWT signed with HS256 (<code>JwtService</code>): subject = user id, claims name, email, roles; 12 h expiry. The backend is an OAuth2 resource server that validates the signature and expiry on every <code>/api/**</code> request. Inactive users cannot log in, and <code>CurrentUser.get()</code> re-checks <code>active</code> on every call, so deactivation takes effect immediately.</td></tr>
+<tr><td>Role-based authorization</td><td>Roles from the token become <code>ROLE_*</code> authorities; endpoints use <code>@PreAuthorize</code>, e.g. dashboard <code>hasAnyRole('TECHNICIAN','SYSTEM_ADMIN')</code>, settings update and catalogue writes <code>hasRole('SYSTEM_ADMIN')</code>, demo controls admin only. Role inheritance is explicit: a TeamLead token carries TECHNICIAN and TEAM_LEAD; an IT manager carries SYSTEM_ADMIN and IT_MANAGER.</td></tr>
+<tr><td>Object-level authorization</td><td><code>IncidentPolicy</code> checks ownership per action (an employee sees only incidents they reported; only the assignee or a supervisor can resolve; only the reporter answers info requests and verifies). Employee searches are forced to their own incidents (<code>IncidentSearch.forReporter</code>). Internal notes and their audit lines are hidden from non-staff. Notifications can only be marked read by their recipient.</td></tr>
+<tr><td>Password protection</td><td>BCrypt (salted, adaptive); minimum 8 characters (max 72, BCrypt's limit); the hash never leaves the server (<code>UserView</code> omits it).</td></tr>
+<tr><td>Input validation</td><td>Jakarta Bean Validation on every request record (<code>@NotBlank</code>, <code>@Size</code>, <code>@Min/@Max</code>, <code>@Email</code>, <code>@Pattern</code> for codes and tags), plus domain checks in factories and value objects. Enum parameters are type-checked. Sort fields are whitelisted and page size is capped at 100.</td></tr>
+<tr><td>Registration control</td><td>Self-registration creates only employees and only with the campus domain (<code>ALLOWED_DOMAIN</code>); emails are unique.</td></tr>
+<tr><td>Secure API access</td><td>Stateless sessions; CSRF protection is disabled because no cookies are used (the token is sent in the <code>Authorization</code> header); CORS allows only configured origins; 401 responses are JSON; error bodies never include stack traces; database errors map to a generic 503.</td></tr>
+<tr><td>Secrets</td><td>JWT secret (must be &ge; 32 bytes, startup fails otherwise), Claude and Gemini keys and the Telegram token come from environment variables or an untracked <code>.env</code>; <code>.env.example</code> documents them.</td></tr>
+<tr><td>Data exposure</td><td>The public status endpoint returns only service health and problem titles, without incident numbers or people. Claude and Gemini receive only the report text, the service name and the category list, and only when a key is configured.</td></tr>
+<tr><td>Concurrency</td><td><code>@Version</code> optimistic locking on incidents prevents lost updates when two people act at once.</td></tr>
+<tr><td>Container</td><td>The backend image runs as a non-root <code>campusops</code> user.</td></tr>
+</tbody></table>
+<h3>Known gaps (documented, not implemented)</h3>
+<ul>
+<li>No refresh tokens, token revocation, password reset or account lockout after repeated failed logins; no rate limiting.</li>
+<li>The bearer token may also be passed as <code>?access_token=</code> (needed because browsers' <code>EventSource</code> cannot set headers); this is enabled for all endpoints, and URLs can end up in logs. A short-lived stream ticket would be better.</li>
+<li>The H2 web console is reachable without login in the default (H2) profile; it is disabled in the <code>postgres</code> profile and must stay off in any shared deployment.</li>
+<li>Telegram link codes are 6 digits and do not expire.</li>
+<li>HTTPS termination is expected at the reverse proxy / hosting platform; the compose file serves plain HTTP for local use.</li>
+</ul>
+</section>
+
+<!-- ======================= 10 ======================= -->
+<section>
+<h1 id="s10">10. Testing</h1>
+<p>The backend has 41 automated JUnit 5 tests: 40 documented test cases (display names TC01-TC40) and one Spring context-load test.
+Unit tests construct domain objects directly with the <code>Fixtures</code> helper (no Spring, no database). Integration tests start
+the full application with an in-memory H2 database seeded by <code>DemoDataSeeder</code> and drive it through the REST API with
+MockMvc and real JWTs. <code>SlaEscalationIntegrationTest</code> moves the clock forward, so it gets its own application context.
+CI (<code>.github/workflows/ci.yml</code>) runs <code>./mvnw -B verify</code> on every push and pull request and uploads the
+Surefire reports. Result of the latest run (21 November 2026): <b>41 tests, 0 failures, 0 errors, 0 skipped</b>.</p>
+
+<table class="small">
+<thead><tr><th style="width:5%">ID</th><th style="width:19%">Name</th><th style="width:7%">Type</th><th style="width:10%">Category</th><th style="width:28%">Steps</th><th style="width:25%">Expected</th><th style="width:6%">Result</th></tr></thead>
+<tbody>
+<tr><td>TC01</td><td>NEW cannot jump straight to CLOSED</td><td>Unit</td><td>Business rule / invalid input</td><td>Create a NEW incident; call <code>transitionTo(CLOSED)</code>.</td><td><code>InvalidStateTransitionException</code> "cannot move from NEW to CLOSED"; status stays NEW.</td><td class="ok">PASS</td></tr>
+<tr><td>TC02</td><td>Full happy path NEW &rarr; ... &rarr; CLOSED with SLA clock updates</td><td>Unit</td><td>Normal</td><td>Classified P2 incident; assign; acknowledge at +5 min; start; resolve at +35 min; verify (5); close.</td><td>Each status reached; respondedAt = ack time, no response breach; SLA MET; closedAt set; no further transitions.</td><td class="ok">PASS</td></tr>
+<tr><td>TC03</td><td>Resolving without resolution details is rejected</td><td>Unit</td><td>Invalid input</td><td>Take an incident to IN_PROGRESS; <code>transitionTo(RESOLVED)</code> with no resolution.</td><td><code>InvalidStateTransitionException</code> mentioning resolution.</td><td class="ok">PASS</td></tr>
+<tr><td>TC04</td><td>A closed incident cannot be reassigned</td><td>Unit</td><td>Business rule</td><td>Cancel a classified incident; try <code>assignTo</code>.</td><td><code>InvalidStateTransitionException</code>.</td><td class="ok">PASS</td></tr>
+<tr><td>TC05</td><td>Reopened incident goes back to ASSIGNED and the SLA clock resumes</td><td>Unit</td><td>Business rule</td><td>Resolve, reopen, reassign to the same technician.</td><td>resolvedAt cleared; status ASSIGNED.</td><td class="ok">PASS</td></tr>
+<tr><td>TC06</td><td>Deadlines are computed from the policy</td><td>Unit</td><td>Normal</td><td>Start an <code>SlaTracker</code> with a 5/30 min P1 policy at T0.</td><td>responseDue = T0+5 min, resolutionDue = T0+30 min, ON_TRACK.</td><td class="ok">PASS</td></tr>
+<tr><td>TC07</td><td>Warning fires once at 75% (boundary), breach fires once after the deadline</td><td>Unit</td><td>Boundary</td><td>Evaluate at 224 s, 225 s, 230 s, 301 s, 400 s with warn = 75 %.</td><td>Nothing at 74.7 %; RESPONSE_WARNING exactly at 225 s, not repeated; AT_RISK; RESPONSE_BREACHED at 301 s, not repeated; BREACHED.</td><td class="ok">PASS</td></tr>
+<tr><td>TC08</td><td>Resolving late marks the resolution breach</td><td>Unit</td><td>Boundary / business rule</td><td>Respond at 1 min, resolve at 45 min on a 30 min target.</td><td>resolutionBreached = true; state BREACHED.</td><td class="ok">PASS</td></tr>
+<tr><td>TC09</td><td>An SLA policy whose resolution target is shorter than its response target is invalid</td><td>Unit</td><td>Invalid input</td><td>Construct policies 60/30 and 0/30.</td><td><code>IllegalArgumentException</code> for both.</td><td class="ok">PASS</td></tr>
+<tr><td>TC10</td><td>Payment portal down for 200 users is P1 (problem scenario from the brief)</td><td>Unit</td><td>Normal</td><td>Weighted strategy: HIGH impact, CRITICAL urgency, criticality-5 service, 200 users.</td><td>P1; rationale names the service.</td><td class="ok">PASS</td></tr>
+<tr><td>TC11</td><td>One user with a minor printer issue is P4</td><td>Unit</td><td>Normal</td><td>LOW impact, MEDIUM urgency, criticality 2, 1 user.</td><td>P4.</td><td class="ok">PASS</td></tr>
+<tr><td>TC12</td><td>Score boundaries: 60 is P1, just below is P2</td><td>Unit</td><td>Boundary</td><td>3&times;4&times;5&times;1 and 3&times;4&times;4&times;1.</td><td>Score 60.0 &rarr; P1; 48 &rarr; P2.</td><td class="ok">PASS</td></tr>
+<tr><td>TC13</td><td>Rule matrix: business-critical service and 500+ users raise priority</td><td>Unit</td><td>Business rule</td><td>Rule strategy: MEDIUM/MEDIUM crit 3; same with crit 5; LOW/LOW with 800 users.</td><td>P3; raised to P2; raised to P2.</td><td class="ok">PASS</td></tr>
+<tr><td>TC14</td><td>Skill-based picks the least busy technician with the matching skill</td><td>Unit</td><td>Normal</td><td>Candidates: busy network tech, free network tech, idle desktop tech.</td><td>Free network tech.</td><td class="ok">PASS</td></tr>
+<tr><td>TC15</td><td>Load-based ignores skills and picks the most free capacity</td><td>Unit</td><td>Normal</td><td>Same candidates.</td><td>Idle desktop tech.</td><td class="ok">PASS</td></tr>
+<tr><td>TC16</td><td>Experience-based picks whoever fixed this service most often</td><td>Unit</td><td>Normal</td><td>Same candidates (busy tech has 6 fixes on the service).</td><td>Busy network tech.</td><td class="ok">PASS</td></tr>
+<tr><td>TC17</td><td>Round robin rotates through the skilled pool</td><td>Unit</td><td>Normal</td><td>Select three times.</td><td>1st &ne; 2nd, 3rd = 1st, never the unskilled tech.</td><td class="ok">PASS</td></tr>
+<tr><td>TC18</td><td>No candidate means no assignment (incident stays queued)</td><td>Unit</td><td>Exception / boundary</td><td>Skill-based with only an unskilled candidate.</td><td>Empty result (service turns this into <code>TechnicianUnavailableException</code>).</td><td class="ok">PASS</td></tr>
+<tr><td>TC19</td><td>Workload boundary: a technician at max capacity cannot take more</td><td>Unit</td><td>Boundary</td><td><code>canTakeMore(4)</code> and <code>(5)</code> with max 5; mark another tech unavailable.</td><td>true at 4, false at 5; unavailable tech cannot take work.</td><td class="ok">PASS</td></tr>
+<tr><td>TC20</td><td>The brief's payment reports are recognised as similar</td><td>Unit</td><td>Normal (intelligent)</td><td>TF-IDF corpus of the three payment reports and a projector report.</td><td>Payment pairs cosine &gt; 0.5; projector = 0.0.</td><td class="ok">PASS</td></tr>
+<tr><td>TC21</td><td>Synonyms fold together: 'not working', 'down' and 'unavailable' mean the same</td><td>Unit</td><td>Normal (intelligent)</td><td><code>terms("Wi-Fi not working")</code>, <code>terms("wifi is down")</code>.</td><td>Both exactly [wifi, fail].</td><td class="ok">PASS</td></tr>
+<tr><td>TC22</td><td>Keyword classifier suggests the right category with a reason</td><td>Unit</td><td>Normal (intelligent)</td><td>Classify "The hostel wifi router has no internet" against NETWORK and PRINTING.</td><td>NETWORK, confidence 1.0, reason mentions wifi.</td><td class="ok">PASS</td></tr>
+<tr><td>TC23</td><td>Workflow 1+2: report &rarr; auto classify/prioritise/assign &rarr; investigate &rarr; resolve &rarr; verify &rarr; close</td><td>Integration</td><td>Normal</td><td>rohan reports a LAB-NET outage via API; the auto-assigned tech acknowledges, starts, resolves; rohan verifies; tech closes.</td><td>ASSIGNED with category NETWORK, P1/P2, SLA due set; each step 200 with the right status; timeline contains CREATED, CLASSIFIED, PRIORITY_CALCULATED, ASSIGNED, RESOLVED, FEEDBACK_GIVEN, CLOSED.</td><td class="ok">PASS</td></tr>
+<tr><td>TC24</td><td>Reporting the same problem twice is caught; confirming a different problem is allowed</td><td>Integration</td><td>Business rule / exception</td><td>ananya posts the same VPN report twice, then again with <code>confirmedNew</code>.</td><td>200, then 409 DUPLICATE_INCIDENT, then 200.</td><td class="ok">PASS</td></tr>
+<tr><td>TC25</td><td>Workflow 3: Wi-Fi reports from several hostels are correlated to Core Switch B</td><td>Integration</td><td>Normal (intelligent)</td><td>Admin runs scenario core-switch-b; read problems and outage map.</td><td>A problem rooted at Core Switch B with &ge; 3 incidents; CORE-B node is rootCause and OUTAGE.</td><td class="ok">PASS</td></tr>
+<tr><td>TC26</td><td>Search filters by status and priority</td><td>Integration</td><td>Normal</td><td><code>GET /api/incidents?status=CLOSED&amp;priority=P1&amp;priority=P2</code>.</td><td>Non-empty; every item CLOSED and P1/P2.</td><td class="ok">PASS</td></tr>
+<tr><td>TC27</td><td>Unknown service is a 404 with code SERVICE_NOT_FOUND</td><td>Integration</td><td>Exception</td><td>Report against service id 99999.</td><td>404, code SERVICE_NOT_FOUND.</td><td class="ok">PASS</td></tr>
+<tr><td>TC28</td><td>Invalid input is rejected with field errors</td><td>Integration</td><td>Invalid input</td><td>Title "Hi", description "short", affectedUsers 0.</td><td>400 INVALID_INPUT with fieldErrors for title and affectedUsers.</td><td class="ok">PASS</td></tr>
+<tr><td>TC29</td><td>Wrong password returns 401 INVALID_LOGIN</td><td>Integration</td><td>Invalid input / authentication</td><td>Log in as aarav with a wrong password.</td><td>401, code INVALID_LOGIN.</td><td class="ok">PASS</td></tr>
+<tr><td>TC30</td><td>API calls without a token are rejected; the public status page is open</td><td>Integration</td><td>Authorization</td><td><code>GET /api/incidents/mine</code> and <code>/api/public/status</code> with no token.</td><td>401; 200 with <code>overall</code>.</td><td class="ok">PASS</td></tr>
+<tr><td>TC31</td><td>An employee cannot open admin settings or the dashboard</td><td>Integration</td><td>Authorization</td><td>aarav calls settings and dashboard; ravi calls dashboard.</td><td>403, 403; 200 for the technician.</td><td class="ok">PASS</td></tr>
+<tr><td>TC32</td><td>An employee cannot view another person's incident or resolve their own</td><td>Integration</td><td>Authorization</td><td>diya reports; kabir opens it; diya tries to resolve it.</td><td>403; 403 UNAUTHORIZED_OPERATION.</td><td class="ok">PASS</td></tr>
+<tr><td>TC33</td><td>Closing before the fix is verified is an invalid state transition (409)</td><td>Integration</td><td>Exception / business rule</td><td>sneha reports; admin calls close immediately.</td><td>409 INVALID_STATE_TRANSITION.</td><td class="ok">PASS</td></tr>
+<tr><td>TC34</td><td>Self-registration requires a campus email</td><td>Integration</td><td>Invalid input / business rule</td><td>Register with someone@gmail.com.</td><td>400, message mentions campus email.</td><td class="ok">PASS</td></tr>
+<tr><td>TC35</td><td>An unacknowledged P1 breaches its SLA and is escalated up the chain</td><td>Integration</td><td>Business rule (SLA)</td><td>sneha reports a CRITICAL/CRITICAL fee-portal outage for 900 users; admin time-warps 11 min; read incident and violations.</td><td>P1; responseBreached; escalationLevel &ge; 1 with escalatedTo; ESCALATED in timeline; SLA violations list non-empty.</td><td class="ok">PASS</td></tr>
+<tr><td>TC36</td><td>Manual assignment beyond a technician's limit is refused unless overridden</td><td>Integration</td><td>Boundary / exception</td><td>Admin sets Suresh max = 1; lead assigns two ERP incidents to him, then retries with override.</td><td>Second assignment 409 WORKLOAD_EXCEEDED; with override 200.</td><td class="ok">PASS</td></tr>
+<tr><td>TC37</td><td>A missing SLA policy is reported as MISSING_SLA_CONFIGURATION</td><td>Integration</td><td>Exception</td><td>Delete the campus-default P4 policy (rolled back); ask for the PRINT/P4 policy.</td><td><code>MissingSlaConfigurationException</code>.</td><td class="ok">PASS</td></tr>
+<tr><td>TC38</td><td>'Me too' counts affected people once per person; the reporter cannot me-too their own incident</td><td>Integration</td><td>Business rule / boundary</td><td>diya reports a library printer fault (1 user); kabir says "me too" twice; diya says "me too" on her own incident.</td><td>supporters 1, affectedUsers 2; second click still 1; own incident 409 INVALID_STATE_TRANSITION.</td><td class="ok">PASS</td></tr>
+<tr><td>TC39</td><td>Fest-load scenario: academic-block network reports point at Core Switch A</td><td>Integration</td><td>Normal (intelligent)</td><td>Admin runs scenario fest-load; read problems.</td><td>A problem rooted at Core Switch A exists.</td><td class="ok">PASS</td></tr>
+<tr><td>TC40</td><td>AI adapters without an API key stay disabled and step aside for the keyword classifier</td><td>Unit</td><td>Exception (external service)</td><td>Build <code>GeminiCategoryClassifier</code> and <code>ClaudeCategoryClassifier</code> with empty keys; classify "wifi down".</td><td>Both report disabled and return empty, so the chain falls through to keywords.</td><td class="ok">PASS</td></tr>
+<tr><td>-</td><td>contextLoads</td><td>Integration</td><td>Smoke</td><td>Start the Spring context.</td><td>Context starts; seeder runs.</td><td class="ok">PASS</td></tr>
+</tbody></table>
+<p>Coverage by brief category: normal operations (TC02, 06, 10, 11, 14-17, 20-23, 25, 26, 39), boundary conditions (TC07, 08, 12, 19, 36, 38),
+invalid inputs (TC03, 09, 28, 29, 34), exceptions (TC18, 24, 27, 33, 37, 40), authorization (TC30, 31, 32), business rules
+(TC01, 04, 05, 13, 24, 35, 38). Frontend behaviour (screens, SSE refresh, voice input, QR prefill) is verified manually in the demo.</p>
+</section>
+
+<!-- ======================= 11 ======================= -->
+<section>
+<h1 id="s11">11. Innovation features</h1>
+<table class="small">
+<thead><tr><th style="width:24%">Brief's Innovation Challenge item</th><th style="width:9%">Status</th><th>What CampusOps does</th></tr></thead>
+<tbody>
+<tr><td>AI-assisted incident classification</td><td class="ok">Done</td><td>Google Gemini API (<code>GeminiCategoryClassifier</code>) and Claude via the official Anthropic Java SDK (<code>ClaudeCategoryClassifier</code>) in a fallback chain ending in an explainable keyword classifier; confidence, method and reason stored and shown.</td></tr>
+<tr><td>AI-based resolution recommendation</td><td class="partial">Partial</td><td>Suggested fixes from past resolutions using TF-IDF similarity (Section 7.7). Algorithmic, not LLM-generated.</td></tr>
+<tr><td>Incident similarity detection</td><td class="ok">Done</td><td>TF-IDF with synonym folding; duplicate flag, own-duplicate block, similar incidents panel, live preview with "Me too".</td></tr>
+<tr><td>Automated root-cause analysis</td><td class="ok">Done</td><td><code>CorrelationEngine</code> finds the most specific shared upstream service and opens a problem record.</td></tr>
+<tr><td>Predictive SLA violation detection</td><td class="ok">Done</td><td><code>SlaRiskAnalyzer</code> (median fix time, workload factor); at-risk list on the dashboard and risk on every incident.</td></tr>
+<tr><td>Service dependency graph</td><td class="ok">Done</td><td>Editable many-to-many graph with cycle check, blast-radius endpoint, React Flow outage map.</td></tr>
+<tr><td>Real-time notifications</td><td class="ok">Done</td><td>Server-Sent Events push notifications and incident changes to open browsers; bell with unread count.</td></tr>
+<tr><td>Mobile push notifications</td><td class="partial">Partial</td><td>Telegram messages reach phones in real time; the PWA is installable, but Web Push via the service worker is not implemented.</td></tr>
+<tr><td>Voice-based incident reporting</td><td class="ok">Done</td><td>Dictation on the report form with the browser Web Speech API; channel recorded as VOICE.</td></tr>
+<tr><td>Chatbot-based incident reporting</td><td class="ok">Done</td><td>Telegram bot: link account, <code>/report</code>, <code>/status</code>, <code>/mine</code>, <code>/services</code>.</td></tr>
+<tr><td>Cloud deployment</td><td class="partial">Ready</td><td>Docker images, Compose file and nginx config are cloud-ready; deployment to a public host is outside this submission.</td></tr>
+<tr><td>Microservice architecture</td><td class="no">No (by choice)</td><td>Deliberately a modular monolith (Section 3.3), with module boundaries ready for extraction.</td></tr>
+<tr><td>Event-driven architecture</td><td class="ok">Done (in-process)</td><td>All side effects driven by <code>IncidentEvent</code>s and observers.</td></tr>
+<tr><td>Real-time operational dashboard</td><td class="ok">Done</td><td>Dashboard and outage map refresh live from SSE events.</td></tr>
+<tr><td>Analytics and visualisation</td><td class="ok">Done</td><td>Overview KPIs, SLA compliance, technician workload, service/category analysis, 14-day trend, channel mix.</td></tr>
+<tr><td>Automated incident escalation</td><td class="ok">Done</td><td>Four-level chain driven by the SLA monitor (Section 2.4.4).</td></tr>
+</tbody></table>
+<p>Extras not in the list: "Me too" crowd confirmation that feeds the priority formula (inspired by SU Connect voting), QR stickers on physical assets (printable sticker sheet; scanning opens the report form with the service,
+location and category prefilled), a public campus status page, an incident replay slider built from audit snapshots, a demo control
+panel (time warp and scripted scenarios) and runtime-switchable strategies.</p>
+</section>
+
+<!-- ======================= 12 ======================= -->
+<section>
+<h1 id="s12">12. Requirement traceability matrix</h1>
+<p>Screens are frontend routes (<code>frontend/src/App.tsx</code>). Endpoints are under <code>/api</code>. "Manual" means verified
+in the demo, not by an automated test.</p>
+<table class="small">
+<thead><tr><th style="width:20%">Brief requirement</th><th style="width:31%">Class / endpoint</th><th style="width:17%">Screen</th><th style="width:12%">Test</th><th style="width:8%">Status</th></tr></thead>
+<tbody>
+<tr><th colspan="5">MVP - User management</th></tr>
+<tr><td>Employee, Technician, Administrator users</td><td><code>User</code> hierarchy, <code>UserFactory</code>; <code>POST /auth/register</code>, <code>POST /users</code>, <code>PATCH /users/{id}/active</code></td><td>/register, /admin/users</td><td>TC29-TC34</td><td class="ok">Full</td></tr>
+<tr><td>At least three user categories (+ extra roles)</td><td>5 roles: <code>Role</code>, <code>TeamLead</code>, <code>ItManager</code></td><td>role-specific navigation (Shell)</td><td>TC31</td><td class="ok">Full</td></tr>
+<tr><th colspan="5">MVP - Incident management</th></tr>
+<tr><td>Create</td><td><code>IncidentService.report</code>, <code>IncidentFactory</code>; <code>POST /incidents</code></td><td>/report</td><td>TC23, TC28</td><td class="ok">Full</td></tr>
+<tr><td>View</td><td><code>GET /incidents/{id}</code>, <code>/incidents/mine</code>, <code>/incidents/assigned</code></td><td>/incidents, /incidents/:id</td><td>TC23, TC32</td><td class="ok">Full</td></tr>
+<tr><td>Update</td><td>notes, request/provide info, change priority: <code>POST /incidents/{id}/notes|request-info|provide-info|priority</code></td><td>/incidents/:id</td><td>TC23 (status updates)</td><td class="ok">Full</td></tr>
+<tr><td>Assign</td><td><code>AssignmentService.choose</code> (auto), <code>POST /incidents/{id}/assign|take</code></td><td>/incidents/:id, /queue</td><td>TC23, TC36</td><td class="ok">Full</td></tr>
+<tr><td>Resolve</td><td><code>Incident.resolve</code>, <code>ResolvedState</code>; <code>POST /incidents/{id}/resolve</code></td><td>/incidents/:id</td><td>TC03, TC23</td><td class="ok">Full</td></tr>
+<tr><td>Close</td><td><code>ClosedState</code>; <code>POST /incidents/{id}/close</code></td><td>/incidents/:id</td><td>TC02, TC23, TC33</td><td class="ok">Full</td></tr>
+<tr><th colspan="5">MVP - Priority management</th></tr>
+<tr><td>Impact, urgency, business criticality (+ users, service)</td><td><code>WeightedScoreStrategy</code>, <code>RuleBasedStrategy</code>, <code>PriorityService</code></td><td>/report, /incidents/:id (rationale), /admin/settings</td><td>TC10-TC13</td><td class="ok">Full</td></tr>
+<tr><th colspan="5">MVP - Technician assignment</th></tr>
+<tr><td>At least two strategies, changeable without redesign</td><td>5 <code>AssignmentStrategy</code> classes; <code>PUT /admin/settings</code></td><td>/admin/settings</td><td>TC14-TC19</td><td class="ok">Full</td></tr>
+<tr><th colspan="5">MVP - SLA management</th></tr>
+<tr><td>SLA calculation</td><td><code>CatalogService.policyFor</code>, <code>SlaTracker.start</code></td><td>/incidents/:id, /admin/sla</td><td>TC06, TC37</td><td class="ok">Full</td></tr>
+<tr><td>Deadline tracking</td><td><code>SlaTracker</code>, <code>SlaMonitor</code></td><td>/queue (countdowns), /incidents/:id</td><td>TC07</td><td class="ok">Full</td></tr>
+<tr><td>Violation detection (+ warnings, records)</td><td><code>SlaTracker.evaluate</code>, <code>SlaViolation</code>; <code>GET /admin/sla-violations</code></td><td>/admin/violations</td><td>TC07, TC08, TC35</td><td class="ok">Full</td></tr>
+<tr><th colspan="5">MVP - Notification</th></tr>
+<tr><td>At least two mechanisms</td><td><code>InAppChannel</code> (+SSE), <code>EmailChannel</code> (simulated outbox), <code>TelegramChannel</code>; <code>GET /notifications</code>, <code>/notifications/outbox</code></td><td>bell menu, /admin/outbox</td><td>Manual</td><td class="partial">Full (no automated test)</td></tr>
+<tr><th colspan="5">MVP - Audit</th></tr>
+<tr><td>Complete incident history</td><td><code>AuditListener</code>, <code>AuditRecord</code>; <code>GET /audit</code>, timeline in incident detail</td><td>/incidents/:id (timeline + replay), /admin/audit</td><td>TC23, TC35</td><td class="ok">Full</td></tr>
+<tr><th colspan="5">MVP - Search and reporting</th></tr>
+<tr><td>&ge; 5 search/filter criteria</td><td><code>IncidentSpecifications</code>: text/number, status, priority, category, service, technician, SLA state, date from/to, escalated, problem, open-only; <code>GET /incidents</code></td><td>/incidents</td><td>TC26 (status, priority); others manual</td><td class="ok">Full</td></tr>
+<tr><td>Reports / dashboards</td><td><code>ReportService.dashboard</code>; <code>GET /reports/dashboard</code></td><td>/dashboard</td><td>TC31 (access)</td><td class="ok">Full</td></tr>
+<tr><th colspan="5">MVP - Intelligent features and persistence</th></tr>
+<tr><td>&ge; 2 intelligent features</td><td>Section 7 (seven features)</td><td>/report preview, /incidents/:id, /map, /problems, /dashboard</td><td>TC20-TC22, TC24, TC25, TC35, TC38, TC39</td><td class="ok">Full</td></tr>
+<tr><td>Third-party APIs (rubric: "use of APIs (Google API...)")</td><td><code>GeminiCategoryClassifier</code> (Google Gemini API), <code>TelegramAdapter</code> (Telegram Bot API), <code>ClaudeCategoryClassifier</code> (Anthropic Claude API)</td><td>/report, /admin/settings (integration status), Telegram chat</td><td>TC40 (fallback); live calls manual</td><td class="ok">Full</td></tr>
+<tr><td>Persistence</td><td>JPA entities + repositories; H2 / PostgreSQL</td><td>-</td><td>all integration tests</td><td class="ok">Full</td></tr>
+<tr><th colspan="5">Employee capabilities</th></tr>
+<tr><td>Register / login</td><td><code>AuthController</code></td><td>/register, /login</td><td>TC29, TC34</td><td class="ok">Full</td></tr>
+<tr><td>Report; view submitted; track status</td><td><code>POST /incidents</code>, <code>GET /incidents/mine</code>, detail with state description</td><td>/report, /incidents, /incidents/:id</td><td>TC23</td><td class="ok">Full</td></tr>
+<tr><td>Confirm an existing problem instead of a duplicate ("Me too")</td><td><code>IncidentService.meToo</code>; <code>POST /incidents/{id}/me-too</code></td><td>/report (live preview), /incidents/:id</td><td>TC38</td><td class="ok">Full</td></tr>
+<tr><td>Add information; respond to support requests</td><td><code>/notes</code>, <code>/provide-info</code> (AWAITING_INFO &rarr; IN_PROGRESS)</td><td>/incidents/:id</td><td>Manual</td><td class="ok">Full</td></tr>
+<tr><td>View resolution; give feedback</td><td>detail fields resolution*, <code>/verify</code> (rating 1-5)</td><td>/incidents/:id</td><td>TC23</td><td class="ok">Full</td></tr>
+<tr><th colspan="5">Technician capabilities</th></tr>
+<tr><td>View assigned; view workload</td><td><code>GET /incidents/assigned</code>, <code>UserView.activeIncidents</code>, dashboard workload</td><td>/queue, /dashboard</td><td>TC31</td><td class="ok">Full</td></tr>
+<tr><td>Accept/acknowledge; investigate; update status</td><td><code>/acknowledge</code>, <code>/start</code>, <code>/take</code></td><td>/queue, /incidents/:id</td><td>TC23</td><td class="ok">Full</td></tr>
+<tr><td>Investigation notes; request info</td><td><code>/notes</code> (internal flag), <code>/request-info</code></td><td>/incidents/:id</td><td>Manual</td><td class="ok">Full</td></tr>
+<tr><td>Resolution details; resolve</td><td><code>/resolve</code> (summary, root cause, code)</td><td>/incidents/:id</td><td>TC23</td><td class="ok">Full</td></tr>
+<tr><th colspan="5">Administrator capabilities</th></tr>
+<tr><td>Manage users; manage technicians</td><td><code>POST /users</code>, <code>PATCH /users/{id}/active</code>, <code>PUT /users/{id}/technician</code></td><td>/admin/users</td><td>TC36 (technician update)</td><td class="ok">Full</td></tr>
+<tr><td>Manage IT services</td><td><code>POST/PUT /services</code>, dependencies, <code>/services/{id}/blast-radius</code>, assets</td><td>/admin/services, /admin/assets</td><td>Manual</td><td class="ok">Full</td></tr>
+<tr><td>Configure SLA policies</td><td><code>PUT /sla-policies</code>, <code>DELETE /sla-policies/{id}</code></td><td>/admin/sla</td><td>TC09, TC37</td><td class="ok">Full</td></tr>
+<tr><td>Configure incident categories</td><td><code>POST/PUT /categories</code> (data, not enum)</td><td>/admin/categories</td><td>Manual</td><td class="ok">Full</td></tr>
+<tr><td>Configure assignment strategies</td><td><code>PUT /admin/settings</code></td><td>/admin/settings</td><td>TC14-TC17 (strategies)</td><td class="ok">Full</td></tr>
+<tr><td>Monitor incidents; view reports</td><td>search, dashboard, outage map</td><td>/incidents, /dashboard, /map</td><td>TC26, TC25</td><td class="ok">Full</td></tr>
+<tr><td>View audit logs; monitor SLA violations</td><td><code>GET /audit</code>, <code>GET /admin/sla-violations</code></td><td>/admin/audit, /admin/violations</td><td>TC35</td><td class="ok">Full</td></tr>
+<tr><th colspan="5">Other "should" requirements in the brief</th></tr>
+<tr><td>Incident fields (ID, reporter, category, description, service, impact, urgency, priority, time, status, technician, SLA, investigation, resolution, closure)</td><td><code>Incident</code> + embedded <code>SlaTracker</code>, <code>Resolution</code>, <code>Feedback</code>, <code>WorkNote</code>s, <code>closedAt</code></td><td>/incidents/:id</td><td>TC23</td><td class="ok">Full</td></tr>
+<tr><td>New categories without major changes</td><td><code>IncidentCategory</code> entity + keywords</td><td>/admin/categories</td><td>TC22</td><td class="ok">Full</td></tr>
+<tr><td>Problem scenario steps 1-14 (create ... analytics)</td><td><code>IncidentService.report</code> pipeline, <code>SlaMonitor</code>, audit, close, dashboard</td><td>/report &rarr; /dashboard</td><td>TC10, TC23, TC35</td><td class="ok">Full</td></tr>
+<tr><td>Prevent inappropriate state transitions (OOP)</td><td>State pattern + <code>IncidentPolicy</code></td><td>action buttons from <code>allowedActions</code></td><td>TC01, TC04, TC33</td><td class="ok">Full</td></tr>
+<tr><td>Generate warnings before deadlines; background monitoring</td><td><code>SlaMonitor</code> (@Scheduled), configurable %</td><td>notifications, /queue</td><td>TC07</td><td class="ok">Full</td></tr>
+<tr><td>Easy to add a notification mechanism</td><td><code>NotificationChannel</code> + <code>NotificationChannelFactory</code></td><td>-</td><td>-</td><td class="ok">Full (design)</td></tr>
+<tr><td>Audit fields: timestamp, user, action, incident, previous/new state, description</td><td><code>AuditRecord</code></td><td>/admin/audit</td><td>TC23</td><td class="ok">Full</td></tr>
+<tr><td>Escalation Technician &rarr; Team Lead &rarr; Sys Admin &rarr; IT Manager</td><td><code>EscalationService</code></td><td>/incidents/:id, notifications</td><td>TC35</td><td class="ok">Full</td></tr>
+<tr><td>Exception list (invalid login ... invalid input)</td><td>Section 5.1 table, <code>GlobalExceptionHandler</code></td><td>error toasts</td><td>TC24, TC27-TC29, TC33, TC36, TC37, TC40</td><td class="partial">Partial: database failure and live network failures not covered by tests</td></tr>
+<tr><td>Security: authentication, RBAC, password protection, validation, secure API, unauthorized operations</td><td><code>SecurityConfig</code>, <code>JwtService</code>, <code>@PreAuthorize</code>, <code>IncidentPolicy</code></td><td>/login, gated routes</td><td>TC28-TC34</td><td class="ok">Full</td></tr>
+<tr><td>Persist users, services, incidents, technicians, SLA policies, audit, resolutions</td><td>tables in Section 8</td><td>-</td><td>integration tests</td><td class="ok">Full</td></tr>
+<tr><td>At least two design patterns</td><td>State, Strategy, Observer, Factory, Adapter, Repository</td><td>-</td><td>TC01-TC22</td><td class="ok">Full</td></tr>
+<tr><td>&ge; 15 documented test cases</td><td>40 + context load</td><td>-</td><td>Section 10</td><td class="ok">Full</td></tr>
+<tr><td>Three demonstrated workflows</td><td>Video script (docs/VIDEO_SCRIPT.md)</td><td>-</td><td>TC23, TC25, TC35, TC39</td><td class="ok">Full</td></tr>
+<tr><td>Different GUI per user type, links between options</td><td>role-based Shell navigation and route gates</td><td>all</td><td>Manual</td><td class="ok">Full</td></tr>
+</tbody></table>
+</section>
+
+<!-- ======================= 13 ======================= -->
+<section>
+<h1 id="s13">13. Team and responsibilities</h1>
+<p class="note">Group number and member details are placeholders; the team will fill them in. The module split below is a suggestion
+that matches the brief's example and the code's package structure. Every member must still understand the whole system.</p>
+<table>
+<thead><tr><th style="width:22%">Member</th><th style="width:22%">Area</th><th>Modules / classes owned</th><th style="width:16%">Demo segment</th></tr></thead>
+<tbody>
+<tr><td>[Member 1 name, ID]</td><td>UI / UX</td><td><code>frontend/</code>: Shell and role navigation, report form (voice, QR prefill, live preview), incident page with replay slider, queue, dashboard, outage map, status page, PWA</td><td>Intro, workflow 1 (UI)</td></tr>
+<tr><td>[Member 2 name, ID]</td><td>Backend / APIs</td><td>controllers, <code>auth</code> (JWT, <code>SecurityConfig</code>), <code>realtime</code> (SSE), <code>telegram</code>, <code>notification</code>, OpenAPI</td><td>Workflow 2, Telegram</td></tr>
+<tr><td>[Member 3 name, ID]</td><td>Domain model / OOP</td><td><code>user</code>, <code>incident</code> (aggregate, State pattern, <code>IncidentPolicy</code>), <code>priority</code>, <code>assignment</code>, <code>events</code>, <code>common</code> exceptions, UML</td><td>OOP walk-through</td></tr>
+<tr><td>[Member 4 name, ID]</td><td>Database / persistence</td><td>JPA mapping, repositories and specifications, <code>catalog</code> (services graph, SLA policies), <code>audit</code>, <code>seed/DemoDataSeeder</code>, Postgres profile, ER diagram</td><td>Admin config, database</td></tr>
+<tr><td>[Member 5 name, ID]</td><td>Testing / DevOps / intelligent features</td><td><code>intelligence</code>, <code>ai</code>, <code>problem</code> (correlation), <code>sla</code> (monitor, escalation), <code>demo</code>, JUnit tests, Docker, CI</td><td>Workflow 3, tests and CI</td></tr>
+</tbody></table>
+</section>
+
+<!-- ======================= 14 ======================= -->
+<section>
+<h1 id="s14">14. Limitations and future work</h1>
+<h2>14.1 Limitations</h2>
+<ul>
+<li><b>Single instance.</b> Number sequences, the round-robin cursor, the SLA-risk cache and SSE subscriptions are in memory, and scheduled jobs would run on every instance (see Section 6, Q9).</li>
+<li><b>Email is simulated</b> (outbox table). No SMS. No Web Push.</li>
+<li><b>SLA clock is 24x7</b>; there are no business hours, holidays or "paused while awaiting info".</li>
+<li><b>Cancel is effectively pre-assignment only.</b> Auto-assignment moves a new incident straight to ASSIGNED, so cancel (allowed in NEW/CLASSIFIED) is available only when no technician could be assigned.</li>
+<li><b>Escalation recipients</b> are the first matching lead/admin/manager; there is no on-call rota.</li>
+<li><b>Keyword classifier mistakes.</b> Because "OTP" folds into the login synonym group, a payment report mentioning an OTP can be classified as Authentication when no AI key is configured (seen in the payment-down scenario). AI classification avoids this, and staff can see the classification reason.</li>
+<li><b>Correlation step 1 has no time limit.</b> A new incident attaches to any open problem that explains it, however old; stale problems must be resolved by a lead.</li>
+<li><b>Analytics in memory</b> (<code>ReportService</code> loads all incidents); fine for campus scale only.</li>
+<li><b>Schema management</b> uses Hibernate <code>ddl-auto=update</code>, not versioned migrations.</li>
+<li>Security gaps listed in Section 9 (refresh tokens, rate limiting, H2 console, query-string token, non-expiring Telegram codes).</li>
+<li>No file attachments (screenshots) on incidents; no frontend automated tests.</li>
+</ul>
+<h2>14.2 Future work</h2>
+<ul>
+<li>Receive IT grievances forwarded from SU Connect (su.bits-hyderabad.ac.in) as CampusOps incidents, keeping the GRV number as an external reference, and post status back so students see one answer in both places.</li>
+<li>Campus Google Workspace SSO (OAuth2 login) and real SMTP/SendGrid email through the existing <code>EmailGateway</code>.</li>
+<li>Business-hours SLA calendars and SLA pause while awaiting the reporter.</li>
+<li>Learned priority and assignment (train on the audit history once enough real data exists), and LLM-written resolution suggestions grounded in the knowledge base.</li>
+<li>Embedding-based similarity (<code>pgvector</code>) and full-text search.</li>
+<li>Web Push from the service worker; WhatsApp or SMS channels as new <code>NotificationChannel</code> classes.</li>
+<li>Flyway migrations, ShedLock for scheduled jobs, Redis for SSE fan-out, metrics and tracing, then extraction of notification and intelligence services behind a broker.</li>
+<li>Integration with CCIT's network monitoring so outages are detected before anyone reports them.</li>
+</ul>
+</section>
+
+<!-- ======================= 15 ======================= -->
+<section>
+<h1 id="s15">15. How to run</h1>
+<h2>15.1 Local (no database install)</h2>
+<pre><span class="cm"># backend: Java 21; starts on http://localhost:8080 with an H2 file database in backend/data/</span>
+cd backend
+./mvnw spring-boot:run              <span class="cm"># Windows: mvnw.cmd spring-boot:run</span>
+
+<span class="cm"># frontend: Node 22; starts on http://localhost:5173 and proxies /api to :8080</span>
+cd frontend
+npm install
+npm run dev</pre>
+<p>On first start the seeder builds the demo campus (Section 8.3). To start again from scratch, stop the backend and delete
+<code>backend/data/</code>. API documentation: <code>http://localhost:8080/swagger-ui.html</code>. Health:
+<code>/actuator/health</code>.</p>
+<h2>15.2 Docker</h2>
+<pre>docker compose up --build
+<span class="cm"># frontend (nginx) http://localhost:3000, backend http://localhost:8080, PostgreSQL 16 in a named volume</span></pre>
+<h2>15.3 Configuration (.env, copied from .env.example; all optional)</h2>
+<table class="small">
+<thead><tr><th style="width:25%">Variable</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td><code>GEMINI_API_KEY</code></td><td>Turns on Google Gemini category suggestion (free tier key from Google AI Studio).</td></tr>
+<tr><td><code>GEMINI_MODEL</code></td><td>Gemini model id (default <code>gemini-3.5-flash-lite</code>). Leave the line out of <code>.env</code> rather than empty.</td></tr>
+<tr><td><code>ANTHROPIC_API_KEY</code></td><td>Turns on Claude category suggestion (tried before Gemini). With neither key the keyword classifier is used.</td></tr>
+<tr><td><code>CAMPUSOPS_AI_MODEL</code></td><td>Claude model id (default <code>claude-opus-5-5</code>).</td></tr>
+<tr><td><code>TELEGRAM_BOT_TOKEN</code></td><td>Turns on the Telegram bot and channel.</td></tr>
+<tr><td><code>JWT_SECRET</code></td><td>Token signing key, at least 32 characters; change it for any shared deployment.</td></tr>
+<tr><td><code>ALLOWED_DOMAIN</code>, <code>CORS_ORIGINS</code>, <code>DEMO_ENABLED</code>, <code>SEED_ENABLED</code>, <code>PORT</code>, <code>DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD</code></td><td>Campus email domain for registration, allowed browser origins, demo controls, seeding, port and PostgreSQL connection (with <code>SPRING_PROFILES_ACTIVE=postgres</code>).</td></tr>
+</tbody></table>
+<h2>15.4 Demo accounts (password <code>Campus@123</code>, domain <code>@hyderabad.bits-pilani.ac.in</code>)</h2>
+<table class="small">
+<thead><tr><th>Role</th><th>Logins</th></tr></thead>
+<tbody>
+<tr><td>Employee / student / faculty</td><td>aarav, diya, kabir, ananya, rohan, lakshmi, sneha</td></tr>
+<tr><td>Technician</td><td>ravi, imran (Network Ops); arjun, meghana (Apps &amp; Data); suresh, farah (Desktop Support)</td></tr>
+<tr><td>Team lead</td><td>priya (Network Ops), vikram (Apps &amp; Data)</td></tr>
+<tr><td>System administrator</td><td>kiran</td></tr>
+<tr><td>IT manager</td><td>anil</td></tr>
+</tbody></table>
+<h2>15.5 Demo controls (admin only, <code>/admin/demo</code>)</h2>
+<ul>
+<li><b>Time warp</b> <code>POST /api/admin/demo/time-warp?minutes=N</code> (1-1440): moves the system clock forward and runs an SLA sweep immediately, so warnings, breaches and escalations appear in seconds. The panel offers +5, +15 and +60 minute buttons; pressing +5 repeatedly shows an unacknowledged P1 climb one level at a time (a single larger warp jumps straight to a higher level).</li>
+<li><b>Scenario "core-switch-b"</b>: four HIGH/HIGH Wi-Fi reports from Gautam, Krishna, Vyas and Meera Bhavan (120 users each) &rarr; correlated into a Core Switch B problem.</li>
+<li><b>Scenario "fest-load"</b>: four HIGH/HIGH reports from the Academic Blocks LAN (two), Library Wi-Fi and the D+F lab network (250 users each) &rarr; correlated into a Core Switch A problem.</li>
+<li><b>Scenario "payment-down"</b>: the brief's three payment reports on the Fee Payment Portal (HIGH/CRITICAL, 300 users) &rarr; P1, duplicates flagged.</li>
+<li><b>Sweep now</b> <code>POST /api/admin/demo/sweep</code>.</li>
+</ul>
+<h2>15.6 Tests</h2>
+<pre>cd backend
+./mvnw test        <span class="cm"># 41 tests (TC01-TC40 + context load), in-memory H2</span></pre>
+</section>
+
+</body>
+</html>

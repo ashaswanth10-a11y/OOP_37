@@ -1,0 +1,69 @@
+@startuml sequence-report
+!include _style.iuml
+skinparam sequence {
+  ParticipantBackgroundColor #E3EDF5
+  ParticipantBorderColor #455A64
+  LifeLineBorderColor #90A4AE
+  BoxBorderColor #B0BEC5
+}
+skinparam maxMessageSize 220
+title Sequence - report -> classify -> prioritise -> SLA -> assign -> notify
+
+actor Employee as E
+participant "IncidentController" as C
+participant "IncidentService" as S
+participant "SimilarityService" as SIM
+participant "IncidentFactory" as F
+participant "Incident" as I
+participant "TriageService" as T
+participant "PriorityService\n(active PriorityStrategy)" as P
+participant "CatalogService" as CAT
+participant "AssignmentService\n(active AssignmentStrategy)" as A
+participant "CorrelationEngine" as CE
+participant "IncidentEventPublisher" as EP
+participant "AuditListener /\nNotificationListener /\nRealtimeListener" as L
+
+E -> C : POST /api/incidents (title, description,\nserviceId, impact, urgency, affectedUsers)
+activate C
+C -> C : @Valid ReportRequest\n(Bean Validation)
+C -> S : report(cmd, reporter)
+activate S
+S -> SIM : findDuplicates(text, service, threshold)
+SIM --> S : matches (TF-IDF score)
+alt own report scores >= 0.75 and not confirmedNew
+  S --> C : throw DuplicateIncidentException (409)
+end
+S -> F : create(...)
+F --> S : new Incident (NEW, INC-nnnn)
+S -> EP : publish(CREATED)
+EP -> L : on(event): audit row, "logged" notification
+S -> T : suggest(text, service)
+T --> S : Suggestion(category, confidence, method)\n(Claude if enabled, else keywords)
+S -> I : classify(category, by, confidence)
+note right of I : NEW -> CLASSIFIED\n(state object validates)
+S -> EP : publish(CLASSIFIED)
+S -> P : assess(impact, urgency, service, users)
+P --> S : Assessment(P1..P4, score, rationale)
+S -> CAT : policyFor(service, priority)
+CAT --> S : SlaPolicy (service-specific or campus default)
+S -> I : applyPriority(priority, score, rationale, policy)
+note right of I : SlaTracker.start():\nresponseDue, resolutionDue
+S -> EP : publish(PRIORITY_CALCULATED)
+opt duplicates found
+  S -> I : flagPossibleDuplicate(top, score)
+  S -> EP : publish(DUPLICATE_DETECTED)
+end
+S -> A : choose(incident)
+A --> S : Recommendation(technician, score, reason)
+S -> I : assignTo(technician, strategyKey)
+note right of I : CLASSIFIED -> ASSIGNED
+S -> EP : publish(ASSIGNED)
+EP -> L : audit row; notify technician (in-app,\nemail, Telegram) and reporter
+S -> CE : correlate(incident)
+CE --> S : ProblemRecord? (links incidents,\npublishes PROBLEM_LINKED)
+S --> C : Incident
+deactivate S
+C --> E : 200 Detail view (status ASSIGNED,\npriority, SLA deadlines, assignee)
+deactivate C
+L ->> E : after commit: SSE "incident" + "notification"\nevents refresh open dashboards
+@enduml

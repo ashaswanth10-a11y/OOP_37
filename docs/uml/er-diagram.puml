@@ -1,0 +1,183 @@
+@startuml er-diagram
+!include _style.iuml
+hide circle
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #E8F5E9
+  BorderColor #2E7D32
+}
+title CampusOps - ER diagram (tables generated from the JPA entities)
+
+entity users {
+  * id : bigint <<PK>>
+  --
+  * user_type : varchar  (EMPLOYEE | TECHNICIAN | TEAM_LEAD | ADMIN | IT_MANAGER)
+  * code : varchar(12) <<UQ>>
+  * full_name : varchar
+  * email : varchar <<UQ>>
+  * password_hash : varchar  (BCrypt)
+  phone, telegram_chat_id, telegram_link_code
+  email_notifications, telegram_notifications, active
+  * created_at : timestamp
+  department, location        (employee)
+  team, max_concurrent, experience_years, available  (technician)
+}
+
+entity technician_skills {
+  * technician_id : bigint <<FK users>>
+  * category_code : varchar
+}
+
+entity incident_category {
+  * id : bigint <<PK>>
+  --
+  * code : varchar(32) <<UQ>>
+  * name : varchar
+  description, keywords(1000), color, active
+}
+
+entity it_service {
+  * id : bigint <<PK>>
+  --
+  * code : varchar(40) <<UQ>>
+  * name : varchar
+  type, criticality (1-5), location, user_base
+  default_category_id : bigint <<FK>>
+  mapx, mapy, active
+}
+
+entity service_dependencies {
+  * service_id : bigint <<FK it_service>>
+  * depends_on_id : bigint <<FK it_service>>
+}
+
+entity asset {
+  * id : bigint <<PK>>
+  --
+  * tag : varchar(40) <<UQ>>
+  * name : varchar
+  location
+  * service_id : bigint <<FK>>
+  category_id : bigint <<FK>>
+}
+
+entity sla_policy {
+  * id : bigint <<PK>>
+  --
+  service_id : bigint <<FK>> (null = campus default)
+  priority : P1..P4
+  response_minutes, resolution_minutes
+  <<UQ (service_id, priority)>>
+}
+
+entity incident {
+  * id : bigint <<PK>>
+  --
+  * number : varchar(16) <<UQ>>  (INC-1001)
+  sequence_no
+  * reporter_id <<FK users>>
+  * service_id <<FK it_service>>
+  asset_id <<FK>>, category_id <<FK>>
+  assignee_id <<FK users>>, escalated_to_id <<FK users>>
+  possible_duplicate_of_id <<FK incident>>, duplicate_score
+  problem_id <<FK problem_record>>
+  title, description(4000), location, channel
+  impact, urgency, affected_users
+  priority, priority_score, priority_rationale
+  classified_by, classification_confidence
+  * status, assigned_at, assignment_strategy, escalation_level
+  .. embedded SlaTracker ..
+  sla_policy_name, sla_start, response_due, resolution_due
+  responded_at, resolved_at, response_warned, resolution_warned
+  response_breached, resolution_breached, sla_state
+  .. embedded Resolution / Feedback ..
+  resolution_summary, root_cause, resolution_code, resolved_by_name
+  feedback_rating, feedback_comment
+  ..
+  created_at, updated_at, closed_at, version (optimistic lock)
+}
+
+entity incident_supporters {
+  * incident_id : bigint <<FK incident>>
+  * user_id : bigint  ("me too")
+}
+
+entity work_note {
+  * id : bigint <<PK>>
+  --
+  * incident_id <<FK>>
+  author_id <<FK users>>
+  type, text(4000), internal, created_at
+}
+
+entity problem_record {
+  * id : bigint <<PK>>
+  --
+  number <<UQ>> (PRB-101)
+  * root_service_id <<FK it_service>>
+  title, analysis, status, detected_at, resolved_at, resolution_summary
+}
+
+entity audit_record {
+  * id : bigint <<PK>>
+  --
+  at, actor_id, actor_name, actor_code, action
+  incident_id, incident_number (indexed, no FK: append-only log)
+  previous_state, new_state, description(2000)
+  snap_priority, snap_assignee, snap_category,
+  snap_sla_state, snap_escalation_level, snap_sla_used
+}
+
+entity sla_violation {
+  * id : bigint <<PK>>
+  --
+  incident_id, incident_number, kind (RESPONSE | RESOLUTION)
+  priority, service_name, assignee_name, due_at, detected_at
+}
+
+entity notification {
+  * id : bigint <<PK>>
+  --
+  * recipient_id <<FK users>>
+  title, body, incident_id, incident_number
+  severity, read_flag, created_at
+}
+
+entity email_outbox_message {
+  * id : bigint <<PK>>
+  --
+  to_address, subject, body, sent_at
+}
+
+entity system_settings {
+  * id = 1 <<PK>>
+  --
+  assignment_strategy, priority_strategy
+  sla_warning_percent, duplicate_threshold
+  correlation_window_minutes, correlation_min_incidents
+  auto_escalation, ai_triage
+}
+
+users ||--o{ technician_skills
+users ||--o{ incident : reports
+users |o--o{ incident : assigned
+users ||--o{ notification
+users |o--o{ work_note : writes
+it_service ||--o{ incident
+it_service ||--o{ asset
+it_service |o--o{ sla_policy
+it_service ||--o{ service_dependencies : service
+it_service ||--o{ service_dependencies : depends on
+it_service ||--o{ problem_record : root
+incident_category |o--o{ incident
+incident_category |o--o{ it_service : default
+incident_category |o--o{ asset
+asset |o--o{ incident
+incident ||--o{ work_note
+incident ||--o{ incident_supporters
+problem_record |o--o{ incident
+incident |o--o{ incident : duplicate of
+incident ..o{ audit_record : by incident_id
+incident ..o{ sla_violation : by incident_id
+@enduml

@@ -1,0 +1,88 @@
+@startuml class-state
+!include _style.iuml
+title Class Diagram 3 - State pattern for the incident lifecycle
+
+class Incident <<Entity>> {
+  - status : IncidentStatus
+  + state() : IncidentState
+  + transitionTo(target : IncidentStatus, now : Instant)
+  ~ sla() : SlaTracker
+  ~ recordClosure(now : Instant)
+}
+
+interface IncidentState <<State>> {
+  + status() : IncidentStatus
+  + allowedNext() : Set<IncidentStatus>
+  + canTransitionTo(t : IncidentStatus) : boolean
+  + allowsAssignment() : boolean
+  + validateEntry(i : Incident)
+  + onEnter(i : Incident, now : Instant)
+  + describe() : String
+}
+
+abstract class AbstractState {
+  - status : IncidentStatus
+  - next : Set<IncidentStatus>
+  + status() : IncidentStatus
+  + allowedNext() : Set<IncidentStatus>
+}
+
+class IncidentStates <<registry>> {
+  - {static} STATES : EnumMap<IncidentStatus, IncidentState>
+  + {static} of(s : IncidentStatus) : IncidentState
+}
+
+enum IncidentStatus {
+  NEW, CLASSIFIED, ASSIGNED, ACKNOWLEDGED,
+  IN_PROGRESS, AWAITING_INFO, RESOLVED,
+  VERIFIED, CLOSED, REOPENED, CANCELLED
+  --
+  + {static} OPEN : Set
+  + {static} ACTIVE_WORK : Set
+  + {static} FIXED : Set
+}
+
+class NewState
+class ClassifiedState {
+  validateEntry: needs category
+  allowsAssignment = true
+}
+class AssignedState {
+  validateEntry: needs assignee
+}
+class AcknowledgedState {
+  onEnter: sla.markResponded
+}
+class InProgressState
+class AwaitingInfoState
+class ResolvedState {
+  validateEntry: needs Resolution
+  onEnter: sla.markResolved
+}
+class VerifiedState
+class ClosedState {
+  onEnter: recordClosure
+}
+class ReopenedState {
+  onEnter: sla.reopen
+}
+class CancelledState {
+  onEnter: recordClosure
+}
+
+Incident ..> IncidentStates : of(status)
+IncidentStates o-- "11" IncidentState
+Incident --> IncidentStatus
+IncidentState <|.. AbstractState
+AbstractState <|-- NewState
+AbstractState <|-- ClassifiedState
+AbstractState <|-- AssignedState
+AbstractState <|-- AcknowledgedState
+AbstractState <|-- InProgressState
+AbstractState <|-- AwaitingInfoState
+AbstractState <|--- ResolvedState
+AbstractState <|--- VerifiedState
+AbstractState <|--- ClosedState
+AbstractState <|--- ReopenedState
+AbstractState <|--- CancelledState
+@enduml

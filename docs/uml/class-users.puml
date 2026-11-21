@@ -1,0 +1,130 @@
+@startuml class-users
+!include _style.iuml
+title Class Diagram 1 - Users, roles and the user factory
+
+package "user" {
+  abstract class User <<Entity>> {
+    - id : Long
+    - code : String
+    - fullName : String
+    - email : String
+    - passwordHash : String
+    - telegramChatId : String
+    - emailNotifications : boolean
+    - telegramNotifications : boolean
+    - active : boolean
+    - createdAt : Instant
+    --
+    + {abstract} getRole() : Role
+    + grantedRoles() : Set<Role>
+    + hasRole(r : Role) : boolean
+    + isStaff() : boolean
+    + changePassword(hash : String)
+    + linkTelegram(chatId : String)
+    + deactivate()
+  }
+
+  class Employee <<Entity>> {
+    - department : String
+    - location : String
+    --
+    + getRole() : Role
+    + moveTo(dept : String, loc : String)
+  }
+
+  class Technician <<Entity>> {
+    - skills : Set<String>
+    - maxConcurrent : int
+    - experienceYears : int
+    - available : boolean
+    - team : String
+    --
+    + getRole() : Role
+    + hasSkill(categoryCode : String) : boolean
+    + canTakeMore(activeIncidents : int) : boolean
+    + updateProfile(...)
+    + setAvailable(b : boolean)
+  }
+
+  class TeamLead <<Entity>> {
+    + getRole() : Role
+    + grantedRoles() : Set<Role>
+  }
+
+  class Administrator <<Entity>> {
+    + getRole() : Role
+  }
+
+  class ItManager <<Entity>> {
+    + getRole() : Role
+    + grantedRoles() : Set<Role>
+  }
+
+  enum Role {
+    EMPLOYEE
+    TECHNICIAN
+    TEAM_LEAD
+    SYSTEM_ADMIN
+    IT_MANAGER
+    --
+    - tier : int
+    - label : String
+    + authority() : String
+  }
+
+  class UserFactory <<Factory>> {
+    - passwordEncoder : PasswordEncoder
+    - sequence : AtomicInteger
+    + create(spec : Spec) : User
+    - nextCode(role : Role) : String
+  }
+
+  class "UserFactory.Spec" as Spec <<record>> {
+    role : Role
+    fullName : String
+    email : String
+    rawPassword : String
+    team : String
+    skills : List<String>
+  }
+
+  interface UserRepository <<Repository>> {
+    + findByEmailIgnoreCase(email) : Optional<User>
+    + findActiveTechnicians() : List<Technician>
+    + findActiveAdministrators() : List<Administrator>
+  }
+
+  class UserService <<Service>> {
+    + register(spec : Spec) : User
+    + requireTechnician(id : Long) : Technician
+    + activeLoad() : Map<Long,Integer>
+    + issueTelegramLinkCode(u : User) : String
+  }
+
+  class CurrentUser <<Component>> {
+    + id() : Long
+    + get() : User
+  }
+}
+
+User <|-- Employee
+User <|-- Technician
+Technician <|-- TeamLead
+User <|-- Administrator
+Administrator <|-- ItManager
+User ..> Role : uses
+UserFactory ..> Spec : reads
+UserFactory ..> User : <<creates>>
+UserService --> UserFactory
+UserService --> UserRepository
+CurrentUser --> UserRepository
+
+note bottom of TeamLead
+  "is-a" Technician: can be auto-assigned,
+  and also receives level-1 escalations.
+end note
+note bottom of ItManager
+  "is-a" Administrator at the top
+  of the escalation chain (level 3).
+end note
+@enduml

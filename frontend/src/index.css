@@ -1,0 +1,275 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --paper: #f3f6f8;
+  --card: #ffffff;
+  --sunk: #e9eef1;
+  --line: #d9e1e6;
+  --line-strong: #bfcbd3;
+  --ink: #13202a;
+  --ink-2: #33444f;
+  --mute: #64737d;
+  --rail: #0f1b24;
+  --rail-2: #182833;
+  --rail-ink: #c9d5dc;
+  --signal: #0a6c7e;
+  --signal-soft: #dcefF2;
+  --beacon: #f2a900;
+
+  --p1: #d02b2b;
+  --p2: #e0670e;
+  --p3: #2d6bc9;
+  --p4: #7b8791;
+
+  --ok: #1e8a4f;
+  --risk: #c88a04;
+  --breach: #c62626;
+  --met: #3e7c8c;
+
+  --outage: #d02b2b;
+  --degraded: #d49a05;
+  --impacted: #b5651d;
+  --operational: #1e8a4f;
+
+  color-scheme: light;
+}
+
+.dark {
+  --paper: #0d151b;
+  --card: #141f27;
+  --sunk: #1a2730;
+  --line: #24343f;
+  --line-strong: #34495a;
+  --ink: #e4ecf0;
+  --ink-2: #c1ced6;
+  --mute: #8a9ba6;
+  --rail: #091117;
+  --rail-2: #13202a;
+  --rail-ink: #b5c3cb;
+  --signal: #3fb3c7;
+  --signal-soft: #10303a;
+  --beacon: #f5b82e;
+
+  --p1: #ef5350;
+  --p2: #f08a3c;
+  --p3: #5b93e6;
+  --p4: #95a2ab;
+  --ok: #3cb371;
+  --risk: #e0a82e;
+  --breach: #ef5350;
+  --met: #6aa9b8;
+  --outage: #ef5350;
+  --degraded: #e0b030;
+  --impacted: #d58a45;
+  --operational: #3cb371;
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-cond: "IBM Plex Sans Condensed", "IBM Plex Sans", sans-serif;
+
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-sunk: var(--sunk);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-mute: var(--mute);
+  --color-rail: var(--rail);
+  --color-rail-2: var(--rail-2);
+  --color-rail-ink: var(--rail-ink);
+  --color-signal: var(--signal);
+  --color-signal-soft: var(--signal-soft);
+  --color-beacon: var(--beacon);
+  --color-p1: var(--p1);
+  --color-p2: var(--p2);
+  --color-p3: var(--p3);
+  --color-p4: var(--p4);
+  --color-ok: var(--ok);
+  --color-risk: var(--risk);
+  --color-breach: var(--breach);
+  --color-met: var(--met);
+  --color-outage: var(--outage);
+  --color-degraded: var(--degraded);
+  --color-impacted: var(--impacted);
+  --color-operational: var(--operational);
+}
+
+html {
+  background: var(--paper);
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+:focus-visible {
+  outline: 2px solid var(--beacon);
+  outline-offset: 2px;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+.field {
+  width: 100%;
+  border: 1px solid var(--line-strong);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 14px;
+}
+
+.field:focus {
+  outline: none;
+  border-color: var(--signal);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--signal) 20%, transparent);
+}
+
+.field:disabled {
+  background: var(--sunk);
+  color: var(--mute);
+}
+
+.label {
+  display: block;
+  font-family: var(--font-cond);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  margin-bottom: 4px;
+}
+
+.eyebrow {
+  font-family: var(--font-cond);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-weight: 500;
+  font-size: 14px;
+  border: 1px solid transparent;
+  transition: background-color 120ms, border-color 120ms, color 120ms;
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+}
+
+.btn-primary {
+  background: var(--signal);
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--signal) 85%, black);
+}
+
+.btn-ghost {
+  background: var(--card);
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  border-color: var(--ink-2);
+}
+
+.btn-danger {
+  background: var(--breach);
+  color: #fff;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--breach) 85%, black);
+}
+
+.panel {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.hatch {
+  background-image: repeating-linear-gradient(-45deg, transparent 0 4px, rgba(255, 255, 255, 0.35) 4px 6px);
+}
+
+@keyframes lamp-blink {
+  0%, 55% { opacity: 1; }
+  70%, 100% { opacity: 0.35; }
+}
+
+.lamp-blink {
+  animation: lamp-blink 1.2s steps(1, end) infinite;
+}
+
+@keyframes toast-in {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+.toast-in {
+  animation: toast-in 180ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lamp-blink, .toast-in { animation: none; }
+}
+
+@media print {
+  .no-print { display: none !important; }
+  body, html { background: #fff; }
+}
+
+.react-flow__attribution {
+  display: none;
+}
+
+.react-flow__controls-button {
+  background: var(--card);
+  border-bottom-color: var(--line);
+  fill: var(--ink-2);
+}
+
+.react-flow__controls-button:hover {
+  background: var(--sunk);
+}
+
+.dark .btn-primary {
+  color: #061316;
+}

@@ -1,0 +1,21 @@
+# Render blueprint for the CampusOps API (free plan).
+# The free instance sleeps when idle; on wake-up the demo campus is re-seeded (embedded H2 database).
+services:
+  - type: web
+    name: campusops-api
+    runtime: docker
+    plan: free
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false # set to the Vercel frontend URL, e.g. https://campusops.vercel.app
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:MaxRAMPercentage=75 -XX:+UseSerialGC

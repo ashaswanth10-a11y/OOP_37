@@ -1,0 +1,110 @@
+@startuml use-case
+!include _style.iuml
+left to right direction
+skinparam usecase {
+  BackgroundColor #F1F8E9
+  BorderColor #558B2F
+  FontSize 11
+}
+skinparam actorStyle awesome
+title CampusOps - Use Case Diagram
+
+actor "Employee /\nStudent" as EMP
+actor "Technician" as TECH
+actor "Team Lead" as LEAD
+actor "System\nAdministrator" as ADMIN
+actor "IT Manager" as MGR
+actor "Visitor\n(no login)" as VIS
+
+
+rectangle "CampusOps" {
+  package "Reporting & tracking" {
+    usecase "Register / log in" as UC_LOGIN
+    usecase "Report incident\n(web, voice, QR, Telegram)" as UC_REPORT
+    usecase "See live preview:\ncategory, duplicates, known fixes" as UC_PREVIEW
+    usecase "View & track own incidents" as UC_TRACK
+    usecase "Confirm an existing incident\n(Me too)" as UC_METOO
+    usecase "Answer info request" as UC_INFO
+    usecase "Verify fix and give feedback" as UC_VERIFY
+    usecase "Reopen or cancel incident" as UC_REOPEN
+    usecase "View public status page" as UC_STATUS
+  }
+  package "Resolution" {
+    usecase "View queue & workload" as UC_QUEUE
+    usecase "Acknowledge / take incident" as UC_ACK
+    usecase "Investigate: notes,\nrequest info" as UC_INV
+    usecase "Resolve with details" as UC_RESOLVE
+    usecase "Close verified incident" as UC_CLOSE
+    usecase "Use suggested fixes &\nsimilar incidents" as UC_KB
+  }
+  package "Supervision" {
+    usecase "Assign / reassign\n(workload override)" as UC_ASSIGN
+    usecase "Change priority" as UC_PRIO
+    usecase "Receive escalations" as UC_ESC
+    usecase "Resolve problem record\n(fix all linked incidents)" as UC_PROBLEM
+    usecase "Dashboard, outage map,\nSLA violations, audit log" as UC_DASH
+  }
+  package "Administration" {
+    usecase "Manage users & technicians" as UC_USERS
+    usecase "Manage services, assets,\ndependencies, categories" as UC_CATALOG
+    usecase "Configure SLA policies" as UC_SLA
+    usecase "Configure strategies\n& thresholds" as UC_CONFIG
+    usecase "Demo controls:\ntime warp, scenarios" as UC_DEMO
+  }
+  package "Automatic (system)" {
+    usecase "Classify, prioritise,\nstart SLA, auto-assign" as UC_TRIAGE
+    usecase "Detect duplicates &\ncorrelate root cause" as UC_CORR
+    usecase "Monitor SLA, warn,\nrecord breach, escalate" as UC_MON
+    usecase "Notify (in-app, email,\nTelegram)" as UC_NOTIFY
+  }
+}
+
+actor "Telegram Bot API" as TG <<secondary>>
+actor "SLA Scheduler" as SCHED <<secondary>>
+actor "Claude API /\nGoogle Gemini API" as AI <<secondary>>
+
+EMP --> UC_LOGIN
+EMP --> UC_REPORT
+EMP --> UC_TRACK
+EMP --> UC_METOO
+EMP --> UC_INFO
+EMP --> UC_VERIFY
+EMP --> UC_REOPEN
+VIS --> UC_STATUS
+
+TECH --> UC_QUEUE
+TECH --> UC_ACK
+TECH --> UC_INV
+TECH --> UC_RESOLVE
+TECH --> UC_CLOSE
+TECH --> UC_KB
+
+LEAD --> UC_ASSIGN
+LEAD --> UC_PRIO
+LEAD --> UC_ESC
+LEAD --> UC_PROBLEM
+LEAD --> UC_DASH
+
+ADMIN --> UC_USERS
+ADMIN --> UC_CATALOG
+ADMIN --> UC_SLA
+ADMIN --> UC_CONFIG
+ADMIN --> UC_DEMO
+ADMIN --> UC_DASH
+ADMIN --> UC_ESC
+MGR --> UC_ESC
+
+UC_REPORT ..> UC_PREVIEW : <<include>>
+UC_REPORT ..> UC_TRIAGE : <<include>>
+UC_TRIAGE ..> UC_CORR : <<include>>
+UC_TRIAGE ..> UC_NOTIFY : <<include>>
+UC_MON ..> UC_NOTIFY : <<include>>
+UC_RESOLVE ..> UC_NOTIFY : <<include>>
+
+UC_TRIAGE --> AI
+LEAD -[#7B1FA2,dashed]-|> TECH : <<extends role>>
+MGR -[#7B1FA2,dashed]-|> ADMIN : <<extends role>>
+UC_NOTIFY --> TG
+TG --> UC_REPORT
+SCHED --> UC_MON
+@enduml

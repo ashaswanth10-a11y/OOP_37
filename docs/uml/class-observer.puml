@@ -1,0 +1,120 @@
+@startuml class-observer
+!include _style.iuml
+title Class Diagram 5 - Observer, notification channels and adapters
+
+package "events" {
+  class IncidentEventPublisher <<Subject>> {
+    - publisher : ApplicationEventPublisher
+    + publish(type, incident, actor, description)
+    + publish(type, incident, actor, from, to, description)
+  }
+  class IncidentEvent <<record>> {
+    type : IncidentEventType
+    incident : Incident
+    actor : User
+    fromStatus : IncidentStatus
+    toStatus : IncidentStatus
+    description : String
+    at : Instant
+    + isSystem() : boolean
+  }
+  enum IncidentEventType {
+    CREATED, CLASSIFIED, PRIORITY_CALCULATED,
+    PRIORITY_CHANGED, ASSIGNED, ASSIGNMENT_FAILED,
+    STATUS_CHANGED, NOTE_ADDED, INFO_REQUESTED,
+    INFO_PROVIDED, RESOLVED, REOPENED,
+    FEEDBACK_GIVEN, CLOSED, SLA_WARNING,
+    SLA_BREACHED, ESCALATED, DUPLICATE_DETECTED,
+    PROBLEM_LINKED, ME_TOO
+  }
+}
+
+package "observers" {
+  class AuditListener <<Observer>> {
+    + on(e : IncidentEvent)  @Order(0)
+  }
+  class NotificationListener <<Observer>> {
+    + on(e : IncidentEvent)  @Order(10)
+  }
+  class RealtimeListener <<Observer>> {
+    + on(e : IncidentEvent)  AFTER_COMMIT
+  }
+}
+
+package "audit" {
+  class AuditRecord <<Entity>> {
+    - at : Instant
+    - actorName : String
+    - action : IncidentEventType
+    - incidentNumber : String
+    - previousState / newState
+    - description : String
+    - snapPriority, snapAssignee, snapSlaState ...
+  }
+}
+
+package "notification" {
+  class NotificationService {
+    + notify(user, title, body, incident, severity)
+    + notifyAll(users, title, body, incident, severity)
+  }
+  class NotificationChannelFactory <<Factory>> {
+    - byType : EnumMap<Type, NotificationChannel>
+    + create(t : Type) : NotificationChannel
+    + channelsFor(u : User) : List<NotificationChannel>
+  }
+  interface NotificationChannel {
+    + type() : Type
+    + supports(u : User) : boolean
+    + send(m : Message)
+  }
+  class InAppChannel
+  class EmailChannel
+  class TelegramChannel
+  interface EmailGateway <<Adapter target>> {
+    + send(to, subject, body)
+  }
+  class SimulatedEmailGateway
+  class Notification <<Entity>>
+  class EmailOutboxMessage <<Entity>>
+}
+
+package "realtime / telegram" {
+  class SseHub {
+    - emitters : ConcurrentHashMap<Long, List<SseEmitter>>
+    + subscribe(userId) : SseEmitter
+    + toUser(userId, event, data)
+    + broadcast(event, data)
+  }
+  class TelegramAdapter <<Adapter>> {
+    + isEnabled() : boolean
+    + sendMessage(chatId, text)
+    + getUpdates(offset) : List<Update>
+  }
+  class TelegramBot {
+    + poll()  @Scheduled 3 s
+    ~ handle(chatId, text) : String
+  }
+}
+
+IncidentEventPublisher ..> IncidentEvent : <<publishes>>
+IncidentEvent --> IncidentEventType
+AuditListener ..> IncidentEvent : observes
+NotificationListener ..> IncidentEvent : observes
+RealtimeListener ..> IncidentEvent : observes
+AuditListener --> AuditRecord : saves
+NotificationListener --> NotificationService
+NotificationService --> NotificationChannelFactory
+NotificationChannelFactory o--> "3" NotificationChannel
+NotificationChannel <|.. InAppChannel
+NotificationChannel <|.. EmailChannel
+NotificationChannel <|.. TelegramChannel
+InAppChannel --> Notification : saves
+InAppChannel --> SseHub
+EmailChannel --> EmailGateway
+EmailGateway <|.. SimulatedEmailGateway
+SimulatedEmailGateway --> EmailOutboxMessage : saves
+TelegramChannel --> TelegramAdapter
+TelegramBot --> TelegramAdapter
+RealtimeListener --> SseHub
+@enduml

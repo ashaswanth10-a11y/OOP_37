@@ -1,0 +1,128 @@
+@startuml class-strategies
+!include _style.iuml
+title Class Diagram 4 - Strategy pattern: priority, assignment and categorisation (chain of responsibility over classifiers)
+
+package "priority" {
+  interface PriorityStrategy <<Strategy>> {
+    + key() : String
+    + label() : String
+    + assess(in : Input) : Assessment
+  }
+  class WeightedScoreStrategy {
+    ~ P1_THRESHOLD = 60
+    ~ P2_THRESHOLD = 30
+    ~ P3_THRESHOLD = 10
+    + assess(in : Input) : Assessment
+  }
+  class RuleBasedStrategy {
+    - MATRIX : Priority[4][4]
+    + assess(in : Input) : Assessment
+  }
+  class PriorityService <<Context>> {
+    - strategies : Map<String, PriorityStrategy>
+    + active() : PriorityStrategy
+    + assess(in : Input) : Assessment
+  }
+}
+
+package "assignment" {
+  interface AssignmentStrategy <<Strategy>> {
+    + key() : String
+    + label() : String
+    + rank(i : Incident, c : List<Candidate>) : List<Recommendation>
+    + select(i : Incident, c : List<Candidate>) : Optional<Recommendation>
+  }
+  class "Candidate" as Cand <<record>> {
+    technician : Technician
+    active : int
+    resolvedOnService : int
+    skillMatch : boolean
+    + loadRatio() : double
+  }
+  class "Recommendation" as Rec <<record>> {
+    technician : Technician
+    score : double
+    reason : String
+  }
+  class SkillBased
+  class LoadBased
+  class RoundRobin {
+    - lastAssignedId : AtomicLong
+  }
+  class ExperienceBased
+  class Smart {
+    weights: skill .40, load .25/.15,
+    history .20/.28, seniority .15/.17
+  }
+  class AssignmentService <<Context>> {
+    - strategies : Map<String, AssignmentStrategy>
+    + choose(i : Incident) : Recommendation
+    + recommend(i : Incident) : List<Recommendation>
+    + checkManual(t : Technician, override : boolean)
+  }
+}
+
+package "intelligence / ai" {
+  interface CategoryClassifier {
+    + name() : String
+    + classify(text, service, categories) : Optional<Suggestion>
+  }
+  class KeywordCategoryClassifier {
+    - SERVICE_PRIOR = 1.5
+  }
+  class ClaudeCategoryClassifier <<Adapter>> {
+    - client : AnthropicClient
+    - model : String
+    + isEnabled() : boolean
+  }
+  class GeminiCategoryClassifier <<Adapter>> {
+    - apiKey : String
+    - model : String
+    + isEnabled() : boolean
+  }
+  class TriageService {
+    - chain() : List<CategoryClassifier>
+    + suggest(text, service) : Optional<Suggestion>
+    + preview(text, service) : Optional<Suggestion>
+  }
+}
+
+class SettingsService {
+  + get() : SystemSettings
+}
+class SystemSettings <<Entity>> {
+  - assignmentStrategy : String
+  - priorityStrategy : String
+  - aiTriage : boolean
+}
+
+PriorityStrategy <|.. WeightedScoreStrategy
+PriorityStrategy <|.. RuleBasedStrategy
+PriorityService o--> "2" PriorityStrategy
+AssignmentStrategy <|.. SkillBased
+AssignmentStrategy <|.. LoadBased
+AssignmentStrategy <|.. RoundRobin
+AssignmentStrategy <|.. ExperienceBased
+AssignmentStrategy <|.. Smart
+AssignmentService o--> "5" AssignmentStrategy
+AssignmentStrategy ..> Cand
+AssignmentStrategy ..> Rec
+CategoryClassifier <|.. KeywordCategoryClassifier
+CategoryClassifier <|.. ClaudeCategoryClassifier
+CategoryClassifier <|.. GeminiCategoryClassifier
+TriageService --> ClaudeCategoryClassifier : 1st (if key)
+TriageService --> GeminiCategoryClassifier : 2nd (if key)
+TriageService --> KeywordCategoryClassifier : last (always)
+PriorityService --> SettingsService
+AssignmentService --> SettingsService
+TriageService --> SettingsService
+SettingsService --> SystemSettings
+
+note bottom of PriorityService
+  The admin picks the active key at runtime
+  (PUT /api/admin/settings); Spring injects
+  every implementation as a List.
+end note
+WeightedScoreStrategy -[hidden]down- AssignmentService
+RuleBasedStrategy -[hidden]down- TriageService
+@enduml

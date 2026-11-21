@@ -1,0 +1,91 @@
+@startuml architecture
+!include _style.iuml
+skinparam component {
+  BackgroundColor #F7FAFC
+  BorderColor #455A64
+}
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #90A4AE
+}
+title CampusOps - component / deployment architecture (modular monolith)
+
+actor "Employee /\nTechnician / Admin" as U
+actor "Visitor" as V
+actor "Telegram user" as TU
+
+node "Browser (PWA)" as BR {
+  component "React + TypeScript SPA\n(Vite, React Router,\nTanStack Query, React Flow,\nRecharts)" as SPA
+}
+
+node "nginx (frontend container :3000)" as NG {
+  component "static files +\nreverse proxy /api" as PROXY
+}
+
+node "Spring Boot 4 backend (Java 21, :8080)" as BE {
+  rectangle "Web layer" {
+    component "REST controllers\n/api/**" as CTRL
+    component "SseHub\n/api/stream" as SSE
+    component "Spring Security\nJWT resource server" as SEC
+    component "GlobalExceptionHandler" as GEH
+  }
+  rectangle "Application services" {
+    component "IncidentService" as IS
+    component "CatalogService / UserService\nSettingsService" as CS
+    component "ReportService" as RS
+    component "SlaMonitor + EscalationService\n@Scheduled every 15 s" as MON
+  }
+  rectangle "Domain + intelligence" {
+    component "Incident aggregate\nState objects, SlaTracker" as DOM
+    component "Priority / Assignment\nstrategies" as STR
+    component "TriageService, SimilarityService,\nSlaRiskAnalyzer, CorrelationEngine" as INT
+  }
+  rectangle "Events (in-process Observer)" {
+    component "IncidentEventPublisher" as PUB
+    component "AuditListener\nNotificationListener\nRealtimeListener" as LIS
+  }
+  rectangle "Adapters" {
+    component "ClaudeCategoryClassifier\n(Anthropic Java SDK)" as CLA
+    component "GeminiCategoryClassifier\n(REST, java.net.http)" as GEM
+    component "TelegramAdapter + TelegramBot" as TGA
+    component "EmailGateway\n(SimulatedEmailGateway)" as EMG
+  }
+  component "Spring Data JPA\nrepositories" as REPO
+}
+
+database "PostgreSQL 16\n(Docker) or H2 file DB\n(local default)" as DB
+cloud "Anthropic Claude API" as CLAUDE
+cloud "Telegram Bot API" as TGAPI
+cloud "Google Gemini API" as GEMAPI
+
+U --> SPA
+V --> SPA : /status (public)
+SPA --> PROXY : HTTPS, Bearer JWT
+PROXY --> CTRL : /api/*
+PROXY --> SSE : /api/stream (unbuffered)
+CTRL --> SEC
+CTRL --> IS
+CTRL --> CS
+CTRL --> RS
+IS --> DOM
+IS --> STR
+IS --> INT
+IS --> PUB
+MON --> PUB
+MON --> DOM
+PUB --> LIS
+LIS --> SSE
+LIS --> EMG
+LIS --> TGA
+INT --> CLA
+CLA --> CLAUDE : Messages API
+INT --> GEM
+GEM --> GEMAPI : generateContent
+TGA --> TGAPI : sendMessage / getUpdates
+TU --> TGAPI
+IS --> REPO
+CS --> REPO
+RS --> REPO
+LIS --> REPO
+REPO --> DB : JDBC
+@enduml

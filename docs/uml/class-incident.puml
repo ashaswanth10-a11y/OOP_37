@@ -1,0 +1,165 @@
+@startuml class-incident
+!include _style.iuml
+title Class Diagram 2 - Incident aggregate (composition) and service catalogue (association)
+
+package "catalog" {
+  class ItService <<Entity>> {
+    - code : String
+    - name : String
+    - type : ServiceType
+    - criticality : int  {1..5}
+    - userBase : int
+    - dependsOn : Set<ItService>
+    + addDependency(up : ItService)
+    + replaceDependencies(ups : Set<ItService>)
+  }
+  class IncidentCategory <<Entity>> {
+    - code : String
+    - name : String
+    - keywords : String
+    - active : boolean
+    + keywordList() : List<String>
+  }
+  class Asset <<Entity>> {
+    - tag : String
+    - name : String
+    - location : String
+  }
+  class SlaPolicy <<Entity>> {
+    - priority : Priority
+    - responseMinutes : int
+    - resolutionMinutes : int
+    + update(resp : int, res : int)
+    + responseTarget() : Duration
+    + resolutionTarget() : Duration
+  }
+  enum Priority {
+    P1
+    P2
+    P3
+    P4
+    + isUrgent() : boolean
+  }
+  enum Level {
+    LOW
+    MEDIUM
+    HIGH
+    CRITICAL
+    + weight() : int
+  }
+}
+
+package "incident" {
+  class Incident <<Entity, aggregate root>> {
+    - number : String
+    - title : String
+    - description : String
+    - impact : Level
+    - urgency : Level
+    - affectedUsers : int
+    - priority : Priority
+    - priorityScore : double
+    - status : IncidentStatus
+    - channel : Channel
+    - escalationLevel : int
+    - supporterIds : Set<Long>
+    - version : long
+    --
+    + state() : IncidentState
+    + transitionTo(target : IncidentStatus, now : Instant)
+    + classify(c : IncidentCategory, by : String, conf : Double, now)
+    + applyPriority(p : Priority, score, why, policy : SlaPolicy, now)
+    + assignTo(t : Technician, strategy : String, now)
+    + resolve(r : Resolution, now)
+    + verify(f : Feedback, now)
+    + escalate(level : int, to : User, now)
+    + addNote(author, type, text, internal, now) : WorkNote
+    + addSupporter(u : User, now) : boolean
+    + getSupporterCount() : int
+    + flagPossibleDuplicate(original : Incident, score)
+    + linkProblem(p : ProblemRecord)
+  }
+
+  class SlaTracker <<Embeddable>> {
+    - slaStart : Instant
+    - responseDue : Instant
+    - resolutionDue : Instant
+    - respondedAt : Instant
+    - resolvedAt : Instant
+    - responseBreached : boolean
+    - resolutionBreached : boolean
+    - slaState : SlaState
+    + start(p : SlaPolicy, from : Instant)
+    + evaluate(now, warnPercent) : List<Signal>
+    + resolutionUsed(now) : double
+    ~ markResponded(now)
+    ~ markResolved(now)
+  }
+  class Resolution <<Embeddable>> {
+    - resolutionSummary : String
+    - rootCause : String
+    - resolutionCode : String
+    + isPresent() : boolean
+  }
+  class Feedback <<Embeddable>> {
+    - feedbackRating : Integer {1..5}
+    - feedbackComment : String
+  }
+  class WorkNote <<Entity>> {
+    - type : Type
+    - text : String
+    - internal : boolean
+    - createdAt : Instant
+  }
+
+  interface IncidentState <<State>>
+  class IncidentFactory <<Factory>> {
+    + create(reporter, title, description, service, asset,\n location, impact, urgency, users, channel) : Incident
+  }
+  class IncidentPolicy <<authorization>> {
+    + allowedActions(u : User, i : Incident) : Set<Action>
+    + require(u : User, i : Incident, a : Action)
+    + requireView(u : User, i : Incident)
+  }
+}
+
+package "problem" {
+  class ProblemRecord <<Entity>> {
+    - number : String
+    - title : String
+    - analysis : String
+    - status : Status
+    + resolve(summary, now)
+  }
+}
+
+package "user" {
+  class User
+  class Technician
+}
+
+Incident *-- "1" SlaTracker : sla
+Incident *-- "0..1" Resolution
+Incident *-- "0..1" Feedback
+Incident "1" *-- "0..*" WorkNote : notes
+Incident "0..*" --> "1" User : reporter
+Incident "0..*" --> "0..1" Technician : assignee
+Incident "0..*" --> "0..1" User : escalatedTo
+Incident "0..*" --> "1" ItService : service
+Incident "0..*" --> "0..1" IncidentCategory : category
+Incident "0..*" --> "0..1" Asset
+Incident "0..*" o--> "0..1" ProblemRecord : problem
+Incident --> "0..1" Incident : possibleDuplicateOf
+WorkNote --> User : author
+ItService "0..*" o--> "0..*" ItService : dependsOn
+ItService --> "0..1" IncidentCategory : defaultCategory
+Asset --> ItService
+Asset --> "0..1" IncidentCategory
+SlaPolicy --> "0..1" ItService : (null = campus default)
+ProblemRecord --> ItService : rootService
+SlaTracker ..> SlaPolicy : start(policy)
+
+Incident ..> IncidentState : delegates transition rules
+IncidentFactory ..> Incident : <<creates>>
+IncidentPolicy ..> Incident
+@enduml

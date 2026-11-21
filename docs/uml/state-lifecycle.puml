@@ -1,0 +1,39 @@
+@startuml state-lifecycle
+!include _style.iuml
+skinparam state {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontSize 12
+}
+title Incident lifecycle (as implemented in IncidentStates)
+
+[*] --> NEW : report()\nIncidentFactory.create
+NEW --> CLASSIFIED : classify()\n[category != null]
+NEW --> CANCELLED : cancel()\nreporter / admin
+CLASSIFIED --> ASSIGNED : assignTo()\nauto strategy, manual, take\n[assignee != null]
+CLASSIFIED --> CANCELLED : cancel()
+ASSIGNED --> ACKNOWLEDGED : acknowledge()\n/ sla.markResponded
+ACKNOWLEDGED --> IN_PROGRESS : start()
+IN_PROGRESS --> AWAITING_INFO : requestInfo()
+AWAITING_INFO --> IN_PROGRESS : provideInfo() / start()
+IN_PROGRESS --> RESOLVED : resolve()\n[resolution present]\n/ sla.markResolved
+AWAITING_INFO --> RESOLVED : resolve()
+RESOLVED --> VERIFIED : verify(rating 1-5)\nreporter / admin
+RESOLVED --> REOPENED : reopen(reason)\n/ sla.reopen
+REOPENED --> ASSIGNED : back to same technician\nor auto-assign
+VERIFIED --> CLOSED : close()\n/ closedAt set
+CLOSED --> [*]
+CANCELLED --> [*]
+
+note right of CLASSIFIED
+  Priority + SLA clock are set here
+  (applyPriority). Reassignment is allowed in
+  CLASSIFIED, ASSIGNED, ACKNOWLEDGED,
+  IN_PROGRESS, AWAITING_INFO, REOPENED.
+end note
+note left of NEW
+  Any other move, e.g. NEW -> CLOSED,
+  throws InvalidStateTransitionException
+  (HTTP 409 INVALID_STATE_TRANSITION).
+end note
+@enduml

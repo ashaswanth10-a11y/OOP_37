@@ -1,0 +1,33 @@
+' Shared look for every CampusOps diagram
+!pragma layout smetana
+skinparam dpi 150
+skinparam shadowing false
+skinparam roundCorner 6
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam ArrowColor #37474F
+skinparam ArrowFontSize 11
+skinparam BackgroundColor #FFFFFF
+skinparam class {
+  BackgroundColor #F7FAFC
+  BorderColor #455A64
+  HeaderBackgroundColor #E3EDF5
+  AttributeFontSize 11
+  StereotypeFontSize 10
+}
+skinparam interface {
+  BackgroundColor #FFF8E1
+  BorderColor #8D6E00
+}
+skinparam package {
+  BackgroundColor #FFFFFF
+  BorderColor #90A4AE
+  FontStyle bold
+}
+skinparam note {
+  BackgroundColor #FFFDE7
+  BorderColor #BDB76B
+  FontSize 11
+}
+hide empty members
+set separator none
