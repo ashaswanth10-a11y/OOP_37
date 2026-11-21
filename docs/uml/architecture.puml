@@ -10,7 +10,7 @@ skinparam rectangle {
 }
 title CampusOps - component / deployment architecture (modular monolith)
 
-actor "Student /\nTechnician / Admin" as U
+actor "Campus reporter /\nTechnician / Admin" as U
 actor "Visitor" as V
 
 node "Browser (PWA)" as BR {

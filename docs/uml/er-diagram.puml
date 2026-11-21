@@ -20,7 +20,8 @@ entity users {
   phone
   email_notifications, active
   * created_at : timestamp
-  department, location        (student)
+  campus_role : varchar
+  department, location        (campus reporter)
   team, max_concurrent, experience_years, available  (technician)
 }
 

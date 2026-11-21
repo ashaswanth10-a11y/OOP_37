@@ -95,4 +95,17 @@ class SecurityIntegrationTest extends ApiSupport {
                 .andExpect(jsonPath("$.user.role").value("STUDENT"))
                 .andExpect(jsonPath("$.user.roles[0]").value("STUDENT"));
     }
+
+    @Test
+    @DisplayName("Faculty and campus employees have separate roles and access only their own tickets")
+    void facultyAndEmployeeAreReporters() throws Exception {
+        for (String[] account : new String[][] {{"lakshmi", "FACULTY"}, {"sneha", "EMPLOYEE"}}) {
+            String token = bearer(account[0]);
+            mvc.perform(get("/api/auth/me").header("Authorization", token))
+                    .andExpect(status().isOk()).andExpect(jsonPath("$.role").value(account[1]));
+            mvc.perform(get("/api/incidents/mine").header("Authorization", token)).andExpect(status().isOk());
+            mvc.perform(get("/api/admin/settings").header("Authorization", token)).andExpect(status().isForbidden());
+            mvc.perform(get("/api/incidents/assigned").header("Authorization", token)).andExpect(status().isForbidden());
+        }
+    }
 }

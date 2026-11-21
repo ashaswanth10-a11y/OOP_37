@@ -37,11 +37,11 @@ export function SlaTag({ s }: { s: SlaState | null }) {
   const c = SLA_VAR[s]
   return (
     <span
-      className="inline-flex items-center gap-1.5 whitespace-nowrap font-cond text-[11px] font-semibold uppercase tracking-wider"
+      className="inline-flex items-center gap-1.5 whitespace-nowrap text-xs font-medium"
       style={{ color: c }}
     >
       <span
-        className={"inline-block h-2 w-2 rounded-full " + (s === "BREACHED" ? "lamp-blink" : "")}
+        className="inline-block h-2 w-2 rounded-full"
         style={{ background: c }}
       />
       {SLA_LABEL[s]}
@@ -65,7 +65,7 @@ export function HealthTag({ h }: { h: Health }) {
   const c = HEALTH_VAR[h]
   return (
     <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-xs font-medium" style={{ color: c }}>
-      <span className={"inline-block h-2.5 w-2.5 rounded-[3px] " + (h === "OUTAGE" ? "lamp-blink" : "")} style={{ background: c }} />
+      <span className="inline-block h-2 w-2 rounded-full" style={{ background: c }} />
       {HEALTH_LABEL[h]}
     </span>
   )
@@ -158,7 +158,7 @@ export function PageHeader({ eyebrow, title, children }: { eyebrow?: string; tit
   return (
     <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
       <div>
-        {eyebrow && <div className="eyebrow mb-1">{eyebrow}</div>}
+        {eyebrow && <p className="mb-1 text-xs font-medium text-mute">{eyebrow}</p>}
         <h1 className="font-cond text-[26px] font-semibold leading-tight tracking-tight">{title}</h1>
       </div>
       {children && <div className="flex flex-wrap items-center gap-2">{children}</div>}

@@ -1,11 +1,11 @@
 # CampusOps
 
 Intelligent IT Service Management and Incident Resolution for BITS Pilani, Hyderabad Campus.
-CS F213 Object-Oriented Programming project, Semester I 2026-2027, group [Group No.].
+CS F213 Object-Oriented Programming project, Semester I 2026-2027.
 
 CampusOps takes an IT incident through **report, classify, prioritise, assign, investigate, resolve, verify and close**, with SLA
 clocks, automatic escalation, duplicate detection, "Me too" confirmations and root-cause correlation on the campus service
-dependency graph. Students report from the web (with voice input or by scanning a QR sticker); technicians work
+dependency graph. Students, faculty and employees report from the web (with voice input or by scanning a QR sticker); technicians work
 a live queue; team leads and admins see dashboards, an outage map and the full audit trail.
 
 ## Screenshots
@@ -26,7 +26,7 @@ On a phone: scanning the QR sticker on a Wi-Fi access point opens the report for
 
 ## Feature highlights
 
-- **Role-specific apps** for Student, Technician, Team Lead, System Administrator and IT Manager, plus a public `/status` page.
+- **Role-specific apps** for Student, Faculty, Employee, Technician, Team Lead, System Administrator and IT Manager, plus a public `/status` page.
 - **Lifecycle as a State pattern**: NEW, CLASSIFIED, ASSIGNED, ACKNOWLEDGED, IN_PROGRESS, AWAITING_INFO, RESOLVED, VERIFIED, CLOSED, REOPENED, CANCELLED. Illegal moves (NEW to CLOSED) are rejected with 409.
 - **Priority strategies** (switchable at runtime): weighted score `impact x urgency x criticality x reach` (default) or an ITIL rule matrix.
 - **Five assignment strategies**: skill-based (default), load-based, round robin, experience-based, smart (weighted).
@@ -83,7 +83,9 @@ Password `Campus@123` for everyone, emails are `<login>@hyderabad.bits-pilani.ac
 
 | Role | Logins |
 |------|--------|
-| Student | aarav, diya, kabir, ananya, rohan, lakshmi, sneha |
+| Student | aarav, diya, kabir, ananya, rohan |
+| Faculty | lakshmi |
+| Employee | sneha |
 | Technician | ravi, imran (Network Ops); arjun, meghana (Apps & Data); suresh, farah (Desktop Support) |
 | Team lead | priya (Network Ops), vikram (Apps & Data) |
 | System administrator | kiran |
@@ -151,16 +153,4 @@ docker-compose.yml       PostgreSQL + backend + frontend
 
 ## Documentation
 
-- Project report (PDF): [`docs/report/CampusOps_Report.pdf`](docs/report/CampusOps_Report.pdf) (source: `docs/report/report.html`)
 - UML diagrams (PlantUML sources, SVG, PNG): [`docs/uml`](docs/uml)
-- Demo video script: [`docs/VIDEO_SCRIPT.md`](docs/VIDEO_SCRIPT.md)
-
-## Team
-
-| Member | Area |
-|--------|------|
-| [Member 1 name, ID] | UI / UX |
-| [Member 2 name, ID] | Backend / APIs |
-| [Member 3 name, ID] | Domain model / OOP |
-| [Member 4 name, ID] | Database / persistence |
-| [Member 5 name, ID] | Testing / DevOps / intelligent features |

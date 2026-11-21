@@ -29,12 +29,10 @@ import {
 } from "lucide-react"
 import * as api from "../lib/api"
 import { isAdmin, isLead, isTech, shellFor, useAuth } from "../lib/auth"
-import { useNow } from "../lib/clock"
 import { useLive } from "../lib/live"
 import { useTheme } from "../lib/theme"
 import { initials, ROLE_LABEL } from "../lib/format"
 import { Bell } from "./Bell"
-import { LampBoard } from "./LampBoard"
 import { Loading, Meter } from "./ui"
 
 export function Logo({ light, small }: { light?: boolean; small?: boolean }) {
@@ -210,52 +208,13 @@ function RailLink({ item, onNavigate }: { item: NavItem; onNavigate: () => void 
   )
 }
 
-function Annunciator() {
+function SupportHeader() {
   const live = useLive()
-  const now = useNow()
-  const navigate = useNavigate()
-  const { data } = useQuery({ queryKey: ["outage-map"], queryFn: api.outageMap, refetchInterval: 60000 })
-  const nodes = data?.nodes ?? []
-  const outages = nodes.filter((n) => n.health === "OUTAGE").length
-  const degraded = nodes.filter((n) => n.health === "DEGRADED" || n.health === "IMPACTED").length
-  const open = nodes.reduce((s, n) => s + n.openIncidents, 0)
-  const clock = new Intl.DateTimeFormat("en-IN", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-    timeZone: "Asia/Kolkata",
-  }).format(new Date(now))
-
   return (
-    <div className="flex min-w-0 flex-1 items-center gap-5">
-      <button onClick={() => navigate("/map")} className="hidden shrink-0 items-center gap-3 xl:flex" title="Open the outage map">
-        <span className="eyebrow">Campus grid</span>
-        <LampBoard lamps={nodes} />
-      </button>
-      <div className="hidden items-center gap-4 whitespace-nowrap font-mono text-[12px] md:flex">
-        <span style={{ color: outages ? "var(--outage)" : "var(--mute)" }}>
-          <b className="text-[13px]">{outages}</b> outage
-        </span>
-        <span style={{ color: degraded ? "var(--degraded)" : "var(--mute)" }}>
-          <b className="text-[13px]">{degraded}</b> degraded
-        </span>
-        <span className="text-ink-2">
-          <b className="text-[13px]">{open}</b> open
-        </span>
-        {data && data.problems.length > 0 && (
-          <Link to="/problems" className="rounded bg-outage px-1.5 py-px font-semibold text-white">
-            {data.problems.length} PROBLEM{data.problems.length > 1 ? "S" : ""}
-          </Link>
-        )}
-      </div>
-      <div className="ml-auto flex items-center gap-3 font-mono text-[12px]">
-        <span className="tnum hidden whitespace-nowrap text-ink-2 sm:inline">{clock} IST</span>
-        <span className="flex items-center gap-1.5" title={live ? "Receiving live updates" : "Live updates disconnected"}>
-          <span className={"h-2 w-2 rounded-full " + (live ? "bg-ok" : "bg-p4")} />
-          <span className={live ? "text-ok" : "text-mute"}>{live ? "LIVE" : "OFFLINE"}</span>
-        </span>
-      </div>
+    <div className="flex min-w-0 flex-1 items-center gap-3">
+      <span className="hidden text-sm font-medium lg:inline">IT support</span>
+      <Link to="/map" className="hidden text-sm text-signal hover:underline sm:inline">Outage map</Link>
+      {!live && <span className="hidden text-xs text-mute md:inline">Reconnecting live updates…</span>}
     </div>
   )
 }
@@ -413,7 +372,7 @@ export function StaffShell() {
         <span className="lg:hidden">
           <Logo small />
         </span>
-        <Annunciator />
+        <SupportHeader />
         <div className="flex items-center gap-0.5">
           <ThemeButton />
           <Bell />

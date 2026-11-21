@@ -92,6 +92,7 @@ const NOTE_LABEL: Record<Note["type"], string> = {
 }
 
 function Conversation({ d, staff }: { d: IncidentDetail; staff: boolean }) {
+  const { user } = useAuth()
   const [showInternal, setShowInternal] = useState(true)
   const [text, setText] = useState("")
   const [internal, setInternal] = useState(staff)
@@ -113,7 +114,7 @@ function Conversation({ d, staff }: { d: IncidentDetail; staff: boolean }) {
       <div className="space-y-3 p-4">
         {notes.length === 0 && <div className="text-sm text-mute">No messages yet.</div>}
         {notes.map((n) => {
-          const mine = n.authorRole === "STUDENT"
+          const mine = n.author?.id === user?.id
           return (
             <div key={n.id} className={"flex " + (mine ? "justify-end" : "")}>
               <div

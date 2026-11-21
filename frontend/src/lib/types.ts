@@ -1,4 +1,4 @@
-export type Role = "STUDENT" | "TECHNICIAN" | "TEAM_LEAD" | "SYSTEM_ADMIN" | "IT_MANAGER"
+export type Role = "STUDENT" | "FACULTY" | "EMPLOYEE" | "TECHNICIAN" | "TEAM_LEAD" | "SYSTEM_ADMIN" | "IT_MANAGER"
 export type Priority = "P1" | "P2" | "P3" | "P4"
 export type Level = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
 export type SlaState = "ON_TRACK" | "AT_RISK" | "BREACHED" | "MET"

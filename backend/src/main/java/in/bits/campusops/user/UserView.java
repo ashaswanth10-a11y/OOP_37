@@ -21,9 +21,9 @@ public record UserView(Long id, String code, String fullName, String email, Role
         Integer max = null;
         Integer exp = null;
         Boolean available = null;
-        if (u instanceof Student e) {
-            department = e.getDepartment();
-            location = e.getLocation();
+        if (u instanceof CampusReporter reporter) {
+            department = reporter.getDepartment();
+            location = reporter.getLocation();
         }
         if (u instanceof Technician t) {
             team = t.getTeam();

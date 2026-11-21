@@ -3,6 +3,8 @@ import type { Health, Priority, Role, SlaState, Status } from "./types"
 
 export const ROLE_LABEL: Record<Role, string> = {
   STUDENT: "Student",
+  FACULTY: "Faculty",
+  EMPLOYEE: "Employee",
   TECHNICIAN: "Technician",
   TEAM_LEAD: "Team lead",
   SYSTEM_ADMIN: "System administrator",

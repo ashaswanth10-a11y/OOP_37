@@ -213,8 +213,8 @@ public class DemoDataSeeder implements ApplicationRunner {
         student("kabir", "Kabir Singh", "Mechanical", "Krishna Bhavan 305");
         student("ananya", "Ananya Iyer", "Chemical", "Meera Bhavan 220");
         student("rohan", "Rohan Varma", "Physics", "Vyas Bhavan 112");
-        student("lakshmi", "Lakshmi Narayan", "Computer Science", "Meera Bhavan 216");
-        student("sneha", "Sneha Kulkarni", "Economics", "Meera Bhavan 208");
+        reporter(Role.FACULTY, "lakshmi", "Lakshmi Narayan", "Computer Science", "C Block 210");
+        reporter(Role.EMPLOYEE, "sneha", "Sneha Kulkarni", "Accounts Office", "C Block");
 
         staff("ravi", Role.TECHNICIAN, "Ravi Kumar", "Network Ops", List.of("NETWORK"), 5, 6);
         staff("imran", Role.TECHNICIAN, "Imran Shaikh", "Network Ops", List.of("NETWORK", "SECURITY"), 4, 3);
@@ -229,7 +229,11 @@ public class DemoDataSeeder implements ApplicationRunner {
     }
 
     private void student(String handle, String name, String department, String location) {
-        people.put(handle, users.save(userFactory.create(new UserFactory.Spec(Role.STUDENT, name, handle + DOMAIN,
+        reporter(Role.STUDENT, handle, name, department, location);
+    }
+
+    private void reporter(Role role, String handle, String name, String department, String location) {
+        people.put(handle, users.save(userFactory.create(new UserFactory.Spec(role, name, handle + DOMAIN,
                 DEMO_PASSWORD, department, location, null, null, null, null))));
     }
 

@@ -21,7 +21,8 @@ package "user" {
     + deactivate()
   }
 
-  class Student <<Entity>> {
+  class CampusReporter <<Entity>> {
+    - campusRole : Role
     - department : String
     - location : String
     --
@@ -59,6 +60,8 @@ package "user" {
 
   enum Role {
     STUDENT
+    FACULTY
+    EMPLOYEE
     TECHNICIAN
     TEAM_LEAD
     SYSTEM_ADMIN
@@ -103,7 +106,7 @@ package "user" {
   }
 }
 
-User <|-- Student
+User <|-- CampusReporter
 User <|-- Technician
 Technician <|-- TeamLead
 User <|-- Administrator

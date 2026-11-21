@@ -10,6 +10,8 @@ const DOMAIN = "@hyderabad.bits-pilani.ac.in"
 
 const DEMO = [
   { who: "aarav", role: "Student", name: "Aarav Mehta" },
+  { who: "lakshmi", role: "Faculty", name: "Lakshmi Narayan" },
+  { who: "sneha", role: "Employee", name: "Sneha Kulkarni" },
   { who: "ravi", role: "Technician", name: "Ravi Kumar" },
   { who: "priya", role: "Team lead", name: "Priya Sharma" },
   { who: "kiran", role: "System admin", name: "Kiran Desai" },

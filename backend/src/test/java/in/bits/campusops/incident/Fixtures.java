@@ -6,7 +6,8 @@ import in.bits.campusops.catalog.Level;
 import in.bits.campusops.catalog.Priority;
 import in.bits.campusops.catalog.ServiceType;
 import in.bits.campusops.catalog.SlaPolicy;
-import in.bits.campusops.user.Student;
+import in.bits.campusops.user.CampusReporter;
+import in.bits.campusops.user.Role;
 import in.bits.campusops.user.Technician;
 import java.lang.reflect.Field;
 import java.time.Instant;
@@ -46,8 +47,8 @@ public final class Fixtures {
                 null, 0, 0), code.hashCode() & 0xffff);
     }
 
-    public static Student student(long id) {
-        return withId(new Student("E" + id, "Student " + id, "e" + id + "@campus.test", "hash", T0, "CS", "Hostel"), id);
+    public static CampusReporter student(long id) {
+        return withId(new CampusReporter(Role.STUDENT, "S" + id, "Student " + id, "e" + id + "@campus.test", "hash", T0, "CS", "Hostel"), id);
     }
 
     public static Technician technician(long id, List<String> skills, int max, int years) {

@@ -42,7 +42,7 @@ public class UserFactory {
         int max = spec.maxConcurrent() == null ? 5 : spec.maxConcurrent();
         int exp = spec.experienceYears() == null ? 1 : spec.experienceYears();
         return switch (spec.role()) {
-            case STUDENT -> new Student(code, spec.fullName(), spec.email(), hash, now,
+            case STUDENT, FACULTY, EMPLOYEE -> new CampusReporter(spec.role(), code, spec.fullName(), spec.email(), hash, now,
                     spec.department(), spec.location());
             case TECHNICIAN -> new Technician(code, spec.fullName(), spec.email(), hash, now,
                     spec.team(), skills, max, exp);
@@ -57,6 +57,8 @@ public class UserFactory {
         sequence.compareAndSet(-1, (int) users.count());
         String prefix = switch (role) {
             case STUDENT -> "S";
+            case FACULTY -> "F";
+            case EMPLOYEE -> "E";
             case TECHNICIAN -> "T";
             case TEAM_LEAD -> "L";
             case SYSTEM_ADMIN -> "A";

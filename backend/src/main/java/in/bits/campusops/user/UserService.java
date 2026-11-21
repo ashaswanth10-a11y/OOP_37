@@ -29,7 +29,7 @@ public class UserService {
 
     public User register(UserFactory.Spec spec) {
         String email = spec.email().trim().toLowerCase();
-        if (!allowedDomain.isBlank() && spec.role() == Role.STUDENT && !email.endsWith("@" + allowedDomain)) {
+        if (!allowedDomain.isBlank() && spec.role().isCampusReporter() && !email.endsWith("@" + allowedDomain)) {
             throw new InvalidInputException("Use your campus email (@" + allowedDomain + ")");
         }
         if (users.existsByEmailIgnoreCase(email)) {

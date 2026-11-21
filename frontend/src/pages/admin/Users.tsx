@@ -2,12 +2,16 @@ import { useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Loader2, Pencil, Plus } from "lucide-react"
 import * as api from "../../lib/api"
+import { isCampusReporter } from "../../lib/auth"
+import { ROLE_LABEL } from "../../lib/format"
 import { useToast } from "../../lib/toast"
 import type { Role, User } from "../../lib/types"
 import { Dialog, ErrorBox, Loading, PageHeader } from "../../components/ui"
 
 const ROLES: { v: Role; label: string }[] = [
   { v: "STUDENT", label: "Student" },
+  { v: "FACULTY", label: "Faculty" },
+  { v: "EMPLOYEE", label: "Employee" },
   { v: "TECHNICIAN", label: "Technician" },
   { v: "TEAM_LEAD", label: "Team lead" },
   { v: "SYSTEM_ADMIN", label: "System admin" },
@@ -58,8 +62,8 @@ function CreateDialog({ onClose }: { onClose: () => void }) {
         fullName: fullName.trim(),
         email: email.trim(),
         password,
-        department: role === "STUDENT" ? department || null : null,
-        location: role === "STUDENT" ? location || null : null,
+        department: isCampusReporter(role) ? department || null : null,
+        location: isCampusReporter(role) ? location || null : null,
         team: tech ? team || null : null,
         skills: tech ? skills : null,
         maxConcurrent: tech ? Number(max) : null,
@@ -68,7 +72,7 @@ function CreateDialog({ onClose }: { onClose: () => void }) {
     onSuccess: (u) => {
       qc.invalidateQueries({ queryKey: ["users"] })
       qc.invalidateQueries({ queryKey: ["technicians"] })
-      toast({ title: u.fullName + " added as " + u.role.replace("_", " ").toLowerCase(), tone: "success" })
+      toast({ title: u.fullName + " added as " + ROLE_LABEL[u.role], tone: "success" })
       onClose()
     },
   })
@@ -83,19 +87,12 @@ function CreateDialog({ onClose }: { onClose: () => void }) {
         }}
       >
         <div>
-          <label className="label">Role</label>
-          <div className="flex flex-wrap gap-1.5">
+          <label className="label" htmlFor="u-role">Account type</label>
+          <select id="u-role" className="field" value={role} onChange={(e) => setRole(e.target.value as Role)}>
             {ROLES.map((r) => (
-              <button
-                key={r.v}
-                type="button"
-                onClick={() => setRole(r.v)}
-                className={"rounded-md border px-3 py-1.5 text-[13px] " + (role === r.v ? "border-signal bg-signal-soft font-medium" : "border-line-strong")}
-              >
-                {r.label}
-              </button>
+              <option key={r.v} value={r.v}>{r.label}</option>
             ))}
-          </div>
+          </select>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
@@ -110,7 +107,7 @@ function CreateDialog({ onClose }: { onClose: () => void }) {
             <label className="label" htmlFor="u-pw">Initial password</label>
             <input id="u-pw" className="field" type="password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
-          {role === "STUDENT" && (
+          {isCampusReporter(role) && (
             <>
               <div>
                 <label className="label" htmlFor="u-dept">Department</label>

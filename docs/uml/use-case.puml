@@ -9,7 +9,7 @@ skinparam usecase {
 skinparam actorStyle awesome
 title CampusOps - Use Case Diagram
 
-actor "Student" as STUDENT
+actor "Student / Faculty / Employee" as REPORTER
 actor "Technician" as TECH
 actor "Team Lead" as LEAD
 actor "System\nAdministrator" as ADMIN
@@ -61,13 +61,13 @@ rectangle "CampusOps" {
 actor "SLA Scheduler" as SCHED <<secondary>>
 actor "Google Gemini API" as AI <<secondary>>
 
-STUDENT --> UC_LOGIN
-STUDENT --> UC_REPORT
-STUDENT --> UC_TRACK
-STUDENT --> UC_METOO
-STUDENT --> UC_INFO
-STUDENT --> UC_VERIFY
-STUDENT --> UC_REOPEN
+REPORTER --> UC_LOGIN
+REPORTER --> UC_REPORT
+REPORTER --> UC_TRACK
+REPORTER --> UC_METOO
+REPORTER --> UC_INFO
+REPORTER --> UC_VERIFY
+REPORTER --> UC_REOPEN
 VIS --> UC_STATUS
 
 TECH --> UC_QUEUE
