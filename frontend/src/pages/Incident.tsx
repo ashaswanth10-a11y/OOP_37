@@ -299,7 +299,7 @@ export default function IncidentPage() {
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-3">
               <Reach affected={s.affectedUsers || d.affectedUsers} supporters={s.supporters} />
-              {s.reporter?.id !== user?.id && s.assignee?.id !== user?.id && OPEN_STATUSES.includes(s.status) && (
+              {!isStaff(user) && s.reporter?.id !== user?.id && OPEN_STATUSES.includes(s.status) && (
                 <MeTooButton key={String(d.supportedByMe)} id={s.id} already={d.supportedByMe} small />
               )}
             </div>

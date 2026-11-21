@@ -63,7 +63,36 @@ class KnownOutageIntegrationTest extends ApiSupport {
     }
 
     @Test
-    @DisplayName("TC45 The Telegram bot points a new report on an affected service to /metoo, and /metoo adds the person")
+    @DisplayName("TC46 Everyone who said \"Me too\" is notified when the outage is fixed")
+    void supportersHearAboutTheFix() throws Exception {
+        JsonNode known = json(mvc.perform(get("/api/public/status")).andReturn()).get("problems").get(0);
+        long follow = known.get("followIncidentId").asLong();
+        String lakshmi = bearer("lakshmi");
+        mvc.perform(post("/api/incidents/" + follow + "/me-too").header("Authorization", lakshmi))
+                .andExpect(status().isOk());
+
+        long problemId = 0;
+        for (JsonNode p : json(mvc.perform(get("/api/problems").header("Authorization", bearer("kiran"))).andReturn())) {
+            if (p.get("number").asString().equals(known.get("number").asString())) {
+                problemId = p.get("id").asLong();
+            }
+        }
+        mvc.perform(post("/api/problems/" + problemId + "/resolve").header("Authorization", bearer("priya"))
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .content("{\"summary\":\"Replaced the failed line card in Core Switch B\"}"))
+                .andExpect(status().isOk());
+
+        boolean told = false;
+        for (JsonNode n : json(mvc.perform(get("/api/notifications").header("Authorization", lakshmi)).andReturn())
+                .get("items")) {
+            told |= n.get("title").asString().endsWith(" fixed")
+                    && n.get("body").asString().contains("line card");
+        }
+        assertThat(told).as("the supporter got a 'fixed' notification").isTrue();
+    }
+
+    @Test
+    @DisplayName("TC45The Telegram bot points a new report on an affected service to /metoo, and /metoo adds the person")
     void botSuggestsMeToo() {
         TransactionTemplate tx = new TransactionTemplate(txManager);
         tx.executeWithoutResult(t -> users.findByEmailIgnoreCase("diya" + DOMAIN).orElseThrow().linkTelegram(CHAT));

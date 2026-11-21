@@ -291,6 +291,11 @@ public class Incident {
         return supporterIds.size();
     }
 
+    /** Ids of the people who said "Me too" (read-only view). */
+    public Set<Long> getSupporterIds() {
+        return java.util.Collections.unmodifiableSet(supporterIds);
+    }
+
     public boolean isSupportedBy(User user) {
         return supporterIds.contains(user.getId());
     }

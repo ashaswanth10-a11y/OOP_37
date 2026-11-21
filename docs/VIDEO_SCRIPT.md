@@ -19,6 +19,19 @@
 
 Note on numbers: the seeded campus has INC-1001 to INC-1048. New incidents in the demo start at INC-1049. If you re-seed, numbers stay the same; if you do not, read the number off the screen instead.
 
+## Slides
+
+`docs/slides/CampusOps_Slides.pptx` (PDF copy next to it). Put member names and the group number on slides 1 and 12 and in the footer.
+
+| Segment | Slides |
+|---|---|
+| 0 Introduction | 1 title, 2 the problem, 3 roles |
+| 3 Correlation (optional recap) | 9 root cause, 10 known outage |
+| 4 OOP design | 4 architecture, 5 State pattern, 6 design patterns, 7 OOP principles |
+| 5 Intelligence | 8 intelligence |
+| 8 Tests | 11 testing and coverage |
+| 9 Close | 12 thank you |
+
 ## Timeline
 
 | # | Time | Segment | Speaker |
@@ -140,7 +153,7 @@ Note on numbers: the seeded campus has INC-1001 to INC-1048. New incidents in th
 
 ## Segment 8 - Tests and CI (16:45-17:45)
 
-- **Member 5:** run `cd backend && ./mvnw test` (or show a finished run): **46 tests, 0 failures** (TC01-TC45 plus context load). Show two names: TC01 "NEW cannot jump straight to CLOSED" and TC35 "An unacknowledged P1 breaches its SLA and is escalated up the chain".
+- **Member 5:** run `cd backend && ./mvnw test` (or show a finished run): **47 tests, 0 failures** (TC01-TC46 plus context load). Show two names: TC01 "NEW cannot jump straight to CLOSED" and TC35 "An unacknowledged P1 breaches its SLA and is escalated up the chain".
 - Show `.github/workflows/ci.yml`: backend `mvnw verify` and frontend `npm run build` on every push.
 - Show the test table in the report (section 10) and the traceability matrix (section 12).
 

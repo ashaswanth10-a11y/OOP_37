@@ -53,9 +53,14 @@ public class NotificationListener {
                     e.description(), i, Severity.WARNING);
             case INFO_PROVIDED -> notifications.notify(assignee, "Reporter replied on " + n, e.description(), i,
                     Severity.INFO);
-            case RESOLVED -> notifications.notify(reporter, n + " resolved",
-                    "Fix: " + i.getResolution().getResolutionSummary()
-                            + " Please confirm it works and rate the support.", i, Severity.SUCCESS);
+            case RESOLVED -> {
+                String fix = i.getResolution().getResolutionSummary();
+                notifications.notify(reporter, n + " resolved",
+                        "Fix: " + fix + " Please confirm it works and rate the support.", i, Severity.SUCCESS);
+                // everyone who said "Me too" was promised an update when it is fixed
+                notifications.notifyAll(users.findAllById(i.getSupporterIds()), n + " fixed",
+                        "The problem you also had is fixed: " + fix, i, Severity.SUCCESS);
+            }
             case REOPENED -> notifications.notify(assignee, n + " reopened", e.description(), i, Severity.WARNING);
             case CLOSED -> notifications.notify(reporter, n + " closed", "Thanks for reporting. This incident is closed.",
                     i, Severity.SUCCESS);

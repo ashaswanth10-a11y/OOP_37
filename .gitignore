@@ -22,3 +22,4 @@ HANDOFF.md
 handover/
 backend.log
 backend-error.log
+.playwright-mcp/

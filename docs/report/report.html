@@ -1014,12 +1014,13 @@ slightly between runs because the history generator uses a fixed random seed but
 <!-- ======================= 10 ======================= -->
 <section>
 <h1 id="s10">10. Testing</h1>
-<p>The backend has 46 automated JUnit 5 tests: 45 documented test cases (display names TC01-TC45) and one Spring context-load test.
+<p>The backend has 47 automated JUnit 5 tests: 46 documented test cases (display names TC01-TC46) and one Spring context-load test.
 Unit tests construct domain objects directly with the <code>Fixtures</code> helper (no Spring, no database). Integration tests start
 the full application with an in-memory H2 database seeded by <code>DemoDataSeeder</code> and drive it through the REST API with
 MockMvc and real JWTs. <code>SlaEscalationIntegrationTest</code> moves the clock forward and <code>UserUpdateAfterPoolRecycleTest</code> recycles the connection pool, <code>DemoResetIntegrationTest</code> wipes and reseeds the database and <code>KnownOutageIntegrationTest</code> fires an outage, so each gets its own application context.
 CI (<code>.github/workflows/ci.yml</code>) runs <code>./mvnw -B verify</code> on every push and pull request and uploads the
-Surefire reports. Result of the latest run (21 November 2026): <b>46 tests, 0 failures, 0 errors, 0 skipped</b>.</p>
+Surefire reports and the JaCoCo coverage report. Result of the latest run (21 November 2026): <b>47 tests, 0 failures, 0 errors, 0 skipped</b>.</p>
+<p><b>Coverage</b> (JaCoCo, <code>./mvnw verify</code> writes <code>backend/target/site/jacoco/index.html</code>): <b>78.9 %</b> of lines and <b>63.9 %</b> of branches overall, and <b>87.7 %</b> of lines in the core logic (incident, priority, assignment, sla, intelligence, problem, events, audit). By module: events 100 %, audit 97 %, problem 96 %, intelligence 95 %, assignment 92 %, priority 91 %, sla 91 %, incident 81 %, notification 78 %, user 76 %. The lowest figures are the outside-service adapters (Telegram, Claude, Gemini), which are only exercised through their fallback paths because the tests run without API keys.</p>
 
 <table class="small">
 <thead><tr><th style="width:5%">ID</th><th style="width:19%">Name</th><th style="width:7%">Type</th><th style="width:10%">Category</th><th style="width:28%">Steps</th><th style="width:25%">Expected</th><th style="width:6%">Result</th></tr></thead>
@@ -1069,6 +1070,7 @@ Surefire reports. Result of the latest run (21 November 2026): <b>46 tests, 0 fa
 <tr><td>TC43</td><td>Demo reset restores the seeded campus: same counts, numbering, clock and logins</td><td>Integration</td><td>Business rule (demo) / authorization</td><td>Create an incident, fire a scenario, warp 30 min; a student calls reset (refused), then the admin resets.</td><td>403 for the student; afterwards the incident and problem counts equal the seed, the clock offset is 0, a token issued before the reset still works and the next incident gets the same number as before.</td><td class="ok">PASS</td></tr>
 <tr><td>TC44</td><td>The public status page lists a known outage with every downstream service it affects</td><td>Integration</td><td>Normal (correlation)</td><td>Fire the Core Switch B scenario, then read <code>/api/public/status</code> without logging in.</td><td>The known problem names Core Switch B, gives an incident to follow, and its affected services include Gautam Bhavan Wi-Fi (downstream).</td><td class="ok">PASS</td></tr>
 <tr><td>TC45</td><td>The Telegram bot points a new report on an affected service to /metoo, and /metoo adds the person</td><td>Integration</td><td>Business rule (duplicates)</td><td>A linked student sends <code>/report WIFI-GAUTAM ...</code> during the outage, then <code>/metoo INC-n</code>, then <code>/report WIFI-GAUTAM anyway ...</code>.</td><td>First reply warns about the known outage with the /metoo command; /metoo adds a supporter; "anyway" files a separate incident.</td><td class="ok">PASS</td></tr>
+<tr><td>TC46</td><td>Everyone who said "Me too" is notified when the outage is fixed</td><td>Integration</td><td>Business rule (notifications)</td><td>A student says "Me too" on an outage incident; the team lead resolves the problem and all its linked incidents.</td><td>The supporter receives a "fixed" notification carrying the resolution summary (as promised by the known-outage banner and the Telegram bot).</td><td class="ok">PASS</td></tr>
 <tr><td>-</td><td>contextLoads</td><td>Integration</td><td>Smoke</td><td>Start the Spring context.</td><td>Context starts; seeder runs.</td><td class="ok">PASS</td></tr>
 </tbody></table>
 <p>Coverage by brief category: normal operations (TC02, 06, 10, 11, 14-17, 20-23, 25, 26, 39), boundary conditions (TC07, 08, 12, 19, 36, 38),
@@ -1279,7 +1281,7 @@ npm run dev</pre>
 </ul>
 <h2>15.6 Tests</h2>
 <pre>cd backend
-./mvnw test        <span class="cm"># 46 tests (TC01-TC45 + context load), in-memory H2</span></pre>
+./mvnw test        <span class="cm"># 47 tests (TC01-TC46 + context load); ./mvnw verify also writes the coverage report, in-memory H2</span></pre>
 </section>
 
 </body>

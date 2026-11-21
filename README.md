@@ -8,6 +8,24 @@ clocks, automatic escalation, duplicate detection, "Me too" confirmations and ro
 dependency graph. Students report from the web (with voice input or by scanning a QR sticker) or from Telegram; technicians work
 a live queue; team leads and admins see dashboards, an outage map and the full audit trail.
 
+## Screenshots
+
+| Outage map: four hostel reports traced to Core Switch B | Known outage: the report form stops a duplicate before it is filed |
+|---|---|
+| ![Outage map](docs/screenshots/outage-map.png) | ![Known outage warning on the report form](docs/screenshots/known-outage.png) |
+| **Incident**: lifecycle, live SLA clocks, breach risk, priority rationale | **Overview** dashboard for team leads and managers |
+| ![Incident page](docs/screenshots/incident.png) | ![Dashboard](docs/screenshots/dashboard.png) |
+| **Demo control** with the presenter script, scenarios and time warp | **Public status page**, no login needed |
+| ![Demo control](docs/screenshots/demo-control.png) | ![Status page](docs/screenshots/status.png) |
+
+<p>
+<img src="docs/screenshots/phone-qr-report.png" alt="Report from a QR sticker on a phone" width="260">
+&nbsp;
+<img src="docs/screenshots/phone-home.png" alt="Student home on a phone" width="260">
+</p>
+
+On a phone: scanning the QR sticker on a Wi-Fi access point opens the report form already filled in, and it warns that the hostel is part of a known outage.
+
 ## Feature highlights
 
 - **Role-specific apps** for Employee/Student, Technician, Team Lead, System Administrator and IT Manager, plus a public `/status` page.
@@ -100,10 +118,12 @@ Without any AI key the keyword classifier is used; without a Telegram token the 
 cd backend && ./mvnw test
 ```
 
-46 JUnit 5 tests (TC01-TC45 plus a context-load test): unit tests for the state machine, SLA tracker, priority and assignment
+47 JUnit 5 tests (TC01-TC46 plus a context-load test): unit tests for the state machine, SLA tracker, priority and assignment
 strategies, text intelligence and AI adapter fallback; integration tests through the REST API for the three demo workflows,
 security, SLA escalation (including an idempotent scheduled sweep), "Me too", the fest-load correlation, demo reset and known-outage deflection (web and Telegram). CI (`.github/workflows/ci.yml`) runs `./mvnw verify` and the
 frontend build on every push.
+
+Coverage (JaCoCo, `./mvnw verify` writes `backend/target/site/jacoco/index.html`, also uploaded by CI): **78.9 % of lines** overall and **87.7 %** in the core logic (incident, priority, assignment, SLA, intelligence, problem, events, audit).
 
 ## Project structure
 
