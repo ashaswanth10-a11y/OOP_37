@@ -317,7 +317,7 @@ automatically ("Raised automatically after N me-too reports"). Priority is never
 <tbody>
 <tr><td>NEW</td><td>CLASSIFIED, CANCELLED</td><td>CLASSIFIED requires a category.</td></tr>
 <tr><td>CLASSIFIED</td><td>ASSIGNED, CANCELLED</td><td>ASSIGNED requires an assignee.</td></tr>
-<tr><td>ASSIGNED</td><td>ACKNOWLEDGED</td><td>Entering ACKNOWLEDGED stamps the response time.</td></tr>
+<tr><td>ASSIGNED</td><td>ACKNOWLEDGED, CANCELLED</td><td>Entering ACKNOWLEDGED stamps the response time. Cancelling is possible until a technician acknowledges.</td></tr>
 <tr><td>ACKNOWLEDGED</td><td>IN_PROGRESS</td><td></td></tr>
 <tr><td>IN_PROGRESS</td><td>AWAITING_INFO, RESOLVED</td><td>RESOLVED requires a non-blank resolution summary; stamps resolution time.</td></tr>
 <tr><td>AWAITING_INFO</td><td>IN_PROGRESS, RESOLVED</td><td></td></tr>
@@ -327,18 +327,22 @@ automatically ("Raised automatically after N me-too reports"). Priority is never
 <tr><td>CLOSED, CANCELLED</td><td>none</td><td>Terminal. Any other move throws <code>InvalidStateTransitionException</code> (409).</td></tr>
 </tbody></table>
 <p>Who may trigger each action is checked separately by <code>IncidentPolicy</code>: acknowledge/start/request-info/resolve
-by the assignee or a supervisor (team lead or admin); provide-info by the reporter; verify/reopen/cancel by the reporter or an
-admin; close by the assignee or a supervisor; assign/change priority by supervisors; take by any technician who is not already
+by the assignee or a supervisor (team lead or admin); provide-info by the reporter; verify/reopen by the reporter or an
+admin; cancel by the reporter or an admin while the incident is NEW, CLASSIFIED or ASSIGNED (before a technician acknowledges); close by the assignee or a supervisor; assign/change priority by supervisors; take by any technician who is not already
 the assignee; notes by the reporter or any staff member. Reassignment is allowed in CLASSIFIED, ASSIGNED, ACKNOWLEDGED,
 IN_PROGRESS, AWAITING_INFO and REOPENED. A manual assignment is refused if the technician is inactive or unavailable
 (<code>TechnicianUnavailableException</code>) or already at <code>maxConcurrent</code> active incidents
 (<code>WorkloadExceededException</code>) unless the supervisor sets <code>override</code>.</p>
 
 <h3>2.4.4 Escalation rules (<code>EscalationService</code>)</h3>
-<p>Chain: level 0 Technician &rarr; 1 Team Lead &rarr; 2 System Administrator &rarr; 3 IT Manager. Levels only go up.</p>
+<p>Chain: level 0 Technician &rarr; 1 Team Lead &rarr; 2 System Administrator &rarr; 3 IT Manager. Levels only go up, and each check climbs <b>at most one level</b>: even after a long gap
+(server restart, large time warp) the incident passes through every level in turn on successive sweeps, so every person in the
+chain is notified.</p>
 <ul>
-<li><b>Not acknowledged:</b> for a P1/P2 incident still in CLASSIFIED, ASSIGNED or REOPENED, the level is the number of whole response windows that have passed since the SLA start (or since assignment, if later), capped at 3. With the default P1 policy (5 min response) an unacknowledged P1 reaches the team lead after 5 min, the admin after 10 and the IT manager after 15.</li>
-<li><b>Resolution breached:</b> any priority, once the resolution deadline has passed and it is not resolved: level &ge; 1 + min(2, overdue &divide; half the resolution window).</li>
+<li><b>Not acknowledged:</b> for a P1/P2 incident still in CLASSIFIED, ASSIGNED or REOPENED, the target level is the number of whole response windows that have passed since the SLA start (or since assignment, if later),
+capped at 3. With the default P1 policy (5 min response) an unacknowledged P1 reaches the team lead after 5 min, the admin after
+10 and the IT manager after 15.</li>
+<li><b>Resolution breached:</b> any priority, once the resolution deadline has passed and it is not resolved: target level &ge; 1 + min(2, overdue &divide; half the resolution window).</li>
 <li>Recipients: level 1 is the team lead of the assignee's team (or the first team lead), level 2 the first active System Administrator, level 3 the first active IT Manager. Each escalation is an <code>ESCALATED</code> event, an audit row and a CRITICAL notification. Auto-escalation can be switched off in settings.</li>
 </ul>
 
@@ -362,7 +366,7 @@ reporter + supporters); a <code>ME_TOO</code> event is audited and the priority 
 incident's service or upstream of it, and it already holds incidents of the same category), the incident is simply linked to it.
 If several qualify, the most specific root (smallest blast radius) wins.</li>
 <li><b>Step 2 - new hypothesis.</b> Otherwise the candidate roots are the incident's service and every service it depends on.
-Evidence is the open P1-P3 incidents of the same category created within the correlation window (default <b>60 min</b>) that are
+Evidence is the open P1-P3 incidents of the same category created within the correlation window (default <b>60 min</b>, admin-adjustable 5 min to 24 h) that are
 not already explained by an open problem.</li>
 <li>A root "explains" the evidence on itself and everything downstream of it, and must explain the trigger. It qualifies when it
 explains at least <b>3</b> incidents (setting <code>correlationMinIncidents</code>) and either they are spread over &ge; 2 services
@@ -991,7 +995,8 @@ slightly between runs because the history generator uses a fixed random seed but
 <tr><td>Password protection</td><td>BCrypt (salted, adaptive); minimum 8 characters (max 72, BCrypt's limit); the hash never leaves the server (<code>UserView</code> omits it).</td></tr>
 <tr><td>Input validation</td><td>Jakarta Bean Validation on every request record (<code>@NotBlank</code>, <code>@Size</code>, <code>@Min/@Max</code>, <code>@Email</code>, <code>@Pattern</code> for codes and tags), plus domain checks in factories and value objects. Enum parameters are type-checked. Sort fields are whitelisted and page size is capped at 100.</td></tr>
 <tr><td>Registration control</td><td>Self-registration creates only employees and only with the campus domain (<code>ALLOWED_DOMAIN</code>); emails are unique.</td></tr>
-<tr><td>Secure API access</td><td>Stateless sessions; CSRF protection is disabled because no cookies are used (the token is sent in the <code>Authorization</code> header); CORS allows only configured origins; 401 responses are JSON; error bodies never include stack traces; database errors map to a generic 503.</td></tr>
+<tr><td>Secure API access</td><td>Stateless sessions; CSRF protection is disabled because no cookies are used (the token is sent in the <code>Authorization</code> header); the token is read only from the <code>Authorization</code> header, except on <code>/api/stream</code>, which also accepts
+<code>?access_token=</code> because browsers' <code>EventSource</code> cannot set headers; CORS allows only configured origins; 401 responses are JSON; error bodies never include stack traces; database errors map to a generic 503.</td></tr>
 <tr><td>Secrets</td><td>JWT secret (must be &ge; 32 bytes, startup fails otherwise), Claude and Gemini keys and the Telegram token come from environment variables or an untracked <code>.env</code>; <code>.env.example</code> documents them.</td></tr>
 <tr><td>Data exposure</td><td>The public status endpoint returns only service health and problem titles, without incident numbers or people. Claude and Gemini receive only the report text, the service name and the category list, and only when a key is configured.</td></tr>
 <tr><td>Concurrency</td><td><code>@Version</code> optimistic locking on incidents prevents lost updates when two people act at once.</td></tr>
@@ -1000,7 +1005,6 @@ slightly between runs because the history generator uses a fixed random seed but
 <h3>Known gaps (documented, not implemented)</h3>
 <ul>
 <li>No refresh tokens, token revocation, password reset or account lockout after repeated failed logins; no rate limiting.</li>
-<li>The bearer token may also be passed as <code>?access_token=</code> (needed because browsers' <code>EventSource</code> cannot set headers); this is enabled for all endpoints, and URLs can end up in logs. A short-lived stream ticket would be better.</li>
 <li>The H2 web console is reachable without login in the default (H2) profile; it is disabled in the <code>postgres</code> profile and must stay off in any shared deployment.</li>
 <li>Telegram link codes are 6 digits and do not expire.</li>
 <li>HTTPS termination is expected at the reverse proxy / hosting platform; the compose file serves plain HTTP for local use.</li>
@@ -1010,12 +1014,12 @@ slightly between runs because the history generator uses a fixed random seed but
 <!-- ======================= 10 ======================= -->
 <section>
 <h1 id="s10">10. Testing</h1>
-<p>The backend has 42 automated JUnit 5 tests: 41 documented test cases (display names TC01-TC41) and one Spring context-load test.
+<p>The backend has 43 automated JUnit 5 tests: 42 documented test cases (display names TC01-TC42) and one Spring context-load test.
 Unit tests construct domain objects directly with the <code>Fixtures</code> helper (no Spring, no database). Integration tests start
 the full application with an in-memory H2 database seeded by <code>DemoDataSeeder</code> and drive it through the REST API with
-MockMvc and real JWTs. <code>SlaEscalationIntegrationTest</code> moves the clock forward, so it gets its own application context.
+MockMvc and real JWTs. <code>SlaEscalationIntegrationTest</code> moves the clock forward and <code>UserUpdateAfterPoolRecycleTest</code> recycles the connection pool, so each gets its own application context.
 CI (<code>.github/workflows/ci.yml</code>) runs <code>./mvnw -B verify</code> on every push and pull request and uploads the
-Surefire reports. Result of the latest run (21 November 2026): <b>42 tests, 0 failures, 0 errors, 0 skipped</b>.</p>
+Surefire reports. Result of the latest run (21 November 2026): <b>43 tests, 0 failures, 0 errors, 0 skipped</b>.</p>
 
 <table class="small">
 <thead><tr><th style="width:5%">ID</th><th style="width:19%">Name</th><th style="width:7%">Type</th><th style="width:10%">Category</th><th style="width:28%">Steps</th><th style="width:25%">Expected</th><th style="width:6%">Result</th></tr></thead>
@@ -1061,6 +1065,7 @@ Surefire reports. Result of the latest run (21 November 2026): <b>42 tests, 0 fa
 <tr><td>TC39</td><td>Fest-load scenario: academic-block network reports point at Core Switch A</td><td>Integration</td><td>Normal (intelligent)</td><td>Admin runs scenario fest-load; read problems.</td><td>A problem rooted at Core Switch A exists.</td><td class="ok">PASS</td></tr>
 <tr><td>TC40</td><td>AI adapters without an API key stay disabled and step aside for the keyword classifier</td><td>Unit</td><td>Exception (external service)</td><td>Build <code>GeminiCategoryClassifier</code> and <code>ClaudeCategoryClassifier</code> with empty keys; classify "wifi down".</td><td>Both report disabled and return empty, so the chain falls through to keywords.</td><td class="ok">PASS</td></tr>
 <tr><td>TC41</td><td>The scheduled SLA sweep saves its flags, so a breach is alerted and recorded only once</td><td>Integration</td><td>Business rule (SLA)</td><td>Run the scheduled sweep once, then sweep twice more.</td><td>The repeat sweeps fire no new warnings, breaches or escalations and check the same incidents.</td><td class="ok">PASS</td></tr>
+<tr><td>TC42</td><td>Users can still be updated after the pool replaces the connection that created the schema</td><td>Integration</td><td>Robustness (database)</td><td>Evict every pooled connection, then request a Telegram link code (an update to the user row).</td><td>200 with a code. Before the fix, H2 rejected every user update with &ldquo;Check constraint invalid&rdquo; about 30 minutes after a fresh start; <code>H2CheckConstraintFix</code> drops the affected IN constraints on H2 only.</td><td class="ok">PASS</td></tr>
 <tr><td>-</td><td>contextLoads</td><td>Integration</td><td>Smoke</td><td>Start the Spring context.</td><td>Context starts; seeder runs.</td><td class="ok">PASS</td></tr>
 </tbody></table>
 <p>Coverage by brief category: normal operations (TC02, 06, 10, 11, 14-17, 20-23, 25, 26, 39), boundary conditions (TC07, 08, 12, 19, 36, 38),
@@ -1195,13 +1200,12 @@ that matches the brief's example and the code's package structure. Every member 
 <li><b>Single instance.</b> Number sequences, the round-robin cursor, the SLA-risk cache and SSE subscriptions are in memory, and scheduled jobs would run on every instance (see Section 6, Q9).</li>
 <li><b>Email is simulated</b> (outbox table). No SMS. No Web Push.</li>
 <li><b>SLA clock is 24x7</b>; there are no business hours, holidays or "paused while awaiting info".</li>
-<li><b>Cancel is effectively pre-assignment only.</b> Auto-assignment moves a new incident straight to ASSIGNED, so cancel (allowed in NEW/CLASSIFIED) is available only when no technician could be assigned.</li>
 <li><b>Escalation recipients</b> are the first matching lead/admin/manager; there is no on-call rota.</li>
 <li><b>Keyword classifier mistakes.</b> Because "OTP" folds into the login synonym group, a payment report mentioning an OTP can be classified as Authentication when no AI key is configured (seen in the payment-down scenario). AI classification avoids this, and staff can see the classification reason.</li>
 <li><b>Correlation step 1 has no time limit.</b> A new incident attaches to any open problem that explains it, however old; stale problems must be resolved by a lead.</li>
 <li><b>Analytics in memory</b> (<code>ReportService</code> loads all incidents); fine for campus scale only.</li>
 <li><b>Schema management</b> uses Hibernate <code>ddl-auto=update</code>, not versioned migrations.</li>
-<li>Security gaps listed in Section 9 (refresh tokens, rate limiting, H2 console, query-string token, non-expiring Telegram codes).</li>
+<li>Security gaps listed in Section 9 (refresh tokens, rate limiting, H2 console, non-expiring Telegram codes, token in the URL of the live stream).</li>
 <li>No file attachments (screenshots) on incidents; no frontend automated tests.</li>
 </ul>
 <h2>14.2 Future work</h2>
@@ -1240,11 +1244,11 @@ npm run dev</pre>
 <thead><tr><th style="width:25%">Variable</th><th>Effect</th></tr></thead>
 <tbody>
 <tr><td><code>GEMINI_API_KEY</code></td><td>Turns on Google Gemini category suggestion (free tier key from Google AI Studio).</td></tr>
-<tr><td><code>GEMINI_MODEL</code></td><td>Gemini model id (default <code>gemini-3.5-flash-lite</code>). Leave the line out of <code>.env</code> rather than empty.</td></tr>
+<tr><td><code>GEMINI_MODEL</code></td><td>Gemini model id (default <code>gemini-3.5-flash-lite</code>); commented out in <code>.env.example</code>.</td></tr>
 <tr><td><code>ANTHROPIC_API_KEY</code></td><td>Turns on Claude category suggestion (tried before Gemini). With neither key the keyword classifier is used.</td></tr>
 <tr><td><code>CAMPUSOPS_AI_MODEL</code></td><td>Claude model id (default <code>claude-opus-5-5</code>).</td></tr>
 <tr><td><code>TELEGRAM_BOT_TOKEN</code></td><td>Turns on the Telegram bot and channel.</td></tr>
-<tr><td><code>JWT_SECRET</code></td><td>Token signing key, at least 32 characters; change it for any shared deployment.</td></tr>
+<tr><td><code>JWT_SECRET</code></td><td>Token signing key, at least 32 characters (commented out in <code>.env.example</code>; a development default is used locally). Set it for any shared deployment.</td></tr>
 <tr><td><code>ALLOWED_DOMAIN</code>, <code>CORS_ORIGINS</code>, <code>DEMO_ENABLED</code>, <code>SEED_ENABLED</code>, <code>PORT</code>, <code>DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD</code></td><td>Campus email domain for registration, allowed browser origins, demo controls, seeding, port and PostgreSQL connection (with <code>SPRING_PROFILES_ACTIVE=postgres</code>).</td></tr>
 </tbody></table>
 <h2>15.4 Demo accounts (password <code>Campus@123</code>, domain <code>@hyderabad.bits-pilani.ac.in</code>)</h2>
@@ -1259,7 +1263,7 @@ npm run dev</pre>
 </tbody></table>
 <h2>15.5 Demo controls (admin only, <code>/admin/demo</code>)</h2>
 <ul>
-<li><b>Time warp</b> <code>POST /api/admin/demo/time-warp?minutes=N</code> (1-1440): moves the system clock forward and runs an SLA sweep immediately, so warnings, breaches and escalations appear in seconds. The panel offers +5, +15 and +60 minute buttons; pressing +5 repeatedly shows an unacknowledged P1 climb one level at a time (a single larger warp jumps straight to a higher level).</li>
+<li><b>Time warp</b> <code>POST /api/admin/demo/time-warp?minutes=N</code> (1-1440): moves the system clock forward and runs an SLA sweep immediately, so warnings, breaches and escalations appear in seconds. The panel offers +5, +15 and +60 minute buttons; pressing +5 repeatedly shows an unacknowledged P1 climb one level at a time; after a larger warp it still climbs one level per sweep, so every level is notified.</li>
 <li><b>Scenario "core-switch-b"</b>: four HIGH/HIGH Wi-Fi reports from Gautam, Krishna, Vyas and Meera Bhavan (120 users each) &rarr; correlated into a Core Switch B problem.</li>
 <li><b>Scenario "fest-load"</b>: four HIGH/HIGH reports from the Academic Blocks LAN (two), Library Wi-Fi and the D+F lab network (250 users each) &rarr; correlated into a Core Switch A problem.</li>
 <li><b>Scenario "payment-down"</b>: the brief's three payment reports on the Fee Payment Portal (HIGH/CRITICAL, 300 users) &rarr; P1, duplicates flagged.</li>
@@ -1267,7 +1271,7 @@ npm run dev</pre>
 </ul>
 <h2>15.6 Tests</h2>
 <pre>cd backend
-./mvnw test        <span class="cm"># 42 tests (TC01-TC41 + context load), in-memory H2</span></pre>
+./mvnw test        <span class="cm"># 43 tests (TC01-TC42 + context load), in-memory H2</span></pre>
 </section>
 
 </body>

@@ -80,11 +80,11 @@ Copy `.env.example` to `.env` in the repo root (never commit it). Everything is 
 | Variable | Purpose |
 |----------|---------|
 | `GEMINI_API_KEY` | Google Gemini API key (free tier, Google AI Studio): enables AI category suggestion. |
-| `GEMINI_MODEL` | Gemini model, default `gemini-3.5-flash-lite`. Delete the line rather than leaving it empty. |
+| `GEMINI_MODEL` | Gemini model, default `gemini-3.5-flash-lite` (commented out in `.env.example`). |
 | `ANTHROPIC_API_KEY` | Claude API key: tried before Gemini when set. |
 | `CAMPUSOPS_AI_MODEL` | Claude model, default `claude-opus-5-5`. |
 | `TELEGRAM_BOT_TOKEN` | Token from @BotFather: enables the Telegram bot and channel. |
-| `JWT_SECRET` | Token signing key, at least 32 characters. Delete the line rather than leaving it empty locally; set it for any shared deployment. |
+| `JWT_SECRET` | Token signing key, at least 32 characters (commented out in `.env.example`; a development default is used locally). Set it for any shared deployment. |
 | `ALLOWED_DOMAIN`, `CORS_ORIGINS`, `DEMO_ENABLED`, `SEED_ENABLED`, `PORT` | Registration domain, allowed origins, demo controls, seeding, port. |
 | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` | PostgreSQL connection, used with `SPRING_PROFILES_ACTIVE=postgres`. |
 
@@ -96,7 +96,7 @@ Without any AI key the keyword classifier is used; without a Telegram token the 
 cd backend && ./mvnw test
 ```
 
-42 JUnit 5 tests (TC01-TC41 plus a context-load test): unit tests for the state machine, SLA tracker, priority and assignment
+43 JUnit 5 tests (TC01-TC42 plus a context-load test): unit tests for the state machine, SLA tracker, priority and assignment
 strategies, text intelligence and AI adapter fallback; integration tests through the REST API for the three demo workflows,
 security, SLA escalation (including an idempotent scheduled sweep), "Me too" and the fest-load correlation. CI (`.github/workflows/ci.yml`) runs `./mvnw verify` and the
 frontend build on every push.

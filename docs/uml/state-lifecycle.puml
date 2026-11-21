@@ -13,6 +13,7 @@ NEW --> CANCELLED : cancel()\nreporter / admin
 CLASSIFIED --> ASSIGNED : assignTo()\nauto strategy, manual, take\n[assignee != null]
 CLASSIFIED --> CANCELLED : cancel()
 ASSIGNED --> ACKNOWLEDGED : acknowledge()\n/ sla.markResponded
+ASSIGNED --> CANCELLED : cancel()\nbefore acknowledgement
 ACKNOWLEDGED --> IN_PROGRESS : start()
 IN_PROGRESS --> AWAITING_INFO : requestInfo()
 AWAITING_INFO --> IN_PROGRESS : provideInfo() / start()

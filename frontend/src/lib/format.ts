@@ -132,8 +132,9 @@ export function minutesLabel(mins: number) {
   if (!mins) return "-"
   if (mins < 60) return Math.round(mins) + " min"
   const h = mins / 60
-  if (h < 24) return h.toFixed(1) + " h"
-  return (h / 24).toFixed(1) + " d"
+  const trim = (n: number) => n.toFixed(1).replace(/\.0$/, "")
+  if (h < 24) return trim(h) + " h"
+  return trim(h / 24) + " d"
 }
 
 export function countdown(ms: number) {

@@ -103,7 +103,7 @@ Note on numbers: the seeded campus has INC-1001 to INC-1048. New incidents in th
 **Escalation, Window D:**
 7. In **Time warp**, click **+5 min**. Nobody has acknowledged the P1 payment incident, so its response SLA is breached and it escalates to the Team Lead. Show the result log and the incident timeline (SLA_BREACHED, ESCALATED).
 8. Click **+5 min** again: escalated to the System Administrator (kiran's bell shows "Escalated to you"). Optionally once more: IT Manager (log in as **anil** to show it).
-- **Member 5:** "Escalation follows Technician, Team Lead, System Administrator, IT Manager. An urgent incident climbs one level for every response window it stays unacknowledged."
+- **Member 5:** "Escalation follows Technician, Team Lead, System Administrator, IT Manager. An urgent incident climbs one level for every response window it stays unacknowledged, and never skips a level, so everyone in the chain is told."
 
 **Window C (priya, team lead):** open the Core Switch B problem, click **Resolve problem + all linked incidents** with *"Replaced the failed line card in Core Switch B"*. All four linked incidents move to RESOLVED at once and each reporter is notified.
 
@@ -138,7 +138,7 @@ Note on numbers: the seeded campus has INC-1001 to INC-1048. New incidents in th
 
 ## Segment 8 - Tests and CI (16:45-17:45)
 
-- **Member 5:** run `cd backend && ./mvnw test` (or show a finished run): **42 tests, 0 failures** (TC01-TC41 plus context load). Show two names: TC01 "NEW cannot jump straight to CLOSED" and TC35 "An unacknowledged P1 breaches its SLA and is escalated up the chain".
+- **Member 5:** run `cd backend && ./mvnw test` (or show a finished run): **43 tests, 0 failures** (TC01-TC42 plus context load). Show two names: TC01 "NEW cannot jump straight to CLOSED" and TC35 "An unacknowledged P1 breaches its SLA and is escalated up the chain".
 - Show `.github/workflows/ci.yml`: backend `mvnw verify` and frontend `npm run build` on every push.
 - Show the test table in the report (section 10) and the traceability matrix (section 12).
 
