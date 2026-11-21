@@ -110,10 +110,10 @@ class SlaEscalationIntegrationTest extends ApiSupport {
     @Transactional
     @DisplayName("TC37 A missing SLA policy is reported as MISSING_SLA_CONFIGURATION")
     void missingSla() {
-        var erp = catalog.allServices().stream().filter(s -> s.getCode().equals("PRINT")).findFirst().orElseThrow();
+        var print = catalog.allServices().stream().filter(s -> s.getCode().equals("PRINT")).findFirst().orElseThrow();
         policies.findByServiceIsNullAndPriority(Priority.P4).ifPresent(policies::delete);
         policies.flush();
-        assertThatThrownBy(() -> catalog.policyFor(erp, Priority.P4))
+        assertThatThrownBy(() -> catalog.policyFor(print, Priority.P4))
                 .isInstanceOf(MissingSlaConfigurationException.class);
     }
 

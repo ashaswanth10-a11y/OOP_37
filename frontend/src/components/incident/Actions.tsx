@@ -169,7 +169,7 @@ function AssignDialog({ d, onClose, run, busy }: { d: IncidentDetail; onClose: (
                     (picked === r.technician.id ? "border-signal bg-signal-soft" : "border-line hover:border-line-strong")
                   }
                 >
-                  <input type="radio" name="tech" checked={picked === r.technician.id} onChange={() => setPicked(r.technician.id)} />
+                  <input type="radio" name="tech-rec" checked={picked === r.technician.id} onChange={() => setPicked(r.technician.id)} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{r.technician.name}</span>
@@ -197,7 +197,7 @@ function AssignDialog({ d, onClose, run, busy }: { d: IncidentDetail; onClose: (
             const full = (t.activeIncidents ?? 0) >= (t.maxConcurrent ?? 99)
             return (
               <label key={t.id} className={"flex cursor-pointer items-center gap-3 border-b border-line px-3 py-2 last:border-0 " + (picked === t.id ? "bg-signal-soft" : "hover:bg-sunk")}>
-                <input type="radio" name="tech" checked={picked === t.id} onChange={() => setPicked(t.id)} />
+                <input type="radio" name="tech-all" checked={picked === t.id} onChange={() => setPicked(t.id)} />
                 <span className="min-w-0 flex-1">
                   <span className="text-[13.5px] font-medium">{t.fullName}</span>{" "}
                   <span className="font-mono text-[11px] text-mute">{t.code}</span>

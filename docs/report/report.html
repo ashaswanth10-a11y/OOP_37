@@ -1010,12 +1010,12 @@ slightly between runs because the history generator uses a fixed random seed but
 <!-- ======================= 10 ======================= -->
 <section>
 <h1 id="s10">10. Testing</h1>
-<p>The backend has 41 automated JUnit 5 tests: 40 documented test cases (display names TC01-TC40) and one Spring context-load test.
+<p>The backend has 42 automated JUnit 5 tests: 41 documented test cases (display names TC01-TC41) and one Spring context-load test.
 Unit tests construct domain objects directly with the <code>Fixtures</code> helper (no Spring, no database). Integration tests start
 the full application with an in-memory H2 database seeded by <code>DemoDataSeeder</code> and drive it through the REST API with
 MockMvc and real JWTs. <code>SlaEscalationIntegrationTest</code> moves the clock forward, so it gets its own application context.
 CI (<code>.github/workflows/ci.yml</code>) runs <code>./mvnw -B verify</code> on every push and pull request and uploads the
-Surefire reports. Result of the latest run (21 November 2026): <b>41 tests, 0 failures, 0 errors, 0 skipped</b>.</p>
+Surefire reports. Result of the latest run (21 November 2026): <b>42 tests, 0 failures, 0 errors, 0 skipped</b>.</p>
 
 <table class="small">
 <thead><tr><th style="width:5%">ID</th><th style="width:19%">Name</th><th style="width:7%">Type</th><th style="width:10%">Category</th><th style="width:28%">Steps</th><th style="width:25%">Expected</th><th style="width:6%">Result</th></tr></thead>
@@ -1060,11 +1060,12 @@ Surefire reports. Result of the latest run (21 November 2026): <b>41 tests, 0 fa
 <tr><td>TC38</td><td>'Me too' counts affected people once per person; the reporter cannot me-too their own incident</td><td>Integration</td><td>Business rule / boundary</td><td>diya reports a library printer fault (1 user); kabir says "me too" twice; diya says "me too" on her own incident.</td><td>supporters 1, affectedUsers 2; second click still 1; own incident 409 INVALID_STATE_TRANSITION.</td><td class="ok">PASS</td></tr>
 <tr><td>TC39</td><td>Fest-load scenario: academic-block network reports point at Core Switch A</td><td>Integration</td><td>Normal (intelligent)</td><td>Admin runs scenario fest-load; read problems.</td><td>A problem rooted at Core Switch A exists.</td><td class="ok">PASS</td></tr>
 <tr><td>TC40</td><td>AI adapters without an API key stay disabled and step aside for the keyword classifier</td><td>Unit</td><td>Exception (external service)</td><td>Build <code>GeminiCategoryClassifier</code> and <code>ClaudeCategoryClassifier</code> with empty keys; classify "wifi down".</td><td>Both report disabled and return empty, so the chain falls through to keywords.</td><td class="ok">PASS</td></tr>
+<tr><td>TC41</td><td>The scheduled SLA sweep saves its flags, so a breach is alerted and recorded only once</td><td>Integration</td><td>Business rule (SLA)</td><td>Run the scheduled sweep once, then sweep twice more.</td><td>The repeat sweeps fire no new warnings, breaches or escalations and check the same incidents.</td><td class="ok">PASS</td></tr>
 <tr><td>-</td><td>contextLoads</td><td>Integration</td><td>Smoke</td><td>Start the Spring context.</td><td>Context starts; seeder runs.</td><td class="ok">PASS</td></tr>
 </tbody></table>
 <p>Coverage by brief category: normal operations (TC02, 06, 10, 11, 14-17, 20-23, 25, 26, 39), boundary conditions (TC07, 08, 12, 19, 36, 38),
 invalid inputs (TC03, 09, 28, 29, 34), exceptions (TC18, 24, 27, 33, 37, 40), authorization (TC30, 31, 32), business rules
-(TC01, 04, 05, 13, 24, 35, 38). Frontend behaviour (screens, SSE refresh, voice input, QR prefill) is verified manually in the demo.</p>
+(TC01, 04, 05, 13, 24, 35, 38, 41). Frontend behaviour (screens, SSE refresh, voice input, QR prefill) is verified manually in the demo.</p>
 </section>
 
 <!-- ======================= 11 ======================= -->
@@ -1156,7 +1157,7 @@ in the demo, not by an automated test.</p>
 <tr><td>New categories without major changes</td><td><code>IncidentCategory</code> entity + keywords</td><td>/admin/categories</td><td>TC22</td><td class="ok">Full</td></tr>
 <tr><td>Problem scenario steps 1-14 (create ... analytics)</td><td><code>IncidentService.report</code> pipeline, <code>SlaMonitor</code>, audit, close, dashboard</td><td>/report &rarr; /dashboard</td><td>TC10, TC23, TC35</td><td class="ok">Full</td></tr>
 <tr><td>Prevent inappropriate state transitions (OOP)</td><td>State pattern + <code>IncidentPolicy</code></td><td>action buttons from <code>allowedActions</code></td><td>TC01, TC04, TC33</td><td class="ok">Full</td></tr>
-<tr><td>Generate warnings before deadlines; background monitoring</td><td><code>SlaMonitor</code> (@Scheduled), configurable %</td><td>notifications, /queue</td><td>TC07</td><td class="ok">Full</td></tr>
+<tr><td>Generate warnings before deadlines; background monitoring</td><td><code>SlaMonitor</code> (@Scheduled), configurable %</td><td>notifications, /queue</td><td>TC07, TC41</td><td class="ok">Full</td></tr>
 <tr><td>Easy to add a notification mechanism</td><td><code>NotificationChannel</code> + <code>NotificationChannelFactory</code></td><td>-</td><td>-</td><td class="ok">Full (design)</td></tr>
 <tr><td>Audit fields: timestamp, user, action, incident, previous/new state, description</td><td><code>AuditRecord</code></td><td>/admin/audit</td><td>TC23</td><td class="ok">Full</td></tr>
 <tr><td>Escalation Technician &rarr; Team Lead &rarr; Sys Admin &rarr; IT Manager</td><td><code>EscalationService</code></td><td>/incidents/:id, notifications</td><td>TC35</td><td class="ok">Full</td></tr>
@@ -1164,7 +1165,7 @@ in the demo, not by an automated test.</p>
 <tr><td>Security: authentication, RBAC, password protection, validation, secure API, unauthorized operations</td><td><code>SecurityConfig</code>, <code>JwtService</code>, <code>@PreAuthorize</code>, <code>IncidentPolicy</code></td><td>/login, gated routes</td><td>TC28-TC34</td><td class="ok">Full</td></tr>
 <tr><td>Persist users, services, incidents, technicians, SLA policies, audit, resolutions</td><td>tables in Section 8</td><td>-</td><td>integration tests</td><td class="ok">Full</td></tr>
 <tr><td>At least two design patterns</td><td>State, Strategy, Observer, Factory, Adapter, Repository</td><td>-</td><td>TC01-TC22</td><td class="ok">Full</td></tr>
-<tr><td>&ge; 15 documented test cases</td><td>40 + context load</td><td>-</td><td>Section 10</td><td class="ok">Full</td></tr>
+<tr><td>&ge; 15 documented test cases</td><td>41 + context load</td><td>-</td><td>Section 10</td><td class="ok">Full</td></tr>
 <tr><td>Three demonstrated workflows</td><td>Video script (docs/VIDEO_SCRIPT.md)</td><td>-</td><td>TC23, TC25, TC35, TC39</td><td class="ok">Full</td></tr>
 <tr><td>Different GUI per user type, links between options</td><td>role-based Shell navigation and route gates</td><td>all</td><td>Manual</td><td class="ok">Full</td></tr>
 </tbody></table>
@@ -1266,7 +1267,7 @@ npm run dev</pre>
 </ul>
 <h2>15.6 Tests</h2>
 <pre>cd backend
-./mvnw test        <span class="cm"># 41 tests (TC01-TC40 + context load), in-memory H2</span></pre>
+./mvnw test        <span class="cm"># 42 tests (TC01-TC41 + context load), in-memory H2</span></pre>
 </section>
 
 </body>

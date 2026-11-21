@@ -79,7 +79,8 @@ public class IncidentPolicy {
             case RESOLVE -> s == IncidentStatus.IN_PROGRESS || s == IncidentStatus.AWAITING_INFO;
             case VERIFY, REOPEN -> s == IncidentStatus.RESOLVED;
             case CLOSE -> s == IncidentStatus.VERIFIED;
-            case CANCEL -> s == IncidentStatus.NEW || s == IncidentStatus.CLASSIFIED;
+            // a reporter can withdraw until a technician has acknowledged it
+            case CANCEL -> s == IncidentStatus.NEW || s == IncidentStatus.CLASSIFIED || s == IncidentStatus.ASSIGNED;
             case ASSIGN -> i.state().allowsAssignment();
             case TAKE -> s == IncidentStatus.CLASSIFIED || s == IncidentStatus.REOPENED;
             case CHANGE_PRIORITY -> i.isOpen();

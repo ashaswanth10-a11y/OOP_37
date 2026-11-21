@@ -49,7 +49,7 @@ export const STATUS_LABEL: Record<Status, string> = {
   ASSIGNED: "Assigned",
   ACKNOWLEDGED: "Acknowledged",
   IN_PROGRESS: "In progress",
-  AWAITING_INFO: "Awaiting your info",
+  AWAITING_INFO: "Awaiting info",
   RESOLVED: "Resolved",
   VERIFIED: "Verified",
   CLOSED: "Closed",

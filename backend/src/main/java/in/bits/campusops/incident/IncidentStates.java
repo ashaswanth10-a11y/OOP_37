@@ -107,7 +107,7 @@ public final class IncidentStates {
 
     static final class AssignedState extends AbstractState {
         AssignedState() {
-            super(IncidentStatus.ASSIGNED, EnumSet.of(IncidentStatus.ACKNOWLEDGED));
+            super(IncidentStatus.ASSIGNED, EnumSet.of(IncidentStatus.ACKNOWLEDGED, IncidentStatus.CANCELLED));
         }
 
         @Override

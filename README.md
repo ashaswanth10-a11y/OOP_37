@@ -96,9 +96,9 @@ Without any AI key the keyword classifier is used; without a Telegram token the 
 cd backend && ./mvnw test
 ```
 
-41 JUnit 5 tests (TC01-TC40 plus a context-load test): unit tests for the state machine, SLA tracker, priority and assignment
+42 JUnit 5 tests (TC01-TC41 plus a context-load test): unit tests for the state machine, SLA tracker, priority and assignment
 strategies, text intelligence and AI adapter fallback; integration tests through the REST API for the three demo workflows,
-security, SLA escalation, "Me too" and the fest-load correlation. CI (`.github/workflows/ci.yml`) runs `./mvnw verify` and the
+security, SLA escalation (including an idempotent scheduled sweep), "Me too" and the fest-load correlation. CI (`.github/workflows/ci.yml`) runs `./mvnw verify` and the
 frontend build on every push.
 
 ## Project structure

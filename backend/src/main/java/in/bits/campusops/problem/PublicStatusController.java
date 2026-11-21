@@ -55,6 +55,6 @@ public class PublicStatusController {
                 .map(n -> new OutageMapService.Node(n.id(), n.code(), n.name(), n.type(), n.location(), n.criticality(),
                         n.x(), n.y(), n.health(), n.openIncidents(), n.worstPriority(), n.rootCause(), null))
                 .toList();
-        return new CampusStatus(overall, Instant.now(), services, problems, m.edges(), nodes);
+        return new CampusStatus(overall, time.now(), services, problems, m.edges(), nodes);
     }
 }

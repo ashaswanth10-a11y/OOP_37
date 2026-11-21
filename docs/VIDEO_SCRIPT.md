@@ -138,7 +138,7 @@ Note on numbers: the seeded campus has INC-1001 to INC-1048. New incidents in th
 
 ## Segment 8 - Tests and CI (16:45-17:45)
 
-- **Member 5:** run `cd backend && ./mvnw test` (or show a finished run): **41 tests, 0 failures** (TC01-TC40 plus context load). Show two names: TC01 "NEW cannot jump straight to CLOSED" and TC35 "An unacknowledged P1 breaches its SLA and is escalated up the chain".
+- **Member 5:** run `cd backend && ./mvnw test` (or show a finished run): **42 tests, 0 failures** (TC01-TC41 plus context load). Show two names: TC01 "NEW cannot jump straight to CLOSED" and TC35 "An unacknowledged P1 breaches its SLA and is escalated up the chain".
 - Show `.github/workflows/ci.yml`: backend `mvnw verify` and frontend `npm run build` on every push.
 - Show the test table in the report (section 10) and the traceability matrix (section 12).
 

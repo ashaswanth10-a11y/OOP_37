@@ -48,7 +48,8 @@ public class EscalationService {
             return false;
         }
         Instant now = time.now();
-        int target = targetLevel(incident, now);
+        // climb one level per check so every person in the chain is told, even after a long gap
+        int target = Math.min(targetLevel(incident, now), incident.getEscalationLevel() + 1);
         if (target <= incident.getEscalationLevel()) {
             return false;
         }

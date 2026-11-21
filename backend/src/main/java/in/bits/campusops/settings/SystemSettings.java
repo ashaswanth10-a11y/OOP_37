@@ -31,6 +31,9 @@ public class SystemSettings {
         if (duplicateThreshold < 0.1 || duplicateThreshold > 0.95) {
             throw new IllegalArgumentException("Duplicate threshold must be between 0.1 and 0.95");
         }
+        if (correlationWindowMinutes < 5 || correlationWindowMinutes > 24 * 60) {
+            throw new IllegalArgumentException("Correlation window must be between 5 minutes and 24 hours");
+        }
         if (correlationMinIncidents < 2) {
             throw new IllegalArgumentException("Correlation needs at least 2 incidents");
         }

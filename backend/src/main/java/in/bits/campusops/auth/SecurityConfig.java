@@ -39,9 +39,13 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http, AuthenticationEntryPoint entryPoint) throws Exception {
-        DefaultBearerTokenResolver tokenResolver = new DefaultBearerTokenResolver();
-        // EventSource (server-sent events) cannot send headers, so the stream may pass ?access_token=
-        tokenResolver.setAllowUriQueryParameter(true);
+        DefaultBearerTokenResolver headerOnly = new DefaultBearerTokenResolver();
+        DefaultBearerTokenResolver withQuery = new DefaultBearerTokenResolver();
+        withQuery.setAllowUriQueryParameter(true);
+        // EventSource (server-sent events) cannot send headers, so only the stream may pass ?access_token=
+        org.springframework.security.oauth2.server.resource.web.BearerTokenResolver tokenResolver =
+                request -> "/api/stream".equals(request.getRequestURI())
+                        ? withQuery.resolve(request) : headerOnly.resolve(request);
 
         http
                 .csrf(csrf -> csrf.disable())
