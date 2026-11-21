@@ -6,8 +6,7 @@
 
 ## Before recording (10 minutes, off camera)
 
-1. Start from a clean database so incident numbers match this script: stop the backend, delete `backend/data/`, then
-   `cd backend && ./mvnw spring-boot:run` and `cd frontend && npm run dev` (or `docker compose up --build` and use port 3000).
+1. Start everything with `run.cmd` (Windows) or `./run.sh` (macOS/Linux). Log in as **kiran**, open **Demo control** and click **Reset demo data**, so incident numbers match this script. The **Presenter script** panel on that page lists every step below with its buttons; tick steps off as you record. Reset again before each new take.
 2. Optional keys in `.env`: `GEMINI_API_KEY` (free, shows "AI" classification), `TELEGRAM_BOT_TOKEN` (for the Telegram segment). Without keys the keyword classifier and the other features still work.
 3. Open four browser profiles (or one normal + three private windows), all at `http://localhost:5173`, and log in (password `Campus@123`, domain `@hyderabad.bits-pilani.ac.in`):
    - A: **aarav** (student, Gautam Bhavan)
@@ -100,6 +99,9 @@ Note on numbers: the seeded campus has INC-1001 to INC-1048. New incidents in th
 6. Open **Outage map**: Core Switch B is marked as the root cause, the four hostel Wi-Fi services are red. Open **Problems**: "Suspected Core Switch B (Hostels) failure" with the four incidents and the analysis text.
 - **Member 5:** "The correlation engine walks the service dependency graph. All four hostels depend on Core Switch B, the captive portal, the Sophos firewall and the uplink. Core Switch B is the most specific shared dependency, so it is the likely root cause. A fifth Wi-Fi report would be attached to the same problem straight away."
 
+**Known outage, Window A (aarav):** open **Report a problem**. A red "Known outage" strip is already at the top. Choose **Hostel Wi-Fi: Ram Bhavan** (nobody has reported Ram yet): the form says "This is probably a known outage" because Ram also hangs off Core Switch B. Click **Me too** instead of filing.
+- **Member 5:** "We stop duplicates before they are filed. The form knows everything downstream of the failed switch, so even a hostel that hasn't complained yet is told it's a known outage. The Telegram bot does the same: /report on an affected service answers with /metoo."
+
 **Escalation, Window D:**
 7. In **Time warp**, click **+5 min**. Nobody has acknowledged the P1 payment incident, so its response SLA is breached and it escalates to the Team Lead. Show the result log and the incident timeline (SLA_BREACHED, ESCALATED).
 8. Click **+5 min** again: escalated to the System Administrator (kiran's bell shows "Escalated to you"). Optionally once more: IT Manager (log in as **anil** to show it).
@@ -138,7 +140,7 @@ Note on numbers: the seeded campus has INC-1001 to INC-1048. New incidents in th
 
 ## Segment 8 - Tests and CI (16:45-17:45)
 
-- **Member 5:** run `cd backend && ./mvnw test` (or show a finished run): **43 tests, 0 failures** (TC01-TC42 plus context load). Show two names: TC01 "NEW cannot jump straight to CLOSED" and TC35 "An unacknowledged P1 breaches its SLA and is escalated up the chain".
+- **Member 5:** run `cd backend && ./mvnw test` (or show a finished run): **46 tests, 0 failures** (TC01-TC45 plus context load). Show two names: TC01 "NEW cannot jump straight to CLOSED" and TC35 "An unacknowledged P1 breaches its SLA and is escalated up the chain".
 - Show `.github/workflows/ci.yml`: backend `mvnw verify` and frontend `npm run build` on every push.
 - Show the test table in the report (section 10) and the traceability matrix (section 12).
 

@@ -114,11 +114,11 @@
     <li><a href="#s8"><span class="t">8. Database design</span></a><span class="dots"></span><span class="pg" data-for="s8">26</span></li>
     <li><a href="#s9"><span class="t">9. Security considerations</span></a><span class="dots"></span><span class="pg" data-for="s9">29</span></li>
     <li><a href="#s10"><span class="t">10. Testing</span></a><span class="dots"></span><span class="pg" data-for="s10">30</span></li>
-    <li><a href="#s11"><span class="t">11. Innovation features</span></a><span class="dots"></span><span class="pg" data-for="s11">32</span></li>
-    <li><a href="#s12"><span class="t">12. Requirement traceability matrix</span></a><span class="dots"></span><span class="pg" data-for="s12">33</span></li>
-    <li><a href="#s13"><span class="t">13. Team and responsibilities</span></a><span class="dots"></span><span class="pg" data-for="s13">35</span></li>
-    <li><a href="#s14"><span class="t">14. Limitations and future work</span></a><span class="dots"></span><span class="pg" data-for="s14">36</span></li>
-    <li><a href="#s15"><span class="t">15. How to run</span></a><span class="dots"></span><span class="pg" data-for="s15">37</span></li>
+    <li><a href="#s11"><span class="t">11. Innovation features</span></a><span class="dots"></span><span class="pg" data-for="s11">33</span></li>
+    <li><a href="#s12"><span class="t">12. Requirement traceability matrix</span></a><span class="dots"></span><span class="pg" data-for="s12">34</span></li>
+    <li><a href="#s13"><span class="t">13. Team and responsibilities</span></a><span class="dots"></span><span class="pg" data-for="s13">36</span></li>
+    <li><a href="#s14"><span class="t">14. Limitations and future work</span></a><span class="dots"></span><span class="pg" data-for="s14">37</span></li>
+    <li><a href="#s15"><span class="t">15. How to run</span></a><span class="dots"></span><span class="pg" data-for="s15">38</span></li>
   </ol>
   <p style="margin-top:14pt" class="note">Notation. Class names are written in <code>monospace</code> exactly as they appear in the
     source tree (<code>backend/src/main/java/in/bits/campusops/...</code>). Every number, threshold and formula in this report is
@@ -1014,12 +1014,12 @@ slightly between runs because the history generator uses a fixed random seed but
 <!-- ======================= 10 ======================= -->
 <section>
 <h1 id="s10">10. Testing</h1>
-<p>The backend has 43 automated JUnit 5 tests: 42 documented test cases (display names TC01-TC42) and one Spring context-load test.
+<p>The backend has 46 automated JUnit 5 tests: 45 documented test cases (display names TC01-TC45) and one Spring context-load test.
 Unit tests construct domain objects directly with the <code>Fixtures</code> helper (no Spring, no database). Integration tests start
 the full application with an in-memory H2 database seeded by <code>DemoDataSeeder</code> and drive it through the REST API with
-MockMvc and real JWTs. <code>SlaEscalationIntegrationTest</code> moves the clock forward and <code>UserUpdateAfterPoolRecycleTest</code> recycles the connection pool, so each gets its own application context.
+MockMvc and real JWTs. <code>SlaEscalationIntegrationTest</code> moves the clock forward and <code>UserUpdateAfterPoolRecycleTest</code> recycles the connection pool, <code>DemoResetIntegrationTest</code> wipes and reseeds the database and <code>KnownOutageIntegrationTest</code> fires an outage, so each gets its own application context.
 CI (<code>.github/workflows/ci.yml</code>) runs <code>./mvnw -B verify</code> on every push and pull request and uploads the
-Surefire reports. Result of the latest run (21 November 2026): <b>43 tests, 0 failures, 0 errors, 0 skipped</b>.</p>
+Surefire reports. Result of the latest run (21 November 2026): <b>46 tests, 0 failures, 0 errors, 0 skipped</b>.</p>
 
 <table class="small">
 <thead><tr><th style="width:5%">ID</th><th style="width:19%">Name</th><th style="width:7%">Type</th><th style="width:10%">Category</th><th style="width:28%">Steps</th><th style="width:25%">Expected</th><th style="width:6%">Result</th></tr></thead>
@@ -1066,6 +1066,9 @@ Surefire reports. Result of the latest run (21 November 2026): <b>43 tests, 0 fa
 <tr><td>TC40</td><td>AI adapters without an API key stay disabled and step aside for the keyword classifier</td><td>Unit</td><td>Exception (external service)</td><td>Build <code>GeminiCategoryClassifier</code> and <code>ClaudeCategoryClassifier</code> with empty keys; classify "wifi down".</td><td>Both report disabled and return empty, so the chain falls through to keywords.</td><td class="ok">PASS</td></tr>
 <tr><td>TC41</td><td>The scheduled SLA sweep saves its flags, so a breach is alerted and recorded only once</td><td>Integration</td><td>Business rule (SLA)</td><td>Run the scheduled sweep once, then sweep twice more.</td><td>The repeat sweeps fire no new warnings, breaches or escalations and check the same incidents.</td><td class="ok">PASS</td></tr>
 <tr><td>TC42</td><td>Users can still be updated after the pool replaces the connection that created the schema</td><td>Integration</td><td>Robustness (database)</td><td>Evict every pooled connection, then request a Telegram link code (an update to the user row).</td><td>200 with a code. Before the fix, H2 rejected every user update with &ldquo;Check constraint invalid&rdquo; about 30 minutes after a fresh start; <code>H2CheckConstraintFix</code> drops the affected IN constraints on H2 only.</td><td class="ok">PASS</td></tr>
+<tr><td>TC43</td><td>Demo reset restores the seeded campus: same counts, numbering, clock and logins</td><td>Integration</td><td>Business rule (demo) / authorization</td><td>Create an incident, fire a scenario, warp 30 min; a student calls reset (refused), then the admin resets.</td><td>403 for the student; afterwards the incident and problem counts equal the seed, the clock offset is 0, a token issued before the reset still works and the next incident gets the same number as before.</td><td class="ok">PASS</td></tr>
+<tr><td>TC44</td><td>The public status page lists a known outage with every downstream service it affects</td><td>Integration</td><td>Normal (correlation)</td><td>Fire the Core Switch B scenario, then read <code>/api/public/status</code> without logging in.</td><td>The known problem names Core Switch B, gives an incident to follow, and its affected services include Gautam Bhavan Wi-Fi (downstream).</td><td class="ok">PASS</td></tr>
+<tr><td>TC45</td><td>The Telegram bot points a new report on an affected service to /metoo, and /metoo adds the person</td><td>Integration</td><td>Business rule (duplicates)</td><td>A linked student sends <code>/report WIFI-GAUTAM ...</code> during the outage, then <code>/metoo INC-n</code>, then <code>/report WIFI-GAUTAM anyway ...</code>.</td><td>First reply warns about the known outage with the /metoo command; /metoo adds a supporter; "anyway" files a separate incident.</td><td class="ok">PASS</td></tr>
 <tr><td>-</td><td>contextLoads</td><td>Integration</td><td>Smoke</td><td>Start the Spring context.</td><td>Context starts; seeder runs.</td><td class="ok">PASS</td></tr>
 </tbody></table>
 <p>Coverage by brief category: normal operations (TC02, 06, 10, 11, 14-17, 20-23, 25, 26, 39), boundary conditions (TC07, 08, 12, 19, 36, 38),
@@ -1088,7 +1091,7 @@ invalid inputs (TC03, 09, 28, 29, 34), exceptions (TC18, 24, 27, 33, 37, 40), au
 <tr><td>Real-time notifications</td><td class="ok">Done</td><td>Server-Sent Events push notifications and incident changes to open browsers; bell with unread count.</td></tr>
 <tr><td>Mobile push notifications</td><td class="partial">Partial</td><td>Telegram messages reach phones in real time; the PWA is installable, but Web Push via the service worker is not implemented.</td></tr>
 <tr><td>Voice-based incident reporting</td><td class="ok">Done</td><td>Dictation on the report form with the browser Web Speech API; channel recorded as VOICE.</td></tr>
-<tr><td>Chatbot-based incident reporting</td><td class="ok">Done</td><td>Telegram bot: link account, <code>/report</code>, <code>/status</code>, <code>/mine</code>, <code>/services</code>.</td></tr>
+<tr><td>Chatbot-based incident reporting</td><td class="ok">Done</td><td>Telegram bot: link account, <code>/report</code>, <code>/metoo</code>, <code>/status</code>, <code>/mine</code>, <code>/services</code>. During a known outage <code>/report</code> on an affected service answers with the outage and the <code>/metoo</code> command instead of filing a duplicate.</td></tr>
 <tr><td>Cloud deployment</td><td class="partial">Ready</td><td>Docker images, Compose file and nginx config are cloud-ready; deployment to a public host is outside this submission.</td></tr>
 <tr><td>Microservice architecture</td><td class="no">No (by choice)</td><td>Deliberately a modular monolith (Section 3.3), with module boundaries ready for extraction.</td></tr>
 <tr><td>Event-driven architecture</td><td class="ok">Done (in-process)</td><td>All side effects driven by <code>IncidentEvent</code>s and observers.</td></tr>
@@ -1098,7 +1101,9 @@ invalid inputs (TC03, 09, 28, 29, 34), exceptions (TC18, 24, 27, 33, 37, 40), au
 </tbody></table>
 <p>Extras not in the list: "Me too" crowd confirmation that feeds the priority formula (inspired by SU Connect voting), QR stickers on physical assets (printable sticker sheet; scanning opens the report form with the service,
 location and category prefilled), a public campus status page, an incident replay slider built from audit snapshots, a demo control
-panel (time warp and scripted scenarios) and runtime-switchable strategies.</p>
+panel (time warp, scripted scenarios, one-click reset and a presenter script) and runtime-switchable strategies.</p>
+<p><b>Known-outage deflection.</b> While a root-cause problem is open, the report form shows it before the student types anything. When the chosen service (or the service of a scanned QR sticker) sits anywhere downstream of the failed component, the form says "This is probably a known outage" and offers <b>Me too</b> on the problem's oldest open incident. The affected set is the root plus <code>CatalogService.downstreamOf(root)</code>, so a hostel nobody has reported yet is still recognised. The same data drives the public status page and the Telegram bot. Duplicates are stopped before they are filed, instead of being detected afterwards.</p>
+<p><b>Resilience for a sleeping host.</b> If the backend cannot be reached (stopped, or a free host waking up), the frontend keeps the user's session, shows a "server is starting up" banner, polls until the server answers and then refetches everything.</p>
 </section>
 
 <!-- ======================= 12 ======================= -->
@@ -1233,8 +1238,9 @@ cd backend
 cd frontend
 npm install
 npm run dev</pre>
-<p>On first start the seeder builds the demo campus (Section 8.3). To start again from scratch, stop the backend and delete
-<code>backend/data/</code>. API documentation: <code>http://localhost:8080/swagger-ui.html</code>. Health:
+<p>Or start both with one command: double-click <code>run.cmd</code> (Windows) or run <code>./run.sh</code> (macOS/Linux). The script checks Java 21+ and Node 20+, installs the frontend packages on first run, starts the backend, waits for it to be healthy, then starts the frontend and opens the browser; Ctrl+C stops both.</p>
+<p>On first start the seeder builds the demo campus (Section 8.3). To start again from scratch, use <b>Reset demo data</b> on the admin Demo page (or stop the backend and delete
+<code>backend/data/</code>). API documentation: <code>http://localhost:8080/swagger-ui.html</code>. Health:
 <code>/actuator/health</code>.</p>
 <h2>15.2 Docker</h2>
 <pre>docker compose up --build
@@ -1268,10 +1274,12 @@ npm run dev</pre>
 <li><b>Scenario "fest-load"</b>: four HIGH/HIGH reports from the Academic Blocks LAN (two), Library Wi-Fi and the D+F lab network (250 users each) &rarr; correlated into a Core Switch A problem.</li>
 <li><b>Scenario "payment-down"</b>: the brief's three payment reports on the Fee Payment Portal (HIGH/CRITICAL, 300 users) &rarr; P1, duplicates flagged.</li>
 <li><b>Sweep now</b> <code>POST /api/admin/demo/sweep</code>.</li>
+<li><b>Reset</b> <code>POST /api/admin/demo/reset</code>: empties every table (identities restart, so logins and tokens keep working), clears in-memory state through the <code>DemoResettable</code> interface (clock offset, number counters, round-robin cursor, SLA-risk cache), reseeds and tells open browsers to refresh. Takes about 10 seconds.</li>
+<li><b>Presenter script</b>: a checklist on the Demo page that follows the video script step by step, with the scenario, time-warp and reset buttons inline and one-click copy of each demo login.</li>
 </ul>
 <h2>15.6 Tests</h2>
 <pre>cd backend
-./mvnw test        <span class="cm"># 43 tests (TC01-TC42 + context load), in-memory H2</span></pre>
+./mvnw test        <span class="cm"># 46 tests (TC01-TC45 + context load), in-memory H2</span></pre>
 </section>
 
 </body>

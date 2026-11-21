@@ -269,7 +269,8 @@ function Annunciator() {
 
 function TechPanel() {
   const { user, setUser } = useAuth()
-  const { data: mine } = useQuery({ queryKey: ["assigned"], queryFn: api.assignedIncidents })
+  const tech = !!user && isTech(user)
+  const { data: mine } = useQuery({ queryKey: ["assigned"], queryFn: api.assignedIncidents, enabled: tech })
   const toggle = useMutation({ mutationFn: (v: boolean) => api.setAvailability(v), onSuccess: setUser })
   if (!user || !isTech(user)) return null
   const active = (mine ?? []).filter((i) => ["ASSIGNED", "ACKNOWLEDGED", "IN_PROGRESS", "AWAITING_INFO"].includes(i.status)).length

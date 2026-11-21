@@ -38,7 +38,11 @@ Full diagrams (use case, five class diagrams, state, sequence, component, ER) ar
 
 ## Quick start
 
-Requirements: Java 21, Node 22 (or just Docker).
+Requirements: Java 21+, Node 20+ (or just Docker).
+
+**One command:** double-click `run.cmd` on Windows, or run `./run.sh` on macOS/Linux. It checks the requirements, installs the frontend packages on first run, starts the backend, waits until it is healthy, starts the frontend and opens the browser. Ctrl+C stops both.
+
+Or start them yourself:
 
 ```bash
 # backend on http://localhost:8080 (H2 file database in backend/data/, seeded on first start)
@@ -54,7 +58,7 @@ Docker (PostgreSQL + backend + nginx frontend on http://localhost:3000):
 docker compose up --build
 ```
 
-To start again from a clean demo campus, stop the backend and delete `backend/data/`.
+To start again from a clean demo campus, log in as the admin and click **Reset demo data** on the Demo page (or stop the backend and delete `backend/data/`).
 
 - API documentation: http://localhost:8080/swagger-ui.html
 - Health: http://localhost:8080/actuator/health
@@ -96,9 +100,9 @@ Without any AI key the keyword classifier is used; without a Telegram token the 
 cd backend && ./mvnw test
 ```
 
-43 JUnit 5 tests (TC01-TC42 plus a context-load test): unit tests for the state machine, SLA tracker, priority and assignment
+46 JUnit 5 tests (TC01-TC45 plus a context-load test): unit tests for the state machine, SLA tracker, priority and assignment
 strategies, text intelligence and AI adapter fallback; integration tests through the REST API for the three demo workflows,
-security, SLA escalation (including an idempotent scheduled sweep), "Me too" and the fest-load correlation. CI (`.github/workflows/ci.yml`) runs `./mvnw verify` and the
+security, SLA escalation (including an idempotent scheduled sweep), "Me too", the fest-load correlation, demo reset and known-outage deflection (web and Telegram). CI (`.github/workflows/ci.yml`) runs `./mvnw verify` and the
 frontend build on every push.
 
 ## Project structure
