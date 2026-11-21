@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
  * time and lets the demo fast-forward SLA clocks without waiting real minutes.
  */
 @Component
-public class TimeProvider {
+public class TimeProvider implements DemoResettable {
 
     private final Clock clock;
     private volatile Duration offset = Duration.ZERO;
@@ -51,5 +51,11 @@ public class TimeProvider {
 
     public Duration offset() {
         return offset;
+    }
+
+    /** Back to real time. */
+    @Override
+    public void resetForDemo() {
+        offset = Duration.ZERO;
     }
 }

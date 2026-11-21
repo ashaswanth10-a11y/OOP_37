@@ -10,6 +10,7 @@ import type { Channel, IncidentDetail, Level, Preview, Service } from "../lib/ty
 import { Countdown } from "../components/Countdown"
 import { ErrorBox, PriorityTag, StatusPill } from "../components/ui"
 import { MeTooButton } from "../components/incident/MeToo"
+import KnownOutages from "../components/KnownOutages"
 
 const IMPACT: { v: Level; label: string; hint: string }[] = [
   { v: "LOW", label: "Just me", hint: "one person" },
@@ -456,6 +457,8 @@ export default function ReportPage() {
           )}
         </div>
       )}
+
+      <KnownOutages serviceId={serviceId} />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <form onSubmit={handleSubmit} className="space-y-5">

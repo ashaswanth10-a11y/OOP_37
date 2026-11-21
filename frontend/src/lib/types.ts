@@ -288,7 +288,17 @@ export interface PublicStatus {
   overall: "ALL_OPERATIONAL" | "DEGRADED" | "MAJOR_OUTAGE"
   generatedAt: string
   services: { id: number; name: string; type: ServiceType; location: string | null; health: Health }[]
-  problems: { number: string; title: string; rootService: string; reports: number; since: string }[]
+  problems: {
+    number: string
+    title: string
+    rootService: string
+    reports: number
+    since: string
+    rootServiceId: number
+    affectedServiceIds: number[]
+    followIncidentId: number | null
+    followIncidentNumber: string | null
+  }[]
   edges: { from: number; to: number }[]
   nodes: MapNode[]
 }

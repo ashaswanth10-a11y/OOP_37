@@ -23,14 +23,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!token) return
-    api
-      .me()
-      .then(setUser)
-      .catch(() => {
-        api.setToken(null)
-        setTokenState(null)
-      })
-      .finally(() => setLoading(false))
+    let cancelled = false
+    let retry: ReturnType<typeof setTimeout> | undefined
+    const load = () =>
+      api
+        .me()
+        .then((u) => {
+          if (cancelled) return
+          setUser(u)
+          setLoading(false)
+        })
+        .catch((err) => {
+          if (cancelled) return
+          // server asleep or restarting: keep the session and try again
+          if (err instanceof api.ApiError && err.code === "OFFLINE") {
+            retry = setTimeout(load, 3000)
+            return
+          }
+          api.setToken(null)
+          setTokenState(null)
+          setLoading(false)
+        })
+    load()
+    return () => {
+      cancelled = true
+      clearTimeout(retry)
+    }
   }, [token])
 
   const signIn = useCallback(async (email: string, password: string) => {

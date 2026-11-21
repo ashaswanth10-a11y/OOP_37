@@ -1,12 +1,13 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { CreditCard, FastForward, Loader2, Network, PartyPopper, ScanLine } from "lucide-react"
+import { CreditCard, FastForward, Loader2, Network, PartyPopper, RotateCcw, ScanLine } from "lucide-react"
 import * as api from "../../lib/api"
 import { getServerOffsetMinutes, syncServerClock } from "../../lib/clock"
 import { useToast } from "../../lib/toast"
 import type { SweepResult } from "../../lib/types"
-import { PageHeader } from "../../components/ui"
+import { Dialog, PageHeader } from "../../components/ui"
+import PresenterScript from "../../components/PresenterScript"
 
 const SCENARIO_NAME: Record<string, string> = {
   "core-switch-b": "Core Switch B outage",
@@ -24,6 +25,7 @@ export default function DemoAdmin() {
   const qc = useQueryClient()
   const toast = useToast()
   const [log, setLog] = useState<LogLine[]>([])
+  const [confirmReset, setConfirmReset] = useState(false)
   const settings = useQuery({ queryKey: ["admin-settings"], queryFn: api.adminSettings })
   const add = (l: Omit<LogLine, "at">) => setLog((prev) => [{ ...l, at: new Date() }, ...prev].slice(0, 30))
   const refreshAll = () => qc.invalidateQueries()
@@ -65,18 +67,46 @@ export default function DemoAdmin() {
     onError: (e) => toast({ title: "Sweep failed", body: api.errorMessage(e), tone: "critical" }),
   })
 
+  const reset = useMutation({
+    mutationFn: api.resetDemo,
+    onSuccess: (r) => {
+      setConfirmReset(false)
+      syncServerClock()
+      add({
+        title: "Demo data reset",
+        detail: r.tables + " tables emptied and the campus seeded again in " + (r.millis / 1000).toFixed(1) + " s. Clock back to real time.",
+        tone: "var(--signal)",
+      })
+      refreshAll()
+    },
+    onError: (e) => {
+      setConfirmReset(false)
+      toast({ title: "Reset failed", body: api.errorMessage(e), tone: "critical" })
+    },
+  })
+
   const offset = settings.data?.clockOffsetMinutes ?? getServerOffsetMinutes()
-  const busy = scenario.isPending || warp.isPending || sweep.isPending
+  const busy = scenario.isPending || warp.isPending || sweep.isPending || reset.isPending
 
   return (
     <div className="mx-auto max-w-[1100px]">
       <PageHeader eyebrow="Administration" title="Demo control">
+        <button className="btn btn-ghost" disabled={busy} onClick={() => setConfirmReset(true)}>
+          {reset.isPending ? <Loader2 size={14} className="animate-spin" /> : <RotateCcw size={14} />} Reset demo data
+        </button>
         <Link to="/map" className="btn btn-ghost">Outage map</Link>
         <Link to="/dashboard" className="btn btn-ghost">Overview</Link>
       </PageHeader>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-4">
+          <PresenterScript
+            busy={busy}
+            onReset={() => setConfirmReset(true)}
+            onScenario={(name) => scenario.mutate(name)}
+            onWarp={(m) => warp.mutate(m)}
+          />
+
           <section className="panel p-5">
             <div className="eyebrow">Scenarios</div>
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
@@ -203,6 +233,23 @@ export default function DemoAdmin() {
           </div>
         </section>
       </div>
+
+      {confirmReset && (
+        <Dialog title="Reset demo data?" onClose={() => !reset.isPending && setConfirmReset(false)}>
+          <p className="text-[13.5px] text-ink-2">
+            This deletes every incident, problem, note and notification, puts the clock back to real time and seeds the
+            demo campus again. Everyone stays logged in. Use it before each recording take.
+          </p>
+          <div className="mt-4 flex justify-end gap-2">
+            <button className="btn btn-ghost" disabled={reset.isPending} onClick={() => setConfirmReset(false)}>
+              Cancel
+            </button>
+            <button className="btn btn-primary" disabled={reset.isPending} onClick={() => reset.mutate()}>
+              {reset.isPending ? <Loader2 size={14} className="animate-spin" /> : <RotateCcw size={14} />} Reset now
+            </button>
+          </div>
+        </Dialog>
+      )}
     </div>
   )
 }

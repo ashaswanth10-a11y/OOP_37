@@ -30,8 +30,13 @@ public class OutageMapService {
     public record Edge(Long from, Long to) {
     }
 
+    /**
+     * An open problem. {@code affectedServiceIds} is the root and everything downstream of it;
+     * {@code followIncident*} is the oldest open linked incident, the one to say "Me too" to.
+     */
     public record ProblemSummary(Long id, String number, String title, String rootService, int incidents,
-                                 String detectedAt) {
+                                 String detectedAt, Long rootServiceId, List<Long> affectedServiceIds,
+                                 Long followIncidentId, String followIncidentNumber) {
     }
 
     public record OutageMap(List<Node> nodes, List<Edge> edges, List<ProblemSummary> problems) {
@@ -84,9 +89,18 @@ public class OutageMapService {
                 edges.add(new Edge(up.getId(), s.getId()));
             }
         }
-        List<ProblemSummary> summaries = open.stream().map(p -> new ProblemSummary(p.getId(), p.getNumber(),
-                p.getTitle(), p.getRootService().getName(), incidents.findByProblemIdOrderByCreatedAtAsc(p.getId()).size(),
-                p.getDetectedAt().toString())).toList();
+        List<ProblemSummary> summaries = open.stream().map(this::summarise).toList();
         return new OutageMap(nodes, edges, summaries);
+    }
+
+    private ProblemSummary summarise(ProblemRecord p) {
+        List<Incident> linked = incidents.findByProblemIdOrderByCreatedAtAsc(p.getId());
+        Incident follow = linked.stream().filter(Incident::isOpen).findFirst().orElse(null);
+        List<Long> affected = new ArrayList<>();
+        affected.add(p.getRootService().getId());
+        catalog.downstreamOf(p.getRootService()).forEach(s -> affected.add(s.getId()));
+        return new ProblemSummary(p.getId(), p.getNumber(), p.getTitle(), p.getRootService().getName(), linked.size(),
+                p.getDetectedAt().toString(), p.getRootService().getId(), affected.stream().distinct().toList(),
+                follow == null ? null : follow.getId(), follow == null ? null : follow.getNumber());
     }
 }

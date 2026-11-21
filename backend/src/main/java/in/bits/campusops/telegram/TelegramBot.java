@@ -5,6 +5,7 @@ import in.bits.campusops.catalog.ItService;
 import in.bits.campusops.common.CampusOpsException;
 import in.bits.campusops.incident.Incident;
 import in.bits.campusops.incident.IncidentService;
+import in.bits.campusops.problem.OutageMapService;
 import in.bits.campusops.user.User;
 import in.bits.campusops.user.UserRepository;
 import java.util.List;
@@ -19,7 +20,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Chat-based reporting over Telegram. Commands:
- * /start CODE (link account), /services, /report SERVICE-CODE description, /status INC-1001, /mine.
+ * /start CODE (link account), /services, /report SERVICE-CODE description, /metoo INC-1001,
+ * /status INC-1001, /mine. Known outages are shown before a report is filed, to stop duplicates.
  */
 @Component
 public class TelegramBot {
@@ -30,15 +32,17 @@ public class TelegramBot {
     private final UserRepository users;
     private final ServiceRepository services;
     private final IncidentService incidents;
+    private final OutageMapService outages;
     private final TransactionTemplate tx;
     private long offset = 0;
 
     public TelegramBot(TelegramAdapter telegram, UserRepository users, ServiceRepository services,
-                       IncidentService incidents, PlatformTransactionManager txManager) {
+                       IncidentService incidents, OutageMapService outages, PlatformTransactionManager txManager) {
         this.telegram = telegram;
         this.users = users;
         this.services = services;
         this.incidents = incidents;
+        this.outages = outages;
         this.tx = new TransactionTemplate(txManager);
     }
 
@@ -85,18 +89,44 @@ public class TelegramBot {
                     return "Link your account first: /start CODE";
                 }
                 if (parts.length < 3) {
-                    return "Usage: /report SERVICE-CODE what is wrong\nExample: /report WIFI-GAUTAM no internet on 2nd floor";
+                    return knownOutagesText() + "Usage: /report SERVICE-CODE what is wrong\n"
+                            + "Example: /report WIFI-GAUTAM no internet on 2nd floor";
                 }
                 ItService service = services.findByCode(parts[1].toUpperCase()).orElse(null);
                 if (service == null) {
                     return "Unknown service " + parts[1] + ". Send /services for the list.";
                 }
                 String description = parts[2];
+                if (description.toLowerCase().startsWith("anyway ")) {
+                    description = description.substring(7).trim();
+                } else {
+                    var known = knownOutageFor(service);
+                    if (known.isPresent() && known.get().followIncidentNumber() != null) {
+                        var p = known.get();
+                        return "⚠️ Known outage: " + p.title() + " (" + p.number() + ", " + p.incidents()
+                                + " reports). Technicians are already on it.\n"
+                                + "Send /metoo " + p.followIncidentNumber() + " to be added and get updates.\n"
+                                + "If yours is a different problem: /report " + service.getCode() + " anyway "
+                                + description;
+                    }
+                }
                 String title = description.length() > 60 ? description.substring(0, 57) + "..." : description;
                 Incident i = incidents.report(new IncidentService.ReportCommand(title, description, service.getId(),
                         null, null, null, null, 1, null, Incident.Channel.TELEGRAM, true), user);
                 return "Logged " + i.getNumber() + " (" + i.getPriority() + ", " + i.getCategory().getName() + ")"
                         + (i.getAssignee() == null ? ". Waiting for a technician." : ". Assigned to " + i.getAssignee().getFullName() + ".");
+            }
+            case "/metoo": {
+                User user = linked.orElse(null);
+                if (user == null) {
+                    return "Link your account first: /start CODE";
+                }
+                if (parts.length < 2) {
+                    return "Usage: /metoo INC-1001";
+                }
+                Incident i = incidents.meToo(incidents.getByNumber(parts[1]).getId(), user);
+                return "Added you to " + i.getNumber() + " (" + i.getSupporterCount() + " people have said me too). "
+                        + "You will get an update here when it is fixed.";
             }
             case "/status": {
                 if (parts.length < 2) {
@@ -141,7 +171,24 @@ public class TelegramBot {
                 .orElse("That code is not valid. Generate a new one on your profile page.");
     }
 
+    private Optional<OutageMapService.ProblemSummary> knownOutageFor(ItService service) {
+        return outages.build().problems().stream()
+                .filter(p -> p.affectedServiceIds().contains(service.getId()))
+                .findFirst();
+    }
+
+    private String knownOutagesText() {
+        var open = outages.build().problems();
+        if (open.isEmpty()) {
+            return "";
+        }
+        return "Known outages right now:\n" + open.stream()
+                .map(p -> "• " + p.title() + " (" + p.incidents() + " reports)"
+                        + (p.followIncidentNumber() == null ? "" : ": /metoo " + p.followIncidentNumber()))
+                .collect(Collectors.joining("\n")) + "\n\n";
+    }
+
     private static String help() {
-        return "Commands:\n/report SERVICE-CODE what is wrong\n/status INC-1001\n/mine\n/services";
+        return "Commands:\n/report SERVICE-CODE what is wrong\n/metoo INC-1001\n/status INC-1001\n/mine\n/services";
     }
 }

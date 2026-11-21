@@ -30,7 +30,10 @@ public class PublicStatusController {
     public record ServiceStatus(Long id, String name, String type, String location, String health) {
     }
 
-    public record KnownProblem(String number, String title, String rootService, int reports, String since) {
+    /** A known outage: lets the report page and the bot say "this is already being fixed, tap Me too". */
+    public record KnownProblem(String number, String title, String rootService, int reports, String since,
+                               Long rootServiceId, List<Long> affectedServiceIds, Long followIncidentId,
+                               String followIncidentNumber) {
     }
 
     public record CampusStatus(String overall, Instant generatedAt, List<ServiceStatus> services,
@@ -48,7 +51,8 @@ public class PublicStatusController {
         long degraded = m.nodes().stream().filter(n -> n.health() != OutageMapService.Health.OPERATIONAL).count();
         String overall = outages > 0 ? "MAJOR_OUTAGE" : degraded > 0 ? "DEGRADED" : "ALL_OPERATIONAL";
         List<KnownProblem> problems = m.problems().stream()
-                .map(p -> new KnownProblem(p.number(), p.title(), p.rootService(), p.incidents(), p.detectedAt()))
+                .map(p -> new KnownProblem(p.number(), p.title(), p.rootService(), p.incidents(), p.detectedAt(),
+                        p.rootServiceId(), p.affectedServiceIds(), p.followIncidentId(), p.followIncidentNumber()))
                 .toList();
         // public nodes carry no incident numbers or names, only health
         List<OutageMapService.Node> nodes = m.nodes().stream()

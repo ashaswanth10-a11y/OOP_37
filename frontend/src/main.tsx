@@ -11,6 +11,7 @@ import { LiveProvider } from "./lib/live"
 import { applyStoredTheme } from "./lib/theme"
 import { syncServerClock } from "./lib/clock"
 import { ApiError } from "./lib/api"
+import ServerBanner from "./components/ServerBanner"
 
 applyStoredTheme()
 syncServerClock()
@@ -33,6 +34,7 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
+        <ServerBanner />
         <ToastProvider>
           <AuthProvider>
             <LiveProvider>

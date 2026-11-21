@@ -20,3 +20,5 @@ Thumbs.db
 HANDOFF.md
 .claude/
 handover/
+backend.log
+backend-error.log

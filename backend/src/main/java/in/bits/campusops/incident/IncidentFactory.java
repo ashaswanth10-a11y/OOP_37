@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
  * human-readable number (INC-1001, INC-1002...).
  */
 @Component
-public class IncidentFactory {
+public class IncidentFactory implements in.bits.campusops.common.DemoResettable {
 
     private final IncidentRepository incidents;
     private final TimeProvider time;
@@ -44,6 +44,11 @@ public class IncidentFactory {
         return new Incident(nextSequence(), reporter, title, description, service, asset,
                 location, impact == null ? Level.MEDIUM : impact, urgency == null ? Level.MEDIUM : urgency,
                 users, channel == null ? Incident.Channel.WEB : channel, time.now());
+    }
+
+    @Override
+    public synchronized void resetForDemo() {
+        sequence.set(-1);
     }
 
     private synchronized int nextSequence() {

@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Demo controls for the recorded presentation: fast-forward time and fire scripted scenarios. */
+/** Demo controls for the recorded presentation: fast-forward time, fire scripted scenarios, reset. */
 @RestController
 @RequestMapping("/api/admin/demo")
 @PreAuthorize("hasRole('SYSTEM_ADMIN')")
@@ -36,15 +36,18 @@ public class DemoController {
     private final IncidentService incidents;
     private final UserRepository users;
     private final ServiceRepository services;
+    private final DemoResetService resetService;
     private final boolean enabled;
 
     public DemoController(TimeProvider time, SlaMonitor monitor, IncidentService incidents, UserRepository users,
-                          ServiceRepository services, @Value("${campusops.demo.enabled:true}") boolean enabled) {
+                          ServiceRepository services, DemoResetService resetService,
+                          @Value("${campusops.demo.enabled:true}") boolean enabled) {
         this.time = time;
         this.monitor = monitor;
         this.incidents = incidents;
         this.users = users;
         this.services = services;
+        this.resetService = resetService;
         this.enabled = enabled;
     }
 
@@ -57,6 +60,13 @@ public class DemoController {
         time.advance(Duration.ofMinutes(minutes));
         SlaMonitor.SweepResult r = monitor.sweep();
         return Map.of("offsetMinutes", time.offset().toMinutes(), "sweep", r);
+    }
+
+    /** Wipes everything and seeds the demo campus again, so each recording starts from the same state. */
+    @PostMapping("/reset")
+    public Map<String, Object> reset() throws Exception {
+        requireEnabled();
+        return resetService.reset();
     }
 
     @PostMapping("/sweep")

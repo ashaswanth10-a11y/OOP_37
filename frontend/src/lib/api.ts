@@ -27,7 +27,9 @@ import type {
   User,
 } from "./types"
 
-export const API_BASE = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "")
+import { markServerDown, markServerUp } from "./serverStatus"
+
+export const API_BASE =(import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "")
 const TOKEN_KEY = "campusops.token"
 
 export function getToken() {
@@ -66,6 +68,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
       body: body === undefined ? undefined : JSON.stringify(body),
     })
   } catch {
+    markServerDown()
     throw new ApiError(0, "OFFLINE", "Can't reach the CampusOps server. Check your connection and try again.")
   }
 
@@ -77,7 +80,18 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   }
 
   const text = await res.text()
-  const data = text ? JSON.parse(text) : undefined
+  let data
+  try {
+    data = text ? JSON.parse(text) : undefined
+  } catch {
+    data = undefined
+  }
+  // a 5xx without our JSON error body comes from the proxy or host, not from CampusOps: the server is down
+  if (res.status >= 500 && !data?.code) {
+    markServerDown()
+    throw new ApiError(res.status, "OFFLINE", "The CampusOps server is starting up. Try again in a moment.")
+  }
+  markServerUp()
   if (!res.ok) {
     throw new ApiError(
       res.status,
@@ -288,6 +302,7 @@ export const timeWarp = (minutes: number) =>
   post<{ offsetMinutes: number; sweep: SweepResult }>("/admin/demo/time-warp?minutes=" + minutes)
 export const runScenario = (name: string) => post<{ scenario: string; created: string[] }>("/admin/demo/scenario/" + name)
 export const runSweep = () => post<SweepResult>("/admin/demo/sweep")
+export const resetDemo = () => post<{ tables: number; millis: number }>("/admin/demo/reset")
 export const auditLog = (page: number, size: number) => get<Page<AuditEntry>>("/audit?page=" + page + "&size=" + size)
 
 // notifications
